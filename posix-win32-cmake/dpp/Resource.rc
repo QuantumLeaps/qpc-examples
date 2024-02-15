@@ -75,15 +75,15 @@ END
 // Bitmap
 //
 
-IDB_BTN_DWN             BITMAP                  "Res\\BTN_DWN.bmp"
+IDB_BTN_DWN             BITMAP                  "Res/BTN_DWN.bmp"
 
-IDB_BTN_UP              BITMAP                  "Res\\BTN_UP.bmp"
+IDB_BTN_UP              BITMAP                  "Res/BTN_UP.bmp"
 
-IDB_EATING              BITMAP                  "Res\\eating.bmp"
+IDB_EATING              BITMAP                  "Res/eating.bmp"
 
-IDB_HUNGRY              BITMAP                  "Res\\hungry.bmp"
+IDB_HUNGRY              BITMAP                  "Res/hungry.bmp"
 
-IDB_THINKING            BITMAP                  "Res\\thinking.bmp"
+IDB_THINKING            BITMAP                  "Res/thinking.bmp"
 
 
 /////////////////////////////////////////////////////////////////////////////
