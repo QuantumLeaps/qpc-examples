@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for QP/C for Windows and POSIX *HOSTS*
-# Last updated for version 7.2.0
-# Last updated on  2022-11-13
+# Last updated for version 7.3.3
+# Last updated on  2024-02-15
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -43,7 +43,7 @@
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
 # is included in the QTools collection for Windows, see:
-#    http://sourceforge.net/projects/qpc/files/QTools/
+#    https://github.com/QuantumLeaps/qtools
 #
 
 #-----------------------------------------------------------------------------
@@ -82,8 +82,9 @@ LIB_DIRS :=
 LIBS     :=
 
 # defines...
-# QP_API_VERSION controls the QP API compatibility; 9999 means the latest API
-DEFINES   := -DQP_API_VERSION=9999
+# QP_CONFIG controls inclusion of the QP configuration file 'qp_config.h'
+DEFINES   := -DQP_CONFIG \
+	$(DEF)
 
 ifeq (,$(CONF))
 	CONF := dbg

@@ -166,10 +166,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\ports\win32-qv\qf_port.c" />
-    <ClCompile Include="..\..\..\ports\win32-qv\qs_port.c">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\..\..\ports\win32-qv\qwin_gui.c" />
     <ClCompile Include="..\..\..\src\qf\qep_hsm.c" />
     <ClCompile Include="..\..\..\src\qf\qep_msm.c" />
@@ -197,9 +193,6 @@
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\ports\win32-qv\qep_port.h" />
-    <ClInclude Include="..\..\..\ports\win32-qv\qf_port.h" />
-    <ClInclude Include="..\..\..\ports\win32-qv\qs_port.h" />
     <ClInclude Include="..\..\..\ports\win32-qv\qwin_gui.h" />
     <ClInclude Include="..\..\..\ports\win32-qv\safe_std.h" />
     <ClInclude Include="bsp.h" />

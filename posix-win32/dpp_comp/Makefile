@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for QP/C for Windows and POSIX *HOSTS*
-# Last updated for version 7.3.0
-# Last updated on  2023-09-03
+# Last updated for version 7.3.3
+# Last updated on  2024-02-15
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -84,7 +84,7 @@ LIB_DIRS :=
 LIBS     :=
 
 # defines...
-# QP_API_VERSION controls the QP API compatibility; 9999 means the latest API
+# QP_CONFIG controls inclusion of the QP configuration file 'qp_config.h'
 DEFINES   := -DQP_CONFIG \
 	$(DEF)
 

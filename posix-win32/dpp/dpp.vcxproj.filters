@@ -56,17 +56,20 @@
     <ClCompile Include="..\..\..\src\qs\qstamp.c">
       <Filter>QS</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\ports\win32\qf_port.c">
+    <ClCompile Include="..\..\..\ports\win32-qv\qf_port.c">
       <Filter>QP_port</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ports\win32-qv\qs_port.c">
+      <Filter>QS</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bsp.h" />
     <ClInclude Include="dpp.h" />
-    <ClInclude Include="..\..\..\ports\win32\qp_port.h">
+    <ClInclude Include="..\..\..\ports\win32-qv\qp_port.h">
       <Filter>QP_port</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\..\ports\win32\safe_std.h">
+    <ClInclude Include="..\..\..\ports\win32-qv\safe_std.h">
       <Filter>QP_port</Filter>
     </ClInclude>
   </ItemGroup>
