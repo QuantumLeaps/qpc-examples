@@ -206,6 +206,7 @@ endif()
 # set general defines and options
 target_compile_definitions(dpp
     PRIVATE
+        $<$<BOOL:${QPC_CFG_USE_QP_CONFIG}>:QP_CONFIG>
         $<$<CONFIG:Spy>:Q_SPY>
         $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
         $<$<BOOL:${QPC_CFG_UNIT_TEST}>:Q_UTEST>

@@ -30,7 +30,10 @@
 			"displayName": "Default (local) config",
 			"description": "Build for local build environment",
 			"inherits": "gen",
-			"binaryDir": "${sourceDir}/Build/dpp"
+			"binaryDir": "${sourceDir}/Build/dpp",
+            "cacheVariables": {
+				"QPC_CFG_USE_QP_CONFIG": "ON"
+			}
 		},
 		{
 			"name": "mingw",
@@ -38,7 +41,10 @@
 			"displayName": "MinGW config",
 			"description": "Build for MinGW",
 			"binaryDir": "${sourceDir}/Build/dpp-mingw",
-			"toolchainFile": "${sourceDir}/../../../3rd_party/cmake/toolchain/tc_mingwgcc.cmake"
+			"toolchainFile": "${sourceDir}/../../../3rd_party/cmake/toolchain/tc_mingwgcc.cmake",
+            "cacheVariables": {
+				"QPC_CFG_USE_QP_CONFIG": "ON"
+			}
 		},
 		{
 			"name": "dpp-gui",
