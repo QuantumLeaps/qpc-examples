@@ -205,7 +205,7 @@ endif()
 
 # set general defines and options
 target_compile_definitions(dpp
-	PRIVATE
+    PRIVATE
         $<$<CONFIG:Spy>:Q_SPY>
         $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
         $<$<BOOL:${QPC_CFG_UNIT_TEST}>:Q_UTEST>
@@ -246,7 +246,7 @@ message(STATUS
  Configuration options set:
     PROJECT_NAME                = ${QPC_PROJECT}
     SW_VERSION                  = ${SW_VERSION}
-    
+
     QPC_CFG_GUI                 = ${QPC_CFG_GUI}
     QPC_CFG_QSPY                = ${QPC_CFG_QSPY}
     QPC_CFG_UNIT_TEST           = ${QPC_CFG_UNIT_TEST}

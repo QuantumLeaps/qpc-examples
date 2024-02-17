@@ -1,7 +1,7 @@
 //============================================================================
 // QP configuration file example
-// Last updated for version: 7.3.0
-// Last updated on: 2023-09-02
+// Last updated for version: 7.3.3
+// Last updated on: 2024-02-15
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -47,5 +47,8 @@
 
 // Activate the QF QActive_stop() API
 #define QF_ACTIVE_STOP
+
+// Activate the QF console access
+#define QF_CONSOLE
 
 #endif // QP_CONFIG_H_

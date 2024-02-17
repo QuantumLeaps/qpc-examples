@@ -1,0 +1,19 @@
+# ninja log v5
+3	61	1708169382979979220	CMakeFiles/dpp.dir/Debug/main.c.o	fd469bf91ccf710c
+6	71	1708169382989979457	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_act.c.o	af58dc963fa47fd3
+7	86	1708169383006646518	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_dyn.c.o	4db1c33c18e169b8
+6	88	1708169383009979930	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_defer.c.o	b5e3f7c0213effe3
+4	93	1708169383013313342	CMakeFiles/dpp.dir/Debug/philo.c.o	96b0d19fae5817ae
+5	94	1708169383013313342	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qep_msm.c.o	f8da430e589cd131
+5	94	1708169383009979930	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qep_hsm.c.o	bea052d77909fb63
+5	100	1708169383019980167	CMakeFiles/dpp.dir/Debug/bsp.c.o	e444c633cc7196df
+4	107	1708169383026646991	CMakeFiles/dpp.dir/Debug/table.c.o	d2ca12a9c24b53e2
+17	120	1708169383039980640	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_ps.c.o	1331b23c08bef9d2
+61	123	1708169383043314052	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_qact.c.o	499dbcf80e7443af
+87	132	1708169383053314289	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_qmact.c.o	f8a27ac3627d6221
+88	138	1708169383059981113	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_time.c.o	f27a1b6d626b82a9
+71	139	1708169383059981113	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_qeq.c.o	408ef82099a4d784
+94	150	1708169383069981350	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_mem.c.o	a04094d7cc799f7a
+93	150	1708169383069981350	qpc-sdk/CMakeFiles/qpc.dir/Debug/src/qf/qf_actq.c.o	310e58a43feb7321
+95	166	1708169383086648411	qpc-sdk/CMakeFiles/qpc.dir/Debug/ports/posix-qv/qf_port.c.o	28b3791429596dd6
+167	581	1708169383363321623	qpc-sdk/Debug/libqpc.a	a46f02e60bec92c5

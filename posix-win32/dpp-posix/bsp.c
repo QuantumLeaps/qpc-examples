@@ -45,13 +45,15 @@ Q_DEFINE_THIS_FILE
 static uint32_t l_rnd; // random seed
 
 #ifdef Q_SPY
+
+    // QSpy source IDs
+    static QSpyId const l_clock_tick = { QS_AP_ID };
+
     enum {
         PHILO_STAT = QS_USER,
         PAUSED_STAT,
     };
 
-    // QSpy source IDs
-    static QSpyId const l_clock_tick = { QS_AP_ID };
 #endif
 
 //============================================================================

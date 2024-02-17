@@ -1,7 +1,7 @@
 //============================================================================
 // Product: History Example, Win32
-// Last updated for version 7.3.0
-// Last updated on  2023-06-30
+// Last updated for version 7.3.3
+// Last updated on  2024-02-15
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -58,13 +58,11 @@ int main() {
     QASM_INIT(the_oven, (void *)0, 0U);
 
     for (;;) {
-        QEvt e = QEVT_INITIALIZER(0U);
-        uint8_t c;
-
-        PRINTF_S("\n", "");
-        c = (uint8_t)QF_consoleWaitForKey();
+        PRINTF_S("%s\n", "");
+        uint8_t c = (uint8_t)QF_consoleWaitForKey();
         PRINTF_S("%c: ", (c >= ' ') ? c : 'X');
 
+        QEvt e = QEVT_INITIALIZER(0U);
         switch (c) {
             case 'o':  e.sig = OPEN_SIG;        break;
             case 'c':  e.sig = CLOSE_SIG;       break;

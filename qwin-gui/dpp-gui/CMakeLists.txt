@@ -73,8 +73,8 @@ qpc_sdk_init()
 
 # set general defines
 target_compile_definitions(dpp
-	PRIVATE
-	    $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
+    PRIVATE
+        $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
         $<$<CONFIG:Spy>:Q_SPY>
 )
 
@@ -103,7 +103,7 @@ message(STATUS
  Configuration options set:
     PROJECT_NAME                = ${QPC_PROJECT}
     SW_VERSION                  = ${SW_VERSION}
-    
+
     CONFIG_GUI                  = ${QPC_CFG_GUI}
     CONFIG_QSPY                 = ${QPC_CFG_QSPY}
     CONFIG_UNIT_TEST            = ${QPC_CFG_UNIT_TEST}

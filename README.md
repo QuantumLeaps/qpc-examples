@@ -1,5 +1,5 @@
 # About qpc-examples
-This `qpc-examples` repository contains the examples for the QP/C Real-Time Embedded Framework including examples using `cmake` to generate the build system.
+This `qpc-examples` repository contains the examples for the QP/C Real-Time Embedded Framework.
 The following examples are enhanced with `cmake` support:
 - [Posix/Win32 dpp example](https://github.com/stefanschober/qpc-examples/tree/cmakeSupport/posix-win32/dpp)
 - [QWin GUI dpp example](https://github.com/stefanschober/qpc-examples/tree/cmakeSupport/qwin-gui/dpp-gui)

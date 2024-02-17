@@ -1,13 +1,13 @@
 ##############################################################################
 # Product: Makefile for QP/C for Windows and POSIX *HOSTS* (multithreaded)
-# Last updated for version 7.3.0
-# Last updated on  2023-09-03
+# Last updated for version 7.3.3
+# Last updated on  2024-02-16
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+# Copyright (C) 2005 Quantum Leaps, LLC, <state-machine.com>.
 #
 # This program is open source software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as published
@@ -84,8 +84,8 @@ LIB_DIRS :=
 LIBS     :=
 
 # defines...
-# QP_API_VERSION controls the QP API compatibility; 9999 means the latest API
-DEFINES   := -DQP_CONFIG
+DEFINES   := -DQP_CONFIG \
+	$(DEF)
 
 ifeq (,$(CONF))
 	CONF := dbg
@@ -125,7 +125,7 @@ else
 # NOTE:
 # This example is only for multithreaded POSIX (NOT for POSIX-QV)
 #
-QP_PORT_DIR := $(QPCPP)/ports/posix
+QP_PORT_DIR := $(QPC)/ports/posix
 
 LIBS += -lpthread
 

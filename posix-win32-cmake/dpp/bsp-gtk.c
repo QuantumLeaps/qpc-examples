@@ -423,7 +423,7 @@ void BSP_displayPhilStat(uint8_t n, char const *stat)
     g_mutex_lock(&mymutex);
     philoState[n] = bitmapNum;
     g_mutex_unlock(&mymutex);
-    
+
     QS_BEGIN_ID(PHILO_STAT, AO_Philo[n]->prio) // app-specific record
         QS_U8(1, n);  // Philosopher number
         QS_STR(stat); // Philosopher status

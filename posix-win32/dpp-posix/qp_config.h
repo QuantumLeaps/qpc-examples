@@ -1,7 +1,7 @@
 //============================================================================
 // QP configuration file example
-// Last updated for version: 7.3.0
-// Last updated on: 2023-09-02
+// Last updated for version: 7.3.3
+// Last updated on: 2024-02-15
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -39,6 +39,9 @@
 // Use the most recent QP API version
 #define QP_API_VERSION      9999
 
+// Enable QEvt constructor for dynamic events
+#define QEVT_DYN_CTOR
+
 // The maximum number of active objects in the application
 #define QF_MAX_ACTIVE       64U
 
@@ -47,5 +50,8 @@
 
 // Activate the QF QActive_stop() API
 #define QF_ACTIVE_STOP
+
+// Activate the QF console access
+#define QF_CONSOLE
 
 #endif // QP_CONFIG_H_
