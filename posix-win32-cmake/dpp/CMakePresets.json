@@ -32,7 +32,7 @@
 			"inherits": "gen",
 			"binaryDir": "${sourceDir}/Build/dpp",
             "cacheVariables": {
-				"QPC_CFG_USE_QP_CONFIG": "ON"
+				"USE_QP_CONFIG": "ON"
 			}
 		},
 		{
@@ -43,7 +43,7 @@
 			"binaryDir": "${sourceDir}/Build/dpp-mingw",
 			"toolchainFile": "${sourceDir}/../../../3rd_party/cmake/toolchain/tc_mingwgcc.cmake",
             "cacheVariables": {
-				"QPC_CFG_USE_QP_CONFIG": "ON"
+				"USE_QP_CONFIG": "ON"
 			}
 		},
 		{

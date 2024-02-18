@@ -49,8 +49,8 @@ The following test configurations can be selected via preset
 "
 )
 # first of all protect against in-source builds
-get_filename_component(_srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
-get_filename_component(_bindir "${CMAKE_BINARY_DIR}" REALPATH)
+file(REAL_PATH "${CMAKE_SOURCE_DIR}" _srcdir)
+file(REAL_PATH "${CMAKE_BINARY_DIR}" _bindir)
 
 if(${_srcdir} STREQUAL ${_bindir})
     message(FATAL_ERROR "  FATAL: In-source builds are not allowed!
@@ -206,7 +206,6 @@ endif()
 # set general defines and options
 target_compile_definitions(dpp
     PRIVATE
-        $<$<BOOL:${QPC_CFG_USE_QP_CONFIG}>:QP_CONFIG>
         $<$<CONFIG:Spy>:Q_SPY>
         $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
         $<$<BOOL:${QPC_CFG_UNIT_TEST}>:Q_UTEST>
@@ -223,10 +222,29 @@ target_link_options(dpp
         LINKER:-Map=${CMAKE_PROJECT_NAME}.map
 )
 
+# set up qpc library
 target_link_libraries(dpp
     PRIVATE
         qpc
 )
+# should a 'qp_config.h' configuration file be used and is it available
+# edit the HINTS in the 'find_file()' call according to your project settings
+if(USE_QP_CONFIG)
+    find_file(QP_CONFIG qp_config.h HINTS ${CMAKE_CURRENT_SOURCE_DIR}) # try to identify 'qp_config.h'
+    if(QP_CONFIG) # found 'qp_config.h'
+        cmake_path(GET QP_CONFIG PARENT_PATH QP_CONFIG_DIR) # extract the path from the FQFN
+        target_compile_definitions(qpc # add -DQP_CONFIG to the qpc build
+            PUBLIC
+                QP_CONFIG
+        )
+        target_include_directories(qpc # add the path to 'qp_config.h' to the list of include paths for qpc
+            PUBLIC
+                ${QP_CONFIG_DIR}
+        )
+    else() # 'qp_config.h' requested but not find - try to configure and build anyways
+        message(WARNING "File 'qp_config.h' not found!")
+    endif()
+endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Windows OR WIN32)
     target_compile_options(dpp
