@@ -283,9 +283,7 @@ void QK_onIdle(void) {
     QF_INT_ENABLE();
 
 #ifdef Q_SPY
-    QF_INT_DISABLE();
     QS_rxParse();  // parse all the received bytes
-    QF_INT_ENABLE();
 
     if ((UCA1STAT & UCBUSY) == 0U) { // TX done?
         QF_INT_DISABLE();

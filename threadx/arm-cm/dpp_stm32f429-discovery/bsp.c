@@ -136,9 +136,9 @@ static void idle_thread_fun(ULONG thread_input) { // see NOTE1
         __NOP();
         __NOP();
         LED_GPIO_PORT->BSRRH = LED6_PIN; // turn LED off
+        QF_CRIT_EXIT();
 
         QS_rxParse();  // parse all the received bytes
-        QF_CRIT_EXIT();
 
         if ((USART2->SR & 0x80U) != 0U) { // is TXE empty?
             QF_CRIT_ENTRY();

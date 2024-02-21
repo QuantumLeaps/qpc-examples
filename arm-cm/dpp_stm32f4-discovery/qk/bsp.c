@@ -393,10 +393,7 @@ void QK_onIdle(void) {
     QF_INT_ENABLE();
 
 #ifdef Q_SPY
-    QF_INT_DISABLE();
     QS_rxParse();  // parse all the received bytes
-    QF_INT_ENABLE();
-    QF_CRIT_EXIT_NOP();
 
     if ((USART2->SR & USART_FLAG_TXE) != 0) { // TXE empty?
         QF_INT_DISABLE();

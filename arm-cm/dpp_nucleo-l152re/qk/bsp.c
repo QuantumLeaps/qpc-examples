@@ -364,19 +364,17 @@ void QK_onIdle(void) {
     //QF_INT_ENABLE();
 
 #ifdef Q_SPY
-    QF_INT_DISABLE();
     QS_rxParse();  // parse all the received bytes
-    QF_INT_ENABLE();
-    QF_CRIT_EXIT_NOP();
 
-    QF_INT_DISABLE();
     if ((USART2->SR & (1U << 7U)) != 0U) {  // is TXE empty?
+        QF_INT_DISABLE();
         uint16_t b = QS_getByte();
+        QF_INT_ENABLE();
+
         if (b != QS_EOD) {  // not End-Of-Data?
             USART2->DR = b; // put into the DR register
         }
     }
-    QF_INT_ENABLE();
 #elif defined NDEBUG
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,

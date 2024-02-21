@@ -368,9 +368,7 @@ void QK_onIdle(void) {
     QK_schedUnlock(lockStat);
 
 #ifdef Q_SPY
-    QF_INT_DISABLE();
     QS_rxParse();  // parse all the received bytes
-    QF_INT_ENABLE();
 
     if ((l_uartHandle.Instance->ISR & UART_FLAG_TXE) != 0U) { // TXE empty?
         QF_INT_DISABLE();

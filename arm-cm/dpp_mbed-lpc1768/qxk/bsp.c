@@ -381,10 +381,7 @@ void QXK_onIdle(void) {
     QF_INT_ENABLE();
 
 #ifdef Q_SPY
-    QF_INT_DISABLE();
     QS_rxParse();  // parse all the received bytes
-    QF_INT_ENABLE();
-    QF_CRIT_EXIT_NOP();
 
     if ((LPC_UART0->LSR & 0x20U) != 0U) {  // TX Holding Register empty?
         uint16_t fifo = UART_TXFIFO_DEPTH; // max bytes we can accept

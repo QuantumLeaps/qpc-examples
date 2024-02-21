@@ -360,9 +360,8 @@ void QV_onIdle(void) { // CATION: called with interrupts DISABLED, see NOTE0
     LPC_GPIO1->FIOCLR = LED_4;  // turn LED off
 
 #ifdef Q_SPY
-    // interrupts still disabled
-    QS_rxParse();  // parse all the received bytes
     QF_INT_ENABLE();
+    QS_rxParse();  // parse all the received bytes
 
     if ((LPC_UART0->LSR & 0x20U) != 0U) {  // TX Holding Register empty?
         uint16_t fifo = UART_TXFIFO_DEPTH; // max bytes we can accept

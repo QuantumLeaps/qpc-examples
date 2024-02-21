@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example, NUCLEO-C031C6 board, QK kernel, MPU isolation
-// Last updated for version 7.3.2
-// Last updated on  2023-12-13
+// Last updated for version 7.3.3
+// Last updated on  2024-02-21
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -53,6 +53,7 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
     // QSpy source IDs
     static QSpyId const l_SysTick_Handler = { 0U };
+    static QSpyId const l_EXTI0_1_IRQHandler = { 0U };
 
     enum AppRecords { // application-specific trace records
         PHILO_STAT = QS_USER,
@@ -71,8 +72,8 @@ typedef struct {
 //============================================================================
 // Error handler and ISRs...
 
-Q_NORETURN Q_onError(char const *module, int_t const id) {
-    // NOTE: this implementation of the assertion handler is intended only
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    // NOTE: this implementation of the error handler is intended only
     // for debugging and MUST be changed for deployment of the application
     // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
@@ -97,7 +98,7 @@ void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// ISRs used in the application ==========================================
+// ISRs used in the application ==============================================
 
 void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
@@ -153,7 +154,7 @@ void EXTI0_1_IRQHandler(void) {
 
     // for testing..
     static QEvt const testEvt = QEVT_INITIALIZER(TEST_SIG);
-    QACTIVE_POST(AO_Table, &testEvt, (void *)0);
+    QACTIVE_POST(AO_Table, &testEvt, &l_EXTI0_1_IRQHandler);
 
     QK_ISR_EXIT();    // inform QK about exiting an ISR
 }
@@ -169,7 +170,7 @@ void USART2_IRQHandler(void); // prototype
 void USART2_IRQHandler(void) { // used in QS-RX (kernel UNAWARE interrutp)
     // is RX register NOT empty?
     QF_MEM_SYS();
-    if ((USART2->ISR & (1U << 5)) != 0) {
+    if ((USART2->ISR & (1U << 5U)) != 0U) {
         uint32_t b = USART2->RDR;
         QS_RX_PUT(b);
     }
@@ -177,48 +178,6 @@ void USART2_IRQHandler(void) { // used in QS-RX (kernel UNAWARE interrutp)
     QK_ARM_ERRATUM_838869();
 }
 #endif // Q_SPY
-
-#ifdef QF_MEM_ISOLATE
-//............................................................................
-__attribute__(( used ))
-void QF_onMemSys(void) {
-    MPU->CTRL = MPU_CTRL_ENABLE_Msk        // enable the MPU
-                | MPU_CTRL_PRIVDEFENA_Msk; // enable background region
-    __ISB();
-    __DSB();
-}
-//............................................................................
-__attribute__(( used ))
-void QF_onMemApp() {
-    MPU->CTRL = MPU_CTRL_ENABLE_Msk; // enable the MPU
-                // but do NOT enable background region
-    __ISB();
-    __DSB();
-}
-//............................................................................
-#ifdef QF_ON_CONTEXT_SW
-// NOTE: the context-switch callback is called with interrupts DISABLED
-void QF_onContextSw(QActive *prev, QActive *next) {
-    if (next != (QActive *)0) {
-        MPU->CTRL = 0U; // disable the MPU
-
-        MPU_Region const * const region =
-            (MPU_Region const *)(next->thread);
-        MPU->RBAR = region[0].RBAR;
-        MPU->RASR = region[0].RASR;
-        MPU->RBAR = region[1].RBAR;
-        MPU->RASR = region[1].RASR;
-        MPU->RBAR = region[2].RBAR;
-        MPU->RASR = region[2].RASR;
-
-        MPU->CTRL = MPU_CTRL_ENABLE_Msk        // enable the MPU
-                    | MPU_CTRL_PRIVDEFENA_Msk; // enable background region
-        __ISB();
-        __DSB();
-    }
-}
-#endif // QF_ON_CONTEXT_SW
-#endif // QF_MEM_ISOLATE
 
 //============================================================================
 
@@ -230,7 +189,7 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 
 // Table AO...................................................................
 // size of Table instance, as power-of-2
-#define TABLE_SIZE_POW2 ((uint32_t)6U)
+#define TABLE_SIZE_POW2 ((uint32_t)7U)
 
 __attribute__((aligned((1U << TABLE_SIZE_POW2))))
 static uint8_t Table_sto[1U << TABLE_SIZE_POW2];
@@ -260,9 +219,9 @@ static MPU_Region const MPU_Table[3] = {
 };
 #endif
 
-// Philo AOs................................................................
+// Philo AOs..................................................................
 // size of Philo instance, as power-of-2
-#define PHILO_SIZE_POW2 ((uint32_t)6U)
+#define PHILO_SIZE_POW2 ((uint32_t)7U)
 
 __attribute__((aligned((1U << PHILO_SIZE_POW2))))
 static uint8_t Philo_sto[N_PHILO][1U << PHILO_SIZE_POW2];
@@ -377,9 +336,8 @@ static MPU_Region const MPU_Philo[N_PHILO][3] = {
     { 0U + 0x12U,                              //---- region #2
       0U }},
 };
-#endif
 
-// Shared Event-pools......................................................
+// Shared Event-pools.........................................................
 #define EPOOLS_SIZE_POW2 ((uint32_t)8U)
 
 __attribute__((aligned((1U << EPOOLS_SIZE_POW2))))
@@ -389,8 +347,102 @@ static struct EPools {
 } EPools_sto;
 Q_ASSERT_STATIC(sizeof(EPools_sto) <= (1U << EPOOLS_SIZE_POW2));
 
-//............................................................................
+
+// Idle thread ............................................................
+#ifdef Q_SPY
+// Idle thread owns QS-RX, so it needs access to its data...
+
+// size of QS_rxPriv_, as power-of-2
+#define QS_RX_PRIV_SIZE_POW2 ((uint32_t)7U)
+__attribute__((aligned((1U << QS_RX_PRIV_SIZE_POW2))))
+QS_RxAttr QS_rxPriv_;
+Q_ASSERT_STATIC(sizeof(QS_rxPriv_) <= (1U << QS_RX_PRIV_SIZE_POW2));
+
+// size of QS-RX buffer, as power-of-2
+#define QS_RX_BUF_SIZE_POW2 ((uint32_t)7U)
+__attribute__((aligned((1U << QS_RX_BUF_SIZE_POW2))))
+uint8_t QS_rxBuf[1U << QS_RX_BUF_SIZE_POW2];
+
+static MPU_Region const MPU_Idle[3] = {
+    { (uint32_t)&QS_rxPriv_ + 0x10U,           //---- region #0
+      ((QS_RX_PRIV_SIZE_POW2 - 1U) << MPU_RASR_SIZE_Pos)  // size
+       + (3U << MPU_RASR_AP_Pos)                      // PA:rw/UA:rw
+       + (1U << MPU_RASR_XN_Pos)                      // XN=1
+       + (1U << MPU_RASR_S_Pos)                       // S=1
+       + (1U << MPU_RASR_C_Pos)                       // C=1
+       + (0U << MPU_RASR_B_Pos)                       // B=0
+       + (0U << MPU_RASR_TEX_Pos)                     // TEX=0
+       + MPU_RASR_ENABLE_Msk },                       // region enable
+    { (uint32_t)&QS_rxBuf + 0x11U,            //---- region #1
+      ((QS_RX_BUF_SIZE_POW2 - 1U) << MPU_RASR_SIZE_Pos)  // size
+       + (3U << MPU_RASR_AP_Pos)                      // PA:rw/UA:rw
+       + (1U << MPU_RASR_XN_Pos)                      // XN=1
+       + (1U << MPU_RASR_S_Pos)                       // S=1
+       + (1U << MPU_RASR_C_Pos)                       // C=1
+       + (0U << MPU_RASR_B_Pos)                       // B=0
+       + (0U << MPU_RASR_TEX_Pos)                     // TEX=0
+       + MPU_RASR_ENABLE_Msk },                       // region enable
+    { 0U + 0x12U,                              //---- region #2
+      0U },
+};
+
+#else // Q_SPY not defined
+
+static MPU_Region const MPU_Idle[3] = {
+    { 0U + 0x10U,                              //---- region #0
+      0U },
+    { 0U + 0x11U,                              //---- region #1
+      0U },
+    { 0U + 0x12U,                              //---- region #2
+      0U },
+};
+
+#endif // Q_SPY not defined
+
+#endif // QF_MEM_ISOLATE
+
+//============================================================================
 #ifdef QF_MEM_ISOLATE
+//............................................................................
+__attribute__(( used ))
+void QF_onMemSys(void) {
+    MPU->CTRL = MPU_CTRL_ENABLE_Msk        // enable the MPU
+                | MPU_CTRL_PRIVDEFENA_Msk; // enable background region
+    __ISB();
+    __DSB();
+}
+//............................................................................
+__attribute__(( used ))
+void QF_onMemApp() {
+    MPU->CTRL = MPU_CTRL_ENABLE_Msk; // enable the MPU
+                // but do NOT enable background region
+    __ISB();
+    __DSB();
+}
+//............................................................................
+// NOTE: the context-switch callback is called with interrupts DISABLED
+void QF_onContextSw(QActive *prev, QActive *next) {
+    MPU_Region const * const region =
+        (next != (QActive *)0)
+        ? (MPU_Region const *)(next->thread)
+        : MPU_Idle;
+
+    MPU->CTRL = 0U; // disable the MPU
+
+    MPU->RBAR = region[0].RBAR;
+    MPU->RASR = region[0].RASR;
+    MPU->RBAR = region[1].RBAR;
+    MPU->RASR = region[1].RASR;
+    MPU->RBAR = region[2].RBAR;
+    MPU->RASR = region[2].RASR;
+
+    MPU->CTRL = MPU_CTRL_ENABLE_Msk        // enable the MPU (Sys privilege)
+                | MPU_CTRL_PRIVDEFENA_Msk; // enable background region
+    __ISB();
+    __DSB();
+}
+
+//............................................................................
 static void STM32C031C6_MPU_setup(void) {
 
     MPU->CTRL = 0U; // disable the MPU
@@ -452,7 +504,7 @@ static void STM32C031C6_MPU_setup(void) {
        + MPU_RASR_ENABLE_Msk;                         // region enable
 #endif
 
-    // region #0: temporary 4G region for initial transient
+    // region #0: temporary 4G region for the initial transient
     MPU->RBAR = 0x00000000U + 0x10U;        // base address + region #0
     MPU->RASR = ((32U - 1U) << MPU_RASR_SIZE_Pos) // 2^32=4G size
        + (3U << MPU_RASR_AP_Pos)                      // PA:rw/UA:rw
@@ -468,7 +520,8 @@ static void STM32C031C6_MPU_setup(void) {
     __ISB();
     __DSB();
 }
-#endif
+
+#endif // QF_MEM_ISOLATE
 
 //============================================================================
 
@@ -521,6 +574,7 @@ void BSP_init(void) {
 
     // dictionaries...
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
+    QS_OBJ_DICTIONARY(&l_EXTI0_1_IRQHandler);
     QS_USR_DICTIONARY(PHILO_STAT);
     QS_USR_DICTIONARY(PAUSED_STAT);
 
@@ -673,18 +727,13 @@ void QK_onIdle(void) {
     //QF_INT_ENABLE();
 
 #ifdef Q_SPY
-    QF_INT_DISABLE();
-    QF_MEM_SYS();
     QS_rxParse();  // parse all the received bytes
-    QF_MEM_APP();
-    QF_INT_ENABLE();
-    QF_CRIT_EXIT_NOP();
 
     QF_INT_DISABLE();
     QF_MEM_SYS();
     if ((USART2->ISR & (1U << 7U)) != 0U) { // is TXE empty?
         uint16_t b = QS_getByte();
-        if (b != QS_EOD) {  // not End-Of-Data?
+        if (b != QS_EOD) {   // not End-Of-Data?
             USART2->TDR = b; // put into the DR register
         }
     }
@@ -694,18 +743,7 @@ void QK_onIdle(void) {
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-M MCU.
-    //
-    // !!!CAUTION!!!
-    // The WFI instruction stops the CPU clock, which unfortunately disables
-    // the JTAG port, so the ST-Link debugger can no longer connect to the
-    // board. For that reason, the call to __WFI() has to be used with CAUTION.
-    //
-    // NOTE: If you find your board "frozen" like this, strap BOOT0 to VDD and
-    // reset the board, then connect with ST-Link Utilities and erase the part.
-    // The trick with BOOT(0) is it gets the part to run the System Loader
-    // instead of your broken code. When done disconnect BOOT0, and start over.
-    //
-    //__WFI(); // Wait-For-Interrupt
+    __WFI(); // Wait-For-Interrupt
 #endif
 }
 
@@ -741,8 +779,13 @@ uint8_t QS_onStartup(void const *arg) {
     static uint8_t qsTxBuf[2*1024]; // buffer for QS-TX channel
     QS_initBuf(qsTxBuf, sizeof(qsTxBuf));
 
-    static uint8_t qsRxBuf[100];    // buffer for QS-RX channel
+#ifdef QF_MEM_ISOLATE
+    // NOTE: the QS-RX buffer is allocated for the MPU
+    QS_rxInitBuf(QS_rxBuf, sizeof(QS_rxBuf));
+#else
+    static uint8_t qsRxBuf[128]; // buffer for QS-RX channel
     QS_rxInitBuf(qsRxBuf, sizeof(qsRxBuf));
+#endif
 
     // enable peripheral clock for USART2
     RCC->IOPENR  |= ( 1U <<  0U);  // Enable GPIOA clock for USART pins
@@ -777,7 +820,7 @@ void QS_onCleanup(void) {
 }
 //............................................................................
 QSTimeCtr QS_onGetTime(void) { // NOTE: invoked with interrupts DISABLED
-    if ((SysTick->CTRL & 0x00010000) == 0) {  // COUNT no set?
+    if ((SysTick->CTRL & 0x00010000U) == 0U) { // not set?
         return QS_tickTime_ - (QSTimeCtr)SysTick->VAL;
     }
     else { // the rollover occurred, but the SysTick_ISR did not run yet

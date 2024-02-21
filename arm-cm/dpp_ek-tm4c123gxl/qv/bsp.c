@@ -365,9 +365,8 @@ void QV_onIdle(void) { // called with interrupts disabled, see NOTE0
     GPIOF_AHB->DATA_Bits[LED_BLUE] = 0U;     // turn the Blue LED off
 
 #ifdef Q_SPY
-    // interrupts still disabled
-    QS_rxParse();  // parse all the received bytes
     QF_INT_ENABLE();
+    QS_rxParse();  // parse all the received bytes
 
     if ((UART0->FR & UART_FR_TXFE) != 0U) { // TX done?
         uint16_t fifo = UART_TXFIFO_DEPTH; // max bytes we can accept

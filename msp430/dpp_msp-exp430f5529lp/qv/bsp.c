@@ -244,12 +244,10 @@ void QV_onIdle(void) { // NOTE: called with interrupts DISABLED, see NOTE1
     P4OUT &= ~LED2;  // turn LED2 off
 
 #ifdef Q_SPY
-    QS_rxParse();  // parse all the received bytes
     QF_INT_ENABLE();
-    QF_CRIT_EXIT_NOP();
+    QS_rxParse();  // parse all the received bytes
 
     if ((UCA1STAT & UCBUSY) == 0U) { // TX done?
-
         QF_INT_DISABLE();
         uint16_t b = QS_getByte();
         QF_INT_ENABLE();

@@ -388,9 +388,7 @@ void QXK_onIdle(void) {
     //QF_INT_ENABLE();
 
 #ifdef Q_SPY
-    QF_INT_DISABLE();
     QS_rxParse();  // parse all the received bytes
-    QF_INT_ENABLE();
 
     if ((USART2->ISR & (1U << 7U)) != 0U) { // TXE empty?
         QF_INT_DISABLE();

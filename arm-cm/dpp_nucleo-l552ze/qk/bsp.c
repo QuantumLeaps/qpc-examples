@@ -390,12 +390,8 @@ void QK_onIdle(void) {
     x = x * 1.73205;
 
 #ifdef Q_SPY
-    QF_INT_DISABLE();
     QS_rxParse();  // parse all the received bytes
-    QF_INT_ENABLE();
-    QF_CRIT_EXIT_NOP();
 
-    QF_INT_DISABLE();
     if ((l_uartHandle.Instance->ISR & UART_FLAG_TXE) != 0U) { // TXE empty?
         QF_INT_DISABLE();
         uint16_t b = QS_getByte();
@@ -405,7 +401,6 @@ void QK_onIdle(void) {
             l_uartHandle.Instance->TDR = b; // put into TDR
         }
     }
-    QF_INT_ENABLE();
 #elif defined NDEBUG
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,

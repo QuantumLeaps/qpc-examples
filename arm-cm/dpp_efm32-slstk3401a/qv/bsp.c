@@ -376,9 +376,8 @@ void QV_onIdle(void) { // CATION: called with interrupts DISABLED, see NOTE0
 //  GPIO->P[LED_PORT].DOUT &= ~(1U << LED1_PIN);
 
 #ifdef Q_SPY
-    // interrupts still disabled
-    QS_rxParse();  // parse all the received bytes
     QF_INT_ENABLE();
+    QS_rxParse();  // parse all the received bytes
 
     if ((l_USART0->STATUS & USART_STATUS_TXBL) != 0) {  // is TXE empty?
         QF_INT_DISABLE();

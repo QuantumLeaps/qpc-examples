@@ -117,15 +117,12 @@ void assert_failed(char const * const module, int_t const id) {
 static void idle_thread_fun(ULONG thread_input); // prototype
 static void idle_thread_fun(ULONG thread_input) { // see NOTE1
     for (;;) {
-        QF_CRIT_STAT
-
-        QF_CRIT_ENTRY();
         QS_rxParse();  // parse all the received bytes
-        QF_CRIT_EXIT();
 
         if ((UART0->FR & UART_FR_TXFE) != 0U) { // TX done?
             uint16_t fifo = UART_TXFIFO_DEPTH; // max bytes we can accept
 
+            QF_CRIT_STAT
             QF_CRIT_ENTRY();
             uint8_t const *block = QS_getBlock(&fifo);
             QF_CRIT_EXIT();

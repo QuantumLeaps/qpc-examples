@@ -401,9 +401,7 @@ void QXK_onIdle(void) {
 //  QF_INT_ENABLE();
 
 #ifdef Q_SPY
-    QF_INT_DISABLE();
     QS_rxParse();  // parse all the received bytes
-    QF_INT_ENABLE();
 
     if ((l_USART0->STATUS & USART_STATUS_TXBL) != 0) {  // is TXE empty?
         QF_INT_DISABLE();
