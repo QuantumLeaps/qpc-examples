@@ -9,6 +9,9 @@ This example implements the "Periodic-Sporadic" application on the STM32 NUCLEO-
 <b>STM32 NUCLEO-L053R8</b>
 </p>
 
+> NOTE<br>
+The CPU is specifically clocked very slowly (only at 2 MHz) to better demonstrate all overheads and delays.
+
 <p align="center">
 <img src="./real-time_trace.png"/><br>
 <b>Logic analyzer trace after pressing the button (QK kernel)</b>
@@ -22,24 +25,30 @@ examples\arm-cm\real-time_nucleo-l053r8
 |   +---armclang   // ARM/KEIL MDK with Compiler 6 (ARM/CLANG)
 |   |       rt-qk.uvprojx // uVision project
 |
-+---qv-ms          // cooperative QV kernel (multi-stage tasks)
++---qv             // cooperative QV kernel
+|   +---armclang   // ARM/KEIL MDK with Compiler 6 (ARM/CLANG)
+|   |       rt-qv.uvprojx // uVision project
+|
++---qv-ms          // cooperative QV kernel (multi-stage threads)
 |   +---armclang   // ARM/KEIL MDK with Compiler 6 (ARM/CLANG)
 |   |       rt-qv-ms.uvprojx // uVision project
 |
 +---qv-tt          // cooperative QV kernel (time-triggered)
 |   +---armclang   // ARM/KEIL MDK with Compiler 6 (ARM/CLANG)
 |   |       rt-qv-tt.uvprojx // uVision project
-
 ```
 
 ## Features Demonstrated
-The example QP application consists of 2 periodic threads (Active Objects) and two sporadic, lon-running threads (Active Objects). Additionally, the Time-Triggered (TT) version has a tt-schedulier thread.
+The example QP application consists of 2 periodic threads (Active Objects) and two sporadic, long-running threads (Active Objects). Additionally, the Time-Triggered (TT) version has a tt-scheduler thread.
 
 - directory `qk`: preemptive run-to-completion QK kernel
 
-- directory `qv-ms`: cooperative run-to-completion QV kernel with multi-stage tasks
+- directory `qv`: cooperative run-to-completion QV kernel with the same threads as QK
 
-- directory `qv-tt`: cooperative run-to-completion QV kernel with time-triggered tasks
+- directory `qv-ms`: cooperative run-to-completion QV kernel with multi-stage threads
+
+- directory `qv-tt`: cooperative run-to-completion QV kernel with time-triggered threads
+
 
 # Building the Examples
 

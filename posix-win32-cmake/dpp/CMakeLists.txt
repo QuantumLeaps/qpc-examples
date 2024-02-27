@@ -55,10 +55,9 @@ file(REAL_PATH "${CMAKE_BINARY_DIR}" _bindir)
 if(${_srcdir} STREQUAL ${_bindir})
     message(FATAL_ERROR "  FATAL: In-source builds are not allowed!
         You should create a separate directory for build files.")
-else()
-    unset(_srcdir)
-    unset(_bindir)
 endif()
+unset(_srcdir)
+unset(_bindir)
 
 # set up configurable options
 set(PROJECT_NAME dpp CACHE STRING "set to the project name of the qpc library project (default: QPC)")
@@ -87,21 +86,16 @@ project(
     LANGUAGES C
 )
 
-# update the module search path
-if(CMAKE_HOST_WIN32)
-    string(REPLACE "\\" "/" HOME_PATH "$ENV{HOMEDRIVE}$ENV{HOMEPATH}")
-    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake;${HOME_PATH}/cmake;${CMAKE_MODULE_PATH}")
-else()
-    set(CMAKE_MODULE_PATH $ENV{HOME}/cmake;${PROJECT_SOURCE_DIR}/cmake;${PROJECT_SOURCE_DIR};${CMAKE_MODULE_PATH})
+# add support for SPY configuration if not set via CMAKE_TOOLCHAIN_FILE
+if(NOT CMAKE_C_FLAGS_SPY)
+    foreach(LANG IN ITEMS C CXX ASM)
+        set(CMAKE_${LANG}_FLAGS_SPY "${CMAKE_${LANG}_FLAGS_DEBUG} -DQ_SPY")
+    endforeach()
 endif()
 
 include(CTest)
 include(CheckIncludeFile)
 include(CheckLibraryExists)
-
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14")
-    include(CheckPIESupported)
-endif()
 
 # the project target
 if(QPC_CFG_UNIT_TEST)
@@ -136,7 +130,7 @@ else()
             message(FATAL_ERROR "no GUI support available for this build!")
         endif()
     else()
-        target_sources(dpp PRIVATE bsp.c)
+        target_sources(dpp PRIVATE bsp-con.c)
     endif()
 endif()
 
@@ -153,23 +147,29 @@ qpc_sdk_init()
 # add GTK+-3.0 support
 if(QPC_CFG_GUI AND (USE_GTK OR (DEFINED QPC_CFG PORT AND QPC_CFG_PORT MATCHES posix) OR (CMAKE_SYSTEM_NAME STREQUAL Linux OR UNIX)))
     find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK3 gtk+-3.0) # QUIET IMPORTED_TARGET)
+    pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0) # QUIET IMPORTED_TARGET)
 
     if (NOT GTK3_FOUND)
         message(FATAL_ERROR "The package GTK3, required for this build, could not be found on the system!")
     endif()
 
+    # Add GTK related defines
+    target_compile_definitions( PkgConfig::GTK3 INTERFACE
+        GDK_DISABLE_DEPRECATED
+        GTK_DISABLE_DEPRECATED
+    )
+
     # Add other flags to the compiler
-    target_compile_options(dpp PRIVATE ${GTK3_CFLAGS_OTHER})
+    #target_compile_options(dpp PRIVATE ${GTK3_CFLAGS_OTHER})
 
     # Setup CMake to use GTK+, tell the compiler where to look for headers
     # and to the linker where to look for libraries
-    target_include_directories(dpp PRIVATE ${GTK3_INCLUDE_DIRS})
-    target_link_directories(dpp PRIVATE ${GTK3_LIBRARY_DIRS})
-    target_link_options(dpp PRIVATE ${GTK3_LDFLAGS_OTHER})
+    #target_include_directories(dpp PRIVATE ${GTK3_INCLUDE_DIRS})
+    #target_link_directories(dpp PRIVATE ${GTK3_LIBRARY_DIRS})
+    #target_link_options(dpp PRIVATE ${GTK3_LDFLAGS_OTHER})
 
     # Link the target to the GTK+ libraries
-    target_link_libraries(dpp PRIVATE ${GTK3_LIBRARIES}) # PkgConfig::GTK3)
+    target_link_libraries(dpp PRIVATE  PkgConfig::GTK3) # ${GTK3_LIBRARIES}) # PkgConfig::GTK3)
 
     find_program(GLIB_COMPILE_RESOURCES
        NAMES glib-compile-resources glib-compile-resources.exe
@@ -204,42 +204,37 @@ if(QPC_CFG_GUI AND (USE_GTK OR (DEFINED QPC_CFG PORT AND QPC_CFG_PORT MATCHES po
 endif()
 
 # set general defines and options
-target_compile_definitions(dpp
-    PRIVATE
-        $<$<CONFIG:Spy>:Q_SPY>
-        $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
-        $<$<BOOL:${QPC_CFG_UNIT_TEST}>:Q_UTEST>
+target_compile_definitions(dpp PRIVATE
+    $<$<CONFIG:Spy>:Q_SPY>
+    $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
+    $<$<BOOL:${QPC_CFG_UNIT_TEST}>:Q_UTEST>
 )
 
-target_compile_options(dpp
-    PRIVATE
-        $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
+target_compile_options(dpp PRIVATE
+    $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
 )
 
-target_link_options(dpp
-    PRIVATE
-        $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
-        LINKER:-Map=${CMAKE_PROJECT_NAME}.map
+target_link_options(dpp PRIVATE
+    $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
+    LINKER:-Map=${CMAKE_PROJECT_NAME}.map
 )
 
 # set up qpc library
-target_link_libraries(dpp
-    PRIVATE
-        qpc
+target_link_libraries(dpp PRIVATE
+    qpc
 )
+
 # should a 'qp_config.h' configuration file be used and is it available
 # edit the HINTS in the 'find_file()' call according to your project settings
 if(USE_QP_CONFIG)
     find_file(QP_CONFIG qp_config.h HINTS ${CMAKE_CURRENT_SOURCE_DIR}) # try to identify 'qp_config.h'
     if(QP_CONFIG) # found 'qp_config.h'
         cmake_path(GET QP_CONFIG PARENT_PATH QP_CONFIG_DIR) # extract the path from the FQFN
-        target_compile_definitions(qpc # add -DQP_CONFIG to the qpc build
-            PUBLIC
-                QP_CONFIG
+        target_compile_definitions(qpc  PUBLIC # add -DQP_CONFIG to the qpc build
+            QP_CONFIG
         )
-        target_include_directories(qpc # add the path to 'qp_config.h' to the list of include paths for qpc
-            PUBLIC
-                ${QP_CONFIG_DIR}
+        target_include_directories(qpc  PUBLIC # add the path to 'qp_config.h' to the list of include paths for qpc
+            ${QP_CONFIG_DIR}
         )
     else() # 'qp_config.h' requested but not find - try to configure and build anyways
         message(WARNING "File 'qp_config.h' not found!")
@@ -247,14 +242,12 @@ if(USE_QP_CONFIG)
 endif()
 
 if(CMAKE_SYSTEM_NAME STREQUAL Windows OR WIN32)
-    target_compile_options(dpp
-        PRIVATE
-            $<IF:$<BOOL:${QPC_CFG_GUI}>,-mwindows,-mconsole>
+    target_compile_options(dpp PRIVATE
+        $<IF:$<BOOL:${QPC_CFG_GUI}>,-mwindows,-mconsole>
     )
 
-    target_link_options(dpp
-        PRIVATE
-            $<$<C_COMPILER_ID:GNU>:$<IF:$<BOOL:${QPC_CFG_GUI}>,-mwindows,-mconsole>>
+    target_link_options(dpp PRIVATE
+        $<$<C_COMPILER_ID:GNU>:$<IF:$<BOOL:${QPC_CFG_GUI}>,-mwindows,-mconsole>>
     )
 endif()
 

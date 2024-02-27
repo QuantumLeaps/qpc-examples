@@ -8,16 +8,15 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14")
 endif()
 
 # first of all protect against in-source builds
-get_filename_component(_srcdir "${CMAKE_SOURCE_DIR}" REALPATH)
-get_filename_component(_bindir "${CMAKE_BINARY_DIR}" REALPATH)
+file(REAL_PATH "${CMAKE_SOURCE_DIR}" _srcdir)
+file(REAL_PATH "${CMAKE_BINARY_DIR}" _bindir)
 
 if(${_srcdir} STREQUAL ${_bindir})
     message(FATAL_ERROR "  FATAL: In-source builds are not allowed!
         You should create a separate directory for build files.")
-else()
-    unset(_srcdir)
-    unset(_bindir)
 endif()
+unset(_srcdir)
+unset(_bindir)
 
 # set up configurable options
 set(PROJECT_NAME dpp CACHE STRING "set to the project name of the qpc library project (default: QPC)")
@@ -46,21 +45,16 @@ project(
     LANGUAGES C
 )
 
-# update the module search path
-if(CMAKE_HOST_WIN32)
-    string(REPLACE "\\" "/" HOME_PATH "$ENV{HOMEDRIVE}$ENV{HOMEPATH}")
-    set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake;${HOME_PATH}/cmake;${CMAKE_MODULE_PATH}")
-else()
-    set(CMAKE_MODULE_PATH $ENV{HOME}/cmake;${PROJECT_SOURCE_DIR}/cmake;${PROJECT_SOURCE_DIR};${CMAKE_MODULE_PATH})
+# add support for SPY configuration if not set via CMAKE_TOOLCHAIN_FILE
+if(NOT CMAKE_C_FLAGS_SPY)
+    foreach(LANG IN ITEMS C CXX ASM)
+        set(CMAKE_${LANG}_FLAGS_SPY "${CMAKE_${LANG}_FLAGS_DEBUG} -DQ_SPY")
+    endforeach()
 endif()
 
 include(CTest)
 include(CheckIncludeFile)
 include(CheckLibraryExists)
-
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14")
-    include(CheckPIESupported)
-endif()
 
 # the project target
 add_executable(dpp bsp.c main.c philo.c table.c)
@@ -74,29 +68,30 @@ endif()
 
 # add the qpc library to the project
 qpc_sdk_init()
+target_compile_definitions(qpc PUBLIC
+    QP_CONFIG
+)
+target_include_directories(qpc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 # set general defines and options
-target_compile_definitions(dpp
-    PRIVATE
-        $<$<CONFIG:Spy>:Q_SPY>
-        $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
+target_compile_definitions(dpp PRIVATE
+    $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
 )
 
-target_compile_options(dpp
-    PRIVATE
-        $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
+target_compile_options(dpp PRIVATE
+    $<$<C_COMPILER_ID:GNU>:-mconsole>
+    $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
 )
 
-target_link_options(dpp
-    PRIVATE
-        $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
+target_link_options(dpp PRIVATE
+    $<$<C_COMPILER_ID:GNU>:-mconsole>
+    $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
 )
 
 # link the library with the application
-target_link_libraries(dpp
-    PRIVATE
-        qpc
-        $<$<CONFIG:Spy>:ws2_32>
+target_link_libraries(dpp PRIVATE
+    qpc
+    $<$<CONFIG:Spy>:ws2_32>
 )
 
 # show configuration results

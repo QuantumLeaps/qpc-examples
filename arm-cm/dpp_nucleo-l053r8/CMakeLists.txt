@@ -1,11 +1,8 @@
 # dpp
 
 # use a recent CMake version
-cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
-cmake_policy(VERSION 3.13)
-if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14")
-    cmake_policy(SET CMP0083 NEW)
-endif()
+cmake_minimum_required(VERSION 3.23 FATAL_ERROR)
+cmake_policy(SET CMP0083 NEW)
 
 # first of all protect against in-source builds
 file(REAL_PATH "${CMAKE_SOURCE_DIR}" _srcdir)
@@ -24,7 +21,7 @@ set(QPC_CFG_KERNEL QV CACHE STRING "set to the kernel to use (QV, QK, QXK) (defa
 set(QPC_SDK_PATH "${CMAKE_SOURCE_DIR}/../../.." CACHE STRING "set to the source path of QPC (default: ../../..)")
 
 option(QPC_CFG_UNIT_TEST  "set to ON, if Q_UTEST shall be enabled (default: OFF)" OFF)
-option(QPC_CFG_GUI        "set to ON, if a Windows (TM) GUI shall be compiled in (default: OFF)" ON)
+option(QPC_CFG_GUI        "set to ON, if a Windows (TM) GUI shall be compiled in (default: ON)" OFF)
 option(QPC_CFG_VERBOSE   "set to ON, to enable more verbosity. (default: OFF)" OFF)
 option(QPC_CFG_DEBUG     "set to ON, to enable debug settings. (default: ON)" ON)
 
@@ -41,8 +38,8 @@ endif()
 project(
     ${PROJECT_NAME}
     VERSION ${SW_VERSION}
-    DESCRIPTION "Dining Philosophers Problem (dpp) using qpc@win32"
-    LANGUAGES C RC
+    DESCRIPTION "Dining Philosophers Problem (dpp)"
+    LANGUAGES C
 )
 
 # add support for SPY configuration if not set via CMAKE_TOOLCHAIN_FILE
@@ -56,38 +53,65 @@ include(CTest)
 include(CheckIncludeFile)
 include(CheckLibraryExists)
 
-# the project target
-add_executable(dpp bsp.c main.c philo.c table.c Resource.rc)
+# the project main target
+set(TGT ${PROJECT_NAME})
+add_executable(${TGT})
 
 # set position independent code compile/link parameters
 if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.14")
     include(CheckPIESupported)
     check_pie_supported()
-    set_property(TARGET dpp PROPERTY POSITION_INDEPENDENT_CODE FALSE)
+    set_property(TARGET ${TGT} PROPERTY POSITION_INDEPENDENT_CODE FALSE)
 endif()
 
 # add the qpc library to the project
 qpc_sdk_init()
 
-# set general defines
-target_compile_definitions(dpp PRIVATE
-    $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
+# check for plausible settings
+string(TOLOWER ${CMAKE_C_COMPILER_ID} _compiler_)
+string(TOLOWER ${QPC_CFG_PORT} PORT)
+if(NOT (PORT STREQUAL arm-cm AND _compiler_ STREQUAL gnu))
+    message(FATAL_ERROR "'${QPC_CFG_PORT}'/'${CMAKE_C_COMPILER_ID}' not supported! Only 'arm-cm' port with GNU compiler is currently supported!")
+endif()
+
+# add project specific setting to the library buiild
+target_compile_definitions(qpc PUBLIC
+    STM32L053xx
 )
 
-target_compile_options(dpp PRIVATE
-    $<$<C_COMPILER_ID:GNU>:-mwindows>
-    $<$<BOOL:${CONFIG_VERBOSE}>:-v>
+target_compile_options(qpc PUBLIC
+    $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
+    -mcpu=cortex-m0plus
+)
+
+# the main target's sources
+target_sources(${TGT} PRIVATE
+    $<LOWER_CASE:${QPC_CFG_KERNEL}>/bsp.c
+    main.c
+    philo.c
+    table.c
+)
+
+add_subdirectory(${QPC_SDK_PATH}/3rd_party/nucleo-l053r8 nucleo-l053r8)
+target_include_directories(dpp PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+target_compile_definitions(dpp PRIVATE
+    STM32L053xx
+    $<$<CONFIG:Spy>:Q_SPY>
 )
 
 target_link_options(dpp PRIVATE
-    $<$<C_COMPILER_ID:GNU>:-mwindows>
-    $<$<BOOL:${CONFIG_VERBOSE}>:-v>
+    $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
+    -T${CMAKE_CURRENT_SOURCE_DIR}/$<LOWER_CASE:${QPC_CFG_KERNEL}>/${_compiler_}/dpp-$<LOWER_CASE:${QPC_CFG_KERNEL}>.ld
+    -Wl,-Map=${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/${TGT}.map
+    -mcpu=cortex-m0plus
 )
 
 # link the library with the application
 target_link_libraries(dpp PRIVATE
     qpc
-    $<$<CONFIG:Spy>:ws2_32>
 )
 
 # show configuration results

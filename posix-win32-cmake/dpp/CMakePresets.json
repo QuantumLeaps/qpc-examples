@@ -22,7 +22,15 @@
             "name": "gui",
             "hidden": true,
             "cacheVariables": {
-                "QPC_CFG_GUI": "ON"
+                "QPC_CFG_GUI": "true"
+            }
+        },
+        {
+            "name": "gtk",
+            "hidden": true,
+            "cacheVariables": {
+                "QPC_CFG_GUI": "true",
+                "USE_GTK": "true"
             }
         },
         {
@@ -32,7 +40,7 @@
             "inherits": "gen",
             "binaryDir": "${sourceDir}/Build/dpp",
             "cacheVariables": {
-                "USE_QP_CONFIG": "ON"
+                "USE_QP_CONFIG": "true"
             }
         },
         {
@@ -43,7 +51,7 @@
             "binaryDir": "${sourceDir}/Build/dpp-mingw",
             "toolchainFile": "${sourceDir}/../../../3rd_party/cmake/toolchain/tc_mingwgcc.cmake",
             "cacheVariables": {
-                "USE_QP_CONFIG": "ON"
+                "USE_QP_CONFIG": "true"
             }
         },
         {
@@ -53,6 +61,16 @@
             "inherits": [
                 "gen",
                 "gui"
+            ],
+            "binaryDir": "${sourceDir}/Build/dppGui"
+        },
+        {
+            "name": "dpp-gtk",
+            "displayName": "Default (local) GTK gui config",
+            "description": "Build for local build environment with GTK gui",
+            "inherits": [
+                "gen",
+                "gtk"
             ],
             "binaryDir": "${sourceDir}/Build/dppGui"
         },
@@ -72,7 +90,7 @@
             "hidden": true,
             "generator": "Ninja",
             "cacheVariables": {
-                "CONFIG_KERNEL": {
+                "QPC_CONFIG_KERNEL": {
                     "type": "STRING",
                     "value": "QV"
                 },
@@ -80,8 +98,8 @@
                     "type": "STRING",
                     "value": "Spy"
                 },
-                "CONFIG_GUI": "OFF",
-                "QPC_CFG_UNIT_TEST": "ON"
+                "QPC_CONFIG_GUI": "false",
+                "QPC_CFG_UNIT_TEST": "true"
             }
         },
         {
@@ -137,6 +155,10 @@
         {
             "name": "dpp-gui",
             "configurePreset": "dpp-gui"
+        },
+        {
+            "name": "dpp-gtk",
+            "configurePreset": "dpp-gtk"
         },
         {
             "name": "mingw-gui",

@@ -1,0 +1,38 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 23,
+        "patch": 0
+    },
+
+    "configurePresets": [
+        {
+            "name": "gen",
+            "hidden": true,
+            "generator": "Ninja Multi-Config",
+            "cacheVariables": {
+                "CMAKE_CONFIGURATION_TYPES": {
+                    "type": "STRING",
+                    "value": "Debug;Release;Spy"
+                }
+            }
+        },
+        {
+            "name": "dpp",
+            "displayName": "Nucleo L053r8 build",
+            "description": "Build for ARM Cortex-M0+ on Nucleo L0538r8",
+            "inherits": "gen",
+            "toolchainFile": "${sourceDir}/../../../3rd_party/cmake/toolchain/tc_gnuarm.cmake",
+            "binaryDir": "${sourceDir}/Build/arm"
+        }
+    ],
+
+    "buildPresets": [
+        {
+            "name": "dpp",
+            "configuration": "Debug",
+            "configurePreset": "dpp"
+        }
+    ]
+}
