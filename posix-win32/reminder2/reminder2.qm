@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="5.3.0" links="1">
+<model version="6.1.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
  <documentation>&quot;Reminder&quot; state pattern example #2</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -17,7 +17,7 @@
     <parameter name="iter" type="uint32_t"/>
     <code>if (me != (ReminderEvt *)0) {
     // don't call QEvt_ctor() because the initialization of all
-    // QEvt attributes is already done in QF_QF_newX_()
+    // QEvt attributes is already done in QF_newX_()
     me-&gt;iter = iter;
 }
 return me;</code>

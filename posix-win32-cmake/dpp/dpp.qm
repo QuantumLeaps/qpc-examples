@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="5.3.0" links="1">
+<model version="6.1.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
  <documentation>Dining Philosopher Problem example</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -45,7 +45,7 @@ QS_SIG_DICTIONARY(HUNGRY_SIG,  (void *)0);</code>
     <parameter name="id" type="uint8_t"/>
     <code>if (me != (TableEvt *)0) {
     // don't call QEvt_ctor() because the initialization of all
-    // QEvt attributes is already done in QF_QF_newX_()
+    // QEvt attributes is already done in QF_newX_()
     me-&gt;philoId = id;
 }
 return me;</code>
@@ -257,7 +257,7 @@ for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
      </tran>
      <!--${AOs::Table::SM::active::serving}-->
      <state name="serving">
-      <entry brief="give pending permitions to eat">// give permissions to eat...
+      <entry brief="give pending permissions to eat">// give permissions to eat...
 for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
     if (me-&gt;isHungry[n]
         &amp;&amp; (me-&gt;fork[left(n)] == FREE)
