@@ -22,11 +22,11 @@
 // <www.state-machine.com>
 // <info@state-machine.com>
 //============================================================================
-//! @date Last updated on: 2023-11-15
-//! @version Last updated for: @ref qpc_7_3_1
+//! @date Last updated on: 2024-05-08
+//! @version Last updated for: @ref qpc_7_3_4
 //!
 //! @file
-//! @brief "Experimental" QF/C port to Espressif ESP-IDF (version 4.x)
+//! @brief "Experimental" QF/C port to Espressif ESP-IDF (version 5.x)
 
 #define QP_IMPL           // this is QP implementation
 #include "qp_port.h"      // QP port

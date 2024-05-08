@@ -22,8 +22,8 @@
 // <www.state-machine.com>
 // <info@state-machine.com>
 //============================================================================
-//! @date Last updated on: 2023-08-16
-//! @version Last updated for: @ref qpc_7_3_0
+//! @date Last updated on: 2024-05-08
+//! @version Last updated for: @ref qpc_7_3_4
 //!
 //! @file
 //! @brief QS/C port to a 32-bit CPU and a generic C11 compiler.

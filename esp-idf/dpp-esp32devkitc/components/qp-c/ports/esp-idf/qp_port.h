@@ -27,11 +27,11 @@
 // <www.state-machine.com>
 // <info@state-machine.com>
 //============================================================================
-//! @date Last updated on: 2023-09-07
-//! @version Last updated for: @ref qpc_7_3_0
+//! @date Last updated on: 2024-05-08
+//! @version Last updated for: @ref qpc_7_3_4
 //!
 //! @file
-//! @brief QP/C port to Espressif ESP-IDF (version 4.x), Experimental, NOTE0
+//! @brief QP/C port to Espressif ESP-IDF (version 5.x), Experimental, NOTE0
 //!
 #ifndef QP_PORT_H_
 #define QP_PORT_H_
