@@ -57,19 +57,14 @@ typedef struct {
 } ReminderEvt;
 
 // public:
-
-#ifdef QEVT_DYN_CTOR
-static inline ReminderEvt * ReminderEvt_ctor(ReminderEvt * const me,
+static inline ReminderEvt * ReminderEvt_init(ReminderEvt * const me,
     uint32_t iter)
 {
     if (me != (ReminderEvt *)0) {
-        // don't call QEvt_ctor() because the initialization of all
-        // QEvt attributes is already done in QF_newX_()
         me->iter = iter;
     }
     return me;
 }
-#endif // def QEVT_DYN_CTOR
 //$enddecl${Events::ReminderEvt} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 //..........................................................................
@@ -128,7 +123,7 @@ static QState Cruncher_processing(Cruncher * const me, QEvt const * const e) {
     switch (e->sig) {
         //${Components::Cruncher::SM::processing}
         case Q_ENTRY_SIG: {
-            #ifdef QEVT_DYN_CTOR
+            #ifdef QEVT_PAR_INIT
             ReminderEvt *reminder = Q_NEW(ReminderEvt, CRUNCH_SIG, 0U);
             #else
             ReminderEvt *reminder = Q_NEW(ReminderEvt, CRUNCH_SIG);
@@ -155,7 +150,7 @@ static QState Cruncher_processing(Cruncher * const me, QEvt const * const e) {
             }
             //${Components::Cruncher::SM::processing::CRUNCH::[i<0x07000000U]}
             if (i < 0x07000000U) {
-                #ifdef QEVT_DYN_CTOR
+                #ifdef QEVT_PAR_INIT
                 ReminderEvt *reminder = Q_NEW(ReminderEvt, CRUNCH_SIG, i);
                 #else
                 ReminderEvt *reminder = Q_NEW(ReminderEvt, CRUNCH_SIG);
@@ -247,24 +242,28 @@ int main(int argc, char *argv[]) {
 //..........................................................................
 void BSP_onKeyboardInput(uint8_t key) {
     switch (key) {
-        case 'e': { // echo the progress so far
+        case 'e': { // 'e' pressed -> post the ECHO event
             // NOTE:
-            // The following Q_NEW_X() allocation might potentially fail
-            // but this is acceptable because the "ECHO" event is not
-            // considered critical. This code illustrates the Q_NEW_X()
-            // API and its use.
-            #ifdef QEVT_DYN_CTOR
-            QEvt const *echoEvt = Q_NEW_X(QEvt, 2U, ECHO_SIG, QEVT_DYNAMIC);
-            #else
-            QEvt const *echoEvt = Q_NEW_X(QEvt, 2U, ECHO_SIG);
-            #endif
+            // Posting the ECHO event would be best handled with an
+            // immutable event, as it is illustrated in the next case
+            // of the TERMINATE event below (case '\033').
+            //
+            // However, for the sake of demonstrating the Q_NEW_X()
+            // facility, the ECHO event is allocated dynamically, which
+            // is allowed to fail because the ECHO event is not
+            // considered critical.
+        #ifdef QEVT_PAR_INIT
+            QEvt const *echoEvt = Q_NEW_X(QEvt, 2U, ECHO_SIG, 0U);
+        #else
+            QEvt *echoEvt = Q_NEW_X(QEvt, 2U, ECHO_SIG);
+        #endif
             if (echoEvt != (QEvt *)0) { // event allocated successfully?
-                QACTIVE_POST((QActive *)&l_cruncher, echoEvt, (void *)0);
+                QACTIVE_POST_X((QActive *)&l_cruncher, echoEvt, 2U, (void *)0);
             }
             break;
         }
         case '\033': { // ESC pressed?
-            // NOTE: this constant event is statically pre-allocated.
+            // NOTE: this immutable event is statically pre-allocated.
             // It can be posted/published as any other event.
             static QEvt const terminateEvt = QEVT_INITIALIZER(TERMINATE_SIG);
             QACTIVE_POST((QActive *)&l_cruncher, &terminateEvt, (void *)0);

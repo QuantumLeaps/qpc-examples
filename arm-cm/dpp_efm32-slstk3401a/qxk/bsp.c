@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example, EFM32-SLSTK3401A board, QXK kernel
-// Last updated for version 7.3.2
-// Last updated on  2023-12-13
+// Last updated for version 7.4.0
+// Last updated on  2024-06-06
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -55,6 +55,7 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 static uint32_t l_rndSeed;
 
 #ifdef Q_SPY
+
     QSTimeCtr QS_tickTime_;
     QSTimeCtr QS_tickPeriod_;
 
@@ -89,9 +90,9 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // for debugging, hang on in an endless loop...
     for (;;) {
     }
-#endif
-
+#else
     NVIC_SystemReset();
+#endif
 }
 //............................................................................
 void assert_failed(char const * const module, int_t const id); // prototype
@@ -149,7 +150,7 @@ void GPIO_EVEN_IRQHandler(void); // prototype
 void GPIO_EVEN_IRQHandler(void) { // for testing, NOTE03
     QXK_ISR_ENTRY(); // inform QXK about entering an ISR
 // for testing...
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
     QACTIVE_PUBLISH(Q_NEW(QEvt, TEST_SIG, QEVT_DYNAMIC),
                     &l_GPIO_EVEN_IRQHandler);
 #else
@@ -276,7 +277,7 @@ void BSP_start(void) {
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
         QACTIVE_START(AO_Philo[n],
-            n + 3U,                  // QF-prio/pthre. see NOTE1
+            n + 3U,                  // QF-prio.
             philoQueueSto[n],        // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
             (void *)0, 0U,           // no stack storage
@@ -311,7 +312,7 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
         GPIO->P[LED_PORT].DOUT |=  (1U << LED0_PIN);
     }
     else {
-        GPIO->P[LED_PORT].DOUT &=  ~(1U << LED0_PIN);
+        GPIO->P[LED_PORT].DOUT &= ~(1U << LED0_PIN);
     }
 
     // app-specific trace record...

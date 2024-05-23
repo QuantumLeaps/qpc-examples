@@ -1,13 +1,13 @@
 ##############################################################################
-# Product: Makefile for QP/C for Windows and POSIX *HOSTS* (multithreaded)
-# Last updated for version 7.3.3
-# Last updated on  2024-02-15
+# Product: Makefile for QP/C for Windows and POSIX *HOSTS*
+# Last updated for version 7.3.5
+# Last updated on  2024-05-31
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+# Copyright (C) 2005 Quantum Leaps, LLC, <state-machine.com>.
 #
 # This program is open source software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as published
@@ -31,15 +31,9 @@
 # <www.state-machine.com/licensing>
 # <info@state-machine.com>
 ##############################################################################
-# This Makefile demonstates the multi-threaded QP/C port (qpc/ports/win32)
 #
-# examples of invoking this Makefile:
-# building configurations: Debug (default), Release, and Spy
-# make
-# make CONF=rel
-# make CONF=spy
-# make clean   # cleanup the build
-# make CONF=spy clean   # cleanup the build
+# This Makefile demonstates how to build QP/C compiled as C code, but mix it
+# with C++ code
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
@@ -74,12 +68,12 @@ endif
 # C source files...
 C_SRCS := \
 	bsp.c \
-	main.c \
 	philo.c \
 	table.c
 
 # C++ source files...
-CPP_SRCS :=
+CPP_SRCS := \
+	mixed.cpp
 
 LIB_DIRS :=
 LIBS     :=
@@ -125,8 +119,8 @@ ifeq ($(OS),Windows_NT)
 # - the single-threaded QP/C port (win32-qv) or
 # - the multithreaded QP/C port (win32).
 #
-#QP_PORT_DIR := $(QPC)/ports/win32-qv
-QP_PORT_DIR := $(QPC)/ports/win32
+QP_PORT_DIR := $(QPC)/ports/win32-qv
+#QP_PORT_DIR := $(QPC)/ports/win32
 LIBS += -lws2_32
 
 else
@@ -136,8 +130,8 @@ else
 # - the single-threaded QP/C port (posix-qv) or
 # - the multithreaded QP/C port (posix).
 #
-#QP_PORT_DIR := $(QPC)/ports/posix-qv
-QP_PORT_DIR := $(QPC)/ports/posix
+QP_PORT_DIR := $(QPC)/ports/posix-qv
+#QP_PORT_DIR := $(QPC)/ports/posix
 
 LIBS += -lpthread
 
@@ -159,8 +153,8 @@ INCLUDES += -I$(QPC)/include -I$(QP_PORT_DIR)
 #
 CC    := gcc
 CPP   := g++
-LINK  := gcc    # for C programs
-#LINK  := g++   # for C++ programs
+#LINK  := gcc    # for C programs
+LINK  := g++   # for C++ programs
 
 #-----------------------------------------------------------------------------
 # basic utilities (depends on the OS this Makefile runs on):
@@ -250,7 +244,7 @@ endif
 all: $(TARGET_EXE)
 
 $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CPP) $(CPPFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

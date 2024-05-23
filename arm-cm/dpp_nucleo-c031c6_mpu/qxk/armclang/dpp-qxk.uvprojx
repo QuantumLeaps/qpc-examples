@@ -338,7 +338,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define></Define>
+              <Define>QP_CONFIG</Define>
               <Undefine></Undefine>
               <IncludePath>..\..;..\..\..\..\..\include;..\..\..\..\..\ports\arm-cm\qxk\armclang;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\nucleo-c031c6</IncludePath>
             </VariousControls>
@@ -428,6 +428,11 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\qp_config.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1075,6 +1080,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
             </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\qp_config.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1720,6 +1730,11 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\qp_config.h</FilePath>
             </File>
           </Files>
         </Group>

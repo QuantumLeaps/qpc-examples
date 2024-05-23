@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example, EFM32-SLSTK3401A board, QK kernel
-// Last updated for version 7.3.2
-// Last updated on  2023-12-13
+// Last updated for version 7.4.0
+// Last updated on  2024-06-06
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -91,7 +91,6 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     for (;;) {
     }
 #endif
-
     NVIC_SystemReset();
 }
 //............................................................................
@@ -140,7 +139,7 @@ void SysTick_Handler(void) {
 #ifdef Q_SPY
     tmp = SysTick->CTRL; // clear CTRL_COUNTFLAG
     QS_tickTime_ += QS_tickPeriod_; // account for the clock rollover
-#endif
+#endif // Q_SPY
 
     QK_ISR_EXIT();  // inform QK about exiting an ISR
 }
@@ -151,7 +150,7 @@ void GPIO_EVEN_IRQHandler(void) { // for testing, NOTE03
     QK_ISR_ENTRY(); // inform QK about entering an ISR
 
 // for testing...
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
     QACTIVE_PUBLISH(Q_NEW(QEvt, TEST_SIG, QEVT_DYNAMIC),
                     &l_GPIO_EVEN_IRQHandler);
 #else
@@ -496,7 +495,7 @@ void QS_onFlush(void) {
         if (b != QS_EOD) {
             while ((l_USART0->STATUS & USART_STATUS_TXBL) == 0U) {
             }
-            l_USART0->TXDATA = (uint8_t)b;
+            l_USART0->TXDATA = b;
         }
         else {
             break;

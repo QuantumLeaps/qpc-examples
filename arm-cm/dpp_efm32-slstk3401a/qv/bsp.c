@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example, EFM32-SLSTK3401A board, QV kernel
-// Last updated for version 7.3.2
-// Last updated on  2023-12-13
+// Last updated for version 7.4.0
+// Last updated on  2024-06-06
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -90,9 +90,8 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // for debugging, hang on in an endless loop...
     for (;;) {
     }
-#else
-    NVIC_SystemReset();
 #endif
+    NVIC_SystemReset();
 }
 //............................................................................
 void assert_failed(char const * const module, int_t const id); // prototype
@@ -139,7 +138,7 @@ void SysTick_Handler(void) {
 #ifdef Q_SPY
     tmp = SysTick->CTRL; // clear CTRL_COUNTFLAG
     QS_tickTime_ += QS_tickPeriod_; // account for the clock rollover
-#endif
+#endif // Q_SPY
 
     QV_ARM_ERRATUM_838869();
 }
@@ -148,8 +147,7 @@ void SysTick_Handler(void) {
 void GPIO_EVEN_IRQHandler(void); // prototype
 void GPIO_EVEN_IRQHandler(void) { // for testing, NOTE03
 // for testing...
-// for testing...
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
     QACTIVE_PUBLISH(Q_NEW(QEvt, TEST_SIG, QEVT_DYNAMIC),
                     &l_GPIO_EVEN_IRQHandler);
 #else
@@ -324,7 +322,6 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
 
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
-    //
     uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
 
@@ -459,7 +456,6 @@ uint8_t QS_onStartup(void const *arg) {
     USART_IntEnable(l_USART0, USART_IF_RXDATAV);
     // NOTE: do not enable the UART0 interrupt in the NVIC yet.
     // Wait till QF_onStartup()
-    //
 
     // Finally enable the UART
     USART_Enable(l_USART0, usartEnable);
@@ -491,7 +487,7 @@ void QS_onFlush(void) {
         if (b != QS_EOD) {
             while ((l_USART0->STATUS & USART_STATUS_TXBL) == 0U) {
             }
-            l_USART0->TXDATA  = b;
+            l_USART0->TXDATA = b;
         }
         else {
             break;

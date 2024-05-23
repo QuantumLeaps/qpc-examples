@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.1.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="6.1.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
  <documentation>Dining Philosopher Problem example with the &quot;Orthogonal Component&quot; state pattern (see https://state-machine.com/doc/Pattern_Orthogonal.pdf)
 
 The model demonstrates the following features:
@@ -48,13 +48,11 @@ QS_SIG_DICTIONARY(HUNGRY_SIG,  (void *)0);</code>
   <class name="TableEvt" superclass="qpc::QEvt">
    <!--${Shared::TableEvt::philoId}-->
    <attribute name="philoId" type="uint8_t" visibility="0x00" properties="0x00"/>
-   <!--${Shared::TableEvt::ctor}-->
-   <operation name="ctor?def QEVT_DYN_CTOR" type="TableEvt *" visibility="0x00" properties="0x02">
-    <!--${Shared::TableEvt::ctor::id}-->
+   <!--${Shared::TableEvt::init}-->
+   <operation name="init" type="TableEvt *" visibility="0x00" properties="0x02">
+    <!--${Shared::TableEvt::init::id}-->
     <parameter name="id" type="uint8_t"/>
-    <code>if (me != (TableEvt *)0) {
-    // don't call QEvt_ctor() because the initialization of all
-    // QEvt attributes is already done in QF_newX_()
+    <code>if (me) {
     me-&gt;philoId = id;
 }
 return me;</code>
@@ -396,7 +394,7 @@ if (!registered) {
     <!--${Comp::Philo::SM::hungry}-->
     <state name="hungry">
      <entry>// asynchronously post event to the Container
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
 TableEvt const *pe = Q_NEW(TableEvt, HUNGRY_SIG, Philo_getId(me));
 #else
 TableEvt *pe = Q_NEW(TableEvt, HUNGRY_SIG);
@@ -419,7 +417,7 @@ QACTIVE_POST_LIFO(AO_Table, &amp;pe-&gt;super);</entry>
      <exit>QTimeEvt_disarm(&amp;me-&gt;timeEvt.super);
 
 // asynchronously post event to the Container
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
 TableEvt const *pe = Q_NEW(TableEvt, DONE_SIG, Philo_getId(me));
 #else
 TableEvt *pe = Q_NEW(TableEvt, DONE_SIG);

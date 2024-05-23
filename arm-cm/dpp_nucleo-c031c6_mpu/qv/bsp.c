@@ -102,6 +102,7 @@ void assert_failed(char const * const module, int_t const id) {
 
 void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
+
     QTIMEEVT_TICK_X(0U, &l_SysTick_Handler); // time events at rate 0
 
     // Perform the debouncing of buttons. The algorithm for debouncing
@@ -163,12 +164,21 @@ void EXTI0_1_IRQHandler(void) {
 
 void USART2_IRQHandler(void); // prototype
 void USART2_IRQHandler(void) { // used in QS-RX (kernel UNAWARE interrutp)
+    uint32_t mpu_ctrl = MPU->CTRL;  // save the previous MPU CTRL
+    MPU->CTRL = MPU_CTRL_ENABLE_Msk        // enable the MPU
+                | MPU_CTRL_PRIVDEFENA_Msk; // enable background region
+    __ISB();
+    __DSB();
+
     // is RX register NOT empty?
-    QF_MEM_SYS();
     if ((USART2->ISR & (1U << 5U)) != 0U) {
         uint32_t b = USART2->RDR;
         QS_RX_PUT(b);
     }
+
+    MPU->CTRL = mpu_ctrl; // restore the previous MPU CTRL
+    __ISB();
+    __DSB();
 
     QV_ARM_ERRATUM_838869();
 }
@@ -212,7 +222,7 @@ static MPU_Region const MPU_Table[3] = {
     { 0U + 0x12U,                              //---- region #2
       0U },
 };
-#endif
+#endif // QF_MEM_ISOLATE
 
 // Philo AOs..................................................................
 // size of Philo instance, as power-of-2
@@ -331,12 +341,28 @@ static MPU_Region const MPU_Philo[N_PHILO][3] = {
     { 0U + 0x12U,                              //---- region #2
       0U }},
 };
-#endif
+#endif // QF_MEM_ISOLATE
+
+// Shared Event-pools.........................................................
+#define EPOOLS_SIZE_POW2 ((uint32_t)8U)
+
+__attribute__((aligned((1U << EPOOLS_SIZE_POW2))))
+static struct EPools {
+    QF_MPOOL_EL(TableEvt) smlPool[2*N_PHILO];
+    // ... other pools
+} EPools_sto;
+Q_ASSERT_STATIC(sizeof(EPools_sto) <= (1U << EPOOLS_SIZE_POW2));
+
 
 // Idle thread ............................................................
-#ifdef QF_MEM_ISOLATE
-
 #ifdef Q_SPY
+
+// size of QS-RX buffer, as power-of-2
+#define QS_RX_BUF_SIZE_POW2 ((uint32_t)7U)
+__attribute__((aligned((1U << QS_RX_BUF_SIZE_POW2))))
+uint8_t QS_rxBuf[1U << QS_RX_BUF_SIZE_POW2];
+
+#ifdef QF_MEM_ISOLATE
 // Idle thread owns QS-RX, so it needs access to its data...
 
 // size of QS_rxPriv_, as power-of-2
@@ -344,11 +370,6 @@ static MPU_Region const MPU_Philo[N_PHILO][3] = {
 __attribute__((aligned((1U << QS_RX_PRIV_SIZE_POW2))))
 QS_RxAttr QS_rxPriv_;
 Q_ASSERT_STATIC(sizeof(QS_rxPriv_) <= (1U << QS_RX_PRIV_SIZE_POW2));
-
-// size of QS-RX buffer, as power-of-2
-#define QS_RX_BUF_SIZE_POW2 ((uint32_t)7U)
-__attribute__((aligned((1U << QS_RX_BUF_SIZE_POW2))))
-uint8_t QS_rxBuf[1U << QS_RX_BUF_SIZE_POW2];
 
 static MPU_Region const MPU_Idle[3] = {
     { (uint32_t)&QS_rxPriv_ + 0x10U,           //---- region #0
@@ -372,9 +393,11 @@ static MPU_Region const MPU_Idle[3] = {
     { 0U + 0x12U,                              //---- region #2
       0U },
 };
+#endif // QF_MEM_ISOLATE
 
 #else // Q_SPY not defined
 
+#ifdef QF_MEM_ISOLATE
 static MPU_Region const MPU_Idle[3] = {
     { 0U + 0x10U,                              //---- region #0
       0U },
@@ -383,26 +406,19 @@ static MPU_Region const MPU_Idle[3] = {
     { 0U + 0x12U,                              //---- region #2
       0U },
 };
-
-#endif // Q_SPY not defined
-
 #endif // QF_MEM_ISOLATE
 
-// Shared Event-pools.........................................................
-#define EPOOLS_SIZE_POW2 ((uint32_t)8U)
-
-__attribute__((aligned((1U << EPOOLS_SIZE_POW2))))
-static struct EPools {
-    QF_MPOOL_EL(TableEvt) smlPool[2*N_PHILO];
-    // ... other pools
-} EPools_sto;
-Q_ASSERT_STATIC(sizeof(EPools_sto) <= (1U << EPOOLS_SIZE_POW2));
+#endif // Q_SPY not defined
 
 //============================================================================
 #ifdef QF_MEM_ISOLATE
 //............................................................................
 __attribute__(( used ))
 void QF_onMemSys(void) {
+    uint32_t const mpu_ctrl = MPU->CTRL;  // save the previous MPU CTRL
+    // no nesting of memory protection
+    Q_REQUIRE_INCRIT(400, (mpu_ctrl & MPU_CTRL_PRIVDEFENA_Msk) == 0U);
+
     MPU->CTRL = MPU_CTRL_ENABLE_Msk        // enable the MPU
                 | MPU_CTRL_PRIVDEFENA_Msk; // enable background region
     __ISB();
@@ -411,6 +427,10 @@ void QF_onMemSys(void) {
 //............................................................................
 __attribute__(( used ))
 void QF_onMemApp() {
+    uint32_t const mpu_ctrl = MPU->CTRL;  // save the previous MPU CTRL
+    // no nesting of memory protection
+    Q_REQUIRE_INCRIT(500, (mpu_ctrl & MPU_CTRL_PRIVDEFENA_Msk) != 0U);
+
     MPU->CTRL = MPU_CTRL_ENABLE_Msk; // enable the MPU
                 // but do NOT enable background region
     __ISB();
@@ -854,12 +874,6 @@ void QS_onCommand(uint8_t cmdId,
 //----------------------------------------------------------------------------
 
 //============================================================================
-// NOTE0:
-// The QV_onIdle() callback is called with interrupts disabled, because the
-// determination of the idle condition might change by any interrupt posting
-// an event. QV_onIdle() must internally enable interrupts, ideally
-// atomically with putting the CPU to the power-saving mode.
-//
 // NOTE1:
 // The QF_AWARE_ISR_CMSIS_PRI constant from the QF port specifies the highest
 // ISR priority that is disabled by the QF framework. The value is suitable
@@ -867,16 +881,16 @@ void QS_onCommand(uint8_t cmdId,
 //
 // Only ISRs prioritized at or below the QF_AWARE_ISR_CMSIS_PRI level (i.e.,
 // with the numerical values of priorities equal or higher than
-// QF_AWARE_ISR_CMSIS_PRI) are allowed to call the QF/QV services. These ISRs
-// are "QF-aware".
+// QF_AWARE_ISR_CMSIS_PRI) are allowed to post/publish events or call
+// any other QF/QV services. These ISRs are "QF-aware".
 //
 // Conversely, any ISRs prioritized above the QF_AWARE_ISR_CMSIS_PRI priority
 // level (i.e., with the numerical values of priorities less than
 // QF_AWARE_ISR_CMSIS_PRI) are never disabled and are not aware of the kernel.
 // Such "QF-unaware" ISRs cannot call ANY QF/QV services. In particular they
-// can NOT call any QF/QV services. The only mechanism by which a "QF-unaware"
-// ISR can communicate with the QF framework is by pending a "QF-aware" ISR,
-// which can post/publish events.
+// can NOT call the macros QV_ISR_ENTRY/QV_ISR_ENTRY. The only mechanism
+// by which a "QF-unaware" ISR can communicate with the QF framework is by
+// triggering a "QF-aware" ISR, which can post/publish events.
 //
 // NOTE2:
 // The User LED is used to visualize the idle loop activity. The brightness
@@ -884,3 +898,9 @@ void QS_onCommand(uint8_t cmdId,
 // Please note that the LED is toggled with interrupts locked, so no interrupt
 // execution time contributes to the brightness of the User LED.
 //
+// NOTE3:
+// The QV_onIdle() callback is called with interrupts disabled, because the
+// determination of the idle condition might change by any interrupt posting
+// an event. QV_onIdle() must internally enable interrupts, ideally
+// atomically with putting the CPU to the power-saving mode.
+

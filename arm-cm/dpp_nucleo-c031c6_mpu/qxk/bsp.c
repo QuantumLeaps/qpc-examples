@@ -167,13 +167,22 @@ void EXTI0_1_IRQHandler(void) {
 // QXK_ISR_ENTRY/QXK_ISR_EXIT and they cannot post or publish events.
 
 void USART2_IRQHandler(void); // prototype
-void USART2_IRQHandler(void) { // used in QS-RX (kernel UNAWARE interrutp)
+void USART2_IRQHandler(void) { // used in QS-RX (kernel UNAWARE interrupt)
+    uint32_t mpu_ctrl = MPU->CTRL;  // save the previous MPU CTRL
+    MPU->CTRL = MPU_CTRL_ENABLE_Msk        // enable the MPU
+                | MPU_CTRL_PRIVDEFENA_Msk; // enable background region
+    __ISB();
+    __DSB();
+
     // is RX register NOT empty?
-    QF_MEM_SYS();
     if ((USART2->ISR & (1U << 5)) != 0) {
         uint32_t b = USART2->RDR;
         QS_RX_PUT(b);
     }
+
+    MPU->CTRL = mpu_ctrl; // restore the previous MPU CTRL
+    __ISB();
+    __DSB();
 
     QXK_ARM_ERRATUM_838869();
 }
@@ -336,11 +345,78 @@ static MPU_Region const MPU_Philo[N_PHILO][3] = {
     { 0U + 0x12U,                              //---- region #2
       0U }},
 };
-#endif
+#endif // QF_MEM_ISOLATE
+
+// Shared Event-pools.........................................................
+#define EPOOLS_SIZE_POW2 ((uint32_t)8U)
+
+__attribute__((aligned((1U << EPOOLS_SIZE_POW2))))
+static struct EPools {
+    QF_MPOOL_EL(TableEvt) smlPool[2*N_PHILO];
+    // ... other pools
+} EPools_sto;
+Q_ASSERT_STATIC(sizeof(EPools_sto) <= (1U << EPOOLS_SIZE_POW2));
+
+
+// Idle thread ............................................................
+#ifdef Q_SPY
+
+// size of QS-RX buffer, as power-of-2
+#define QS_RX_BUF_SIZE_POW2 ((uint32_t)7U)
+__attribute__((aligned((1U << QS_RX_BUF_SIZE_POW2))))
+uint8_t QS_rxBuf[1U << QS_RX_BUF_SIZE_POW2];
+
+#ifdef QF_MEM_ISOLATE
+// Idle thread owns QS-RX, so it needs access to its data...
+
+// size of QS_rxPriv_, as power-of-2
+#define QS_RX_PRIV_SIZE_POW2 ((uint32_t)7U)
+__attribute__((aligned((1U << QS_RX_PRIV_SIZE_POW2))))
+QS_RxAttr QS_rxPriv_;
+Q_ASSERT_STATIC(sizeof(QS_rxPriv_) <= (1U << QS_RX_PRIV_SIZE_POW2));
+
+static MPU_Region const MPU_Idle[3] = {
+    { (uint32_t)&QS_rxPriv_ + 0x10U,           //---- region #0
+      ((QS_RX_PRIV_SIZE_POW2 - 1U) << MPU_RASR_SIZE_Pos)  // size
+       + (3U << MPU_RASR_AP_Pos)                      // PA:rw/UA:rw
+       + (1U << MPU_RASR_XN_Pos)                      // XN=1
+       + (1U << MPU_RASR_S_Pos)                       // S=1
+       + (1U << MPU_RASR_C_Pos)                       // C=1
+       + (0U << MPU_RASR_B_Pos)                       // B=0
+       + (0U << MPU_RASR_TEX_Pos)                     // TEX=0
+       + MPU_RASR_ENABLE_Msk },                       // region enable
+    { (uint32_t)&QS_rxBuf + 0x11U,            //---- region #1
+      ((QS_RX_BUF_SIZE_POW2 - 1U) << MPU_RASR_SIZE_Pos)  // size
+       + (3U << MPU_RASR_AP_Pos)                      // PA:rw/UA:rw
+       + (1U << MPU_RASR_XN_Pos)                      // XN=1
+       + (1U << MPU_RASR_S_Pos)                       // S=1
+       + (1U << MPU_RASR_C_Pos)                       // C=1
+       + (0U << MPU_RASR_B_Pos)                       // B=0
+       + (0U << MPU_RASR_TEX_Pos)                     // TEX=0
+       + MPU_RASR_ENABLE_Msk },                       // region enable
+    { 0U + 0x12U,                              //---- region #2
+      0U },
+};
+#endif // QF_MEM_ISOLATE
+
+#else // Q_SPY not defined
+
+#ifdef QF_MEM_ISOLATE
+static MPU_Region const MPU_Idle[3] = {
+    { 0U + 0x10U,                              //---- region #0
+      0U },
+    { 0U + 0x11U,                              //---- region #1
+      0U },
+    { 0U + 0x12U,                              //---- region #2
+      0U },
+};
+#endif // QF_MEM_ISOLATE
+
+#endif // Q_SPY not defined
 
 // XThread1 thread............................................................
-#define XTHREAD1_SIZE_POW2  ((uint32_t)10U)  // XThread1 instance + stack
-#define XTHREAD1_STACK_SIZE ((uint32_t)400U) // XThread1 stack size
+#define XTHREAD1_SIZE_POW2  ((uint32_t)10U)   // XThread1 instance + stack
+#define XTHREAD1_STACK_SIZE ((uint32_t)400U)  // XThread1 stack size
 
 __attribute__((aligned((1U << XTHREAD1_SIZE_POW2))))
 uint8_t XThread1_sto[1U << XTHREAD1_SIZE_POW2];
@@ -371,8 +447,8 @@ static MPU_Region const MPU_XThread1[3] = {
 #endif
 
 // XThread2 thread............................................................
-#define XTHREAD2_SIZE_POW2  ((uint32_t)10U)  // XThread2 instance + stack
-#define XTHREAD2_STACK_SIZE ((uint32_t)400U) // XThread2 stack size
+#define XTHREAD2_SIZE_POW2  ((uint32_t)10U)   // XThread2 instance + stack
+#define XTHREAD2_STACK_SIZE ((uint32_t)400U)  // XThread2 stack size
 
 __attribute__((aligned((1U << XTHREAD2_SIZE_POW2))))
 uint8_t XThread2_sto[1U << XTHREAD2_SIZE_POW2];
@@ -402,76 +478,15 @@ static MPU_Region const MPU_XThread2[3] = {
 };
 #endif
 
-// Idle thread ............................................................
-#ifdef QF_MEM_ISOLATE
-
-#ifdef Q_SPY
-// Idle thread owns QS-RX, so it needs access to its data...
-
-// size of QS_rxPriv_, as power-of-2
-#define QS_RX_PRIV_SIZE_POW2 ((uint32_t)7U)
-__attribute__((aligned((1U << QS_RX_PRIV_SIZE_POW2))))
-QS_RxAttr QS_rxPriv_;
-Q_ASSERT_STATIC(sizeof(QS_rxPriv_) <= (1U << QS_RX_PRIV_SIZE_POW2));
-
-// size of QS-RX buffer, as power-of-2
-#define QS_RX_BUF_SIZE_POW2 ((uint32_t)7U)
-__attribute__((aligned((1U << QS_RX_BUF_SIZE_POW2))))
-uint8_t QS_rxBuf[1U << QS_RX_BUF_SIZE_POW2];
-
-static MPU_Region const MPU_Idle[3] = {
-    { (uint32_t)&QS_rxPriv_ + 0x10U,           //---- region #0
-      ((QS_RX_PRIV_SIZE_POW2 - 1U) << MPU_RASR_SIZE_Pos)  // size
-       + (3U << MPU_RASR_AP_Pos)                      // PA:rw/UA:rw
-       + (1U << MPU_RASR_XN_Pos)                      // XN=1
-       + (1U << MPU_RASR_S_Pos)                       // S=1
-       + (1U << MPU_RASR_C_Pos)                       // C=1
-       + (0U << MPU_RASR_B_Pos)                       // B=0
-       + (0U << MPU_RASR_TEX_Pos)                     // TEX=0
-       + MPU_RASR_ENABLE_Msk },                       // region enable
-    { (uint32_t)&QS_rxBuf + 0x11U,            //---- region #1
-      ((QS_RX_BUF_SIZE_POW2 - 1U) << MPU_RASR_SIZE_Pos)  // size
-       + (3U << MPU_RASR_AP_Pos)                      // PA:rw/UA:rw
-       + (1U << MPU_RASR_XN_Pos)                      // XN=1
-       + (1U << MPU_RASR_S_Pos)                       // S=1
-       + (1U << MPU_RASR_C_Pos)                       // C=1
-       + (0U << MPU_RASR_B_Pos)                       // B=0
-       + (0U << MPU_RASR_TEX_Pos)                     // TEX=0
-       + MPU_RASR_ENABLE_Msk },                       // region enable
-    { 0U + 0x12U,                              //---- region #2
-      0U },
-};
-
-#else // Q_SPY not defined
-
-static MPU_Region const MPU_Idle[3] = {
-    { 0U + 0x10U,                              //---- region #0
-      0U },
-    { 0U + 0x11U,                              //---- region #1
-      0U },
-    { 0U + 0x12U,                              //---- region #2
-      0U },
-};
-
-#endif // Q_SPY not defined
-
-#endif // QF_MEM_ISOLATE
-
-// Shared Event-pools.........................................................
-#define EPOOLS_SIZE_POW2 ((uint32_t)8U)
-
-__attribute__((aligned((1U << EPOOLS_SIZE_POW2))))
-static struct EPools {
-    QF_MPOOL_EL(TableEvt) smlPool[2*N_PHILO];
-    // ... other pools
-} EPools_sto;
-Q_ASSERT_STATIC(sizeof(EPools_sto) <= (1U << EPOOLS_SIZE_POW2));
-
 //============================================================================
 #ifdef QF_MEM_ISOLATE
 //............................................................................
 __attribute__(( used ))
 void QF_onMemSys(void) {
+    uint32_t const mpu_ctrl = MPU->CTRL;  // save the previous MPU CTRL
+    // no nesting of memory protection
+    Q_REQUIRE_INCRIT(400, (mpu_ctrl & MPU_CTRL_PRIVDEFENA_Msk) == 0U);
+
     MPU->CTRL = MPU_CTRL_ENABLE_Msk        // enable the MPU
                 | MPU_CTRL_PRIVDEFENA_Msk; // enable background region
     __ISB();
@@ -480,6 +495,10 @@ void QF_onMemSys(void) {
 //............................................................................
 __attribute__(( used ))
 void QF_onMemApp() {
+    uint32_t const mpu_ctrl = MPU->CTRL;  // save the previous MPU CTRL
+    // no nesting of memory protection
+    Q_REQUIRE_INCRIT(500, (mpu_ctrl & MPU_CTRL_PRIVDEFENA_Msk) != 0U);
+
     MPU->CTRL = MPU_CTRL_ENABLE_Msk; // enable the MPU
                 // but do NOT enable background region
     __ISB();

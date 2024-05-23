@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for QP/C for Windows and POSIX *HOSTS*
-# Last updated for version 7.3.4
-# Last updated on  2024-02-15
+# Last updated for version 7.3.5
+# Last updated on  2024-05-31
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -32,7 +32,7 @@
 # <info@state-machine.com>
 ##############################################################################
 #
-# This Makefile demonstates how to build QP/C with C++ compiler
+# This Makefile demonstates how to build QP/C compiled as C++ code
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which

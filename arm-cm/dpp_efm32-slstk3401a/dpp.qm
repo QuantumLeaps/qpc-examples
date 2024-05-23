@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.1.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="6.1.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
  <documentation>Dining Philosopher Problem example</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -39,15 +39,11 @@ QS_SIG_DICTIONARY(HUNGRY_SIG,  (void *)0);</code>
   <class name="TableEvt" superclass="qpc::QEvt">
    <!--${Shared::TableEvt::philoId}-->
    <attribute name="philoId" type="uint8_t" visibility="0x00" properties="0x00"/>
-   <!--${Shared::TableEvt::ctor}-->
-   <operation name="ctor?def QEVT_DYN_CTOR" type="TableEvt *" visibility="0x00" properties="0x02">
-    <!--${Shared::TableEvt::ctor::id}-->
+   <!--${Shared::TableEvt::init}-->
+   <operation name="init" type="TableEvt *" visibility="0x00" properties="0x02">
+    <!--${Shared::TableEvt::init::id}-->
     <parameter name="id" type="uint8_t"/>
-    <code>if (me != (TableEvt *)0) {
-    // don't call QEvt_ctor() because the initialization of all
-    // QEvt attributes is already done in QF_newX_()
-    me-&gt;philoId = id;
-}
+    <code>me-&gt;philoId = id;
 return me;</code>
    </operation>
   </class>
@@ -141,7 +137,7 @@ Q_ASSERT(Q_EVT_CAST(TableEvt)-&gt;philoId != me-&gt;id);</action>
     </state>
     <!--${AOs::Philo::SM::hungry}-->
     <state name="hungry">
-     <entry>#ifdef QEVT_DYN_CTOR
+     <entry>#ifdef QEVT_PAR_INIT
 TableEvt const *pe = Q_NEW(TableEvt, HUNGRY_SIG, me-&gt;id);
 #else
 TableEvt *pe = Q_NEW(TableEvt, HUNGRY_SIG);
@@ -178,7 +174,7 @@ Q_ASSERT(Q_EVT_CAST(TableEvt)-&gt;philoId != me-&gt;id);</action>
      <entry>QTimeEvt_armX(&amp;me-&gt;timeEvt, eat_time(), 0U);</entry>
      <exit>(void)QTimeEvt_disarm(&amp;me-&gt;timeEvt);
 
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
 TableEvt const *pe = Q_NEW(TableEvt, DONE_SIG, me-&gt;id);
 #else
 TableEvt *pe = Q_NEW(TableEvt, DONE_SIG);
@@ -265,7 +261,7 @@ for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
     {
         me-&gt;fork[left(n)] = USED;
         me-&gt;fork[n] = USED;
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
         TableEvt const *pe = Q_NEW(TableEvt, EAT_SIG, n);
 #else
         TableEvt *pe = Q_NEW(TableEvt, EAT_SIG);
@@ -290,7 +286,7 @@ uint8_t m = left(n);</action>
         <guard brief="both free">(me-&gt;fork[m] == FREE) &amp;&amp; (me-&gt;fork[n] == FREE)</guard>
         <action>me-&gt;fork[m] = USED;
 me-&gt;fork[n] = USED;
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
 TableEvt const *pe = Q_NEW(TableEvt, EAT_SIG, n);
 #else
 TableEvt *pe = Q_NEW(TableEvt, EAT_SIG);
@@ -335,7 +331,7 @@ if (me-&gt;isHungry[m] &amp;&amp; (me-&gt;fork[m] == FREE)) {
     me-&gt;fork[n] = USED;
     me-&gt;fork[m] = USED;
     me-&gt;isHungry[m] = false;
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
     TableEvt const *pe = Q_NEW(TableEvt, EAT_SIG, m);
 #else
     TableEvt *pe = Q_NEW(TableEvt, EAT_SIG);
@@ -350,7 +346,7 @@ if (me-&gt;isHungry[m] &amp;&amp; (me-&gt;fork[n] == FREE)) {
     me-&gt;fork[m] = USED;
     me-&gt;fork[n] = USED;
     me-&gt;isHungry[m] = false;
-#ifdef QEVT_DYN_CTOR
+#ifdef QEVT_PAR_INIT
     TableEvt const *pe = Q_NEW(TableEvt, EAT_SIG, m);
 #else
     TableEvt *pe = Q_NEW(TableEvt, EAT_SIG);
