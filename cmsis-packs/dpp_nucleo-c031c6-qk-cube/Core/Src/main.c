@@ -66,7 +66,6 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  QF_init();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -99,6 +98,7 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  QF_init();
   BSP_init();
   BSP_start();
   QF_run(); // does NOT return
