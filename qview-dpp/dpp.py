@@ -9,9 +9,13 @@
 # trace record QS_USER_00 (PHILO_STAT) produced when the status of
 # a Philo changes.
 
-class DPP:
-    def __init__(self):
+from qview import QView
+from tkinter import *
+from tkinter.ttk import * # override the basic Tk widgets with Ttk widgets
 
+class DPP(QView):
+    # on_init() callback
+    def on_init(self):
         # add commands to the Custom menu...
         QView.custom_menu.add_command(label="Custom command",
                                       command=self.cust_command)
@@ -22,9 +26,9 @@ class DPP:
 
         # tuple of activity images (correspond to self._philo_state)
         self._act_img = (
-            PhotoImage(file=HOME_DIR + "/img/thinking.gif"),
-            PhotoImage(file=HOME_DIR + "/img/hungry.gif"),
-            PhotoImage(file=HOME_DIR + "/img/eating.gif"),
+            PhotoImage(file="img/thinking.gif"),
+            PhotoImage(file="img/hungry.gif"),
+            PhotoImage(file="img/eating.gif"),
         )
         # tuple of philo canvas images (correspond to self._philo_obj)
         self._philo_img = (\
@@ -36,8 +40,8 @@ class DPP:
         )
 
         # button images for UP and DOWN
-        self.img_UP  = PhotoImage(file=HOME_DIR + "/img/BTN_UP.gif")
-        self.img_DWN = PhotoImage(file=HOME_DIR + "/img/BTN_DWN.gif")
+        self.img_UP  = PhotoImage(file="img/BTN_UP.gif")
+        self.img_DWN = PhotoImage(file="img/BTN_DWN.gif")
 
         # images of a button for pause/serve
         self.btn = QView.canvas.create_image(200, 120, image=self.img_UP)
@@ -46,22 +50,27 @@ class DPP:
         # request target reset on startup...
         # NOTE: Normally, for an embedded application you would like
         # to start with resetting the Target, to start clean with
-        # Qs dictionaries, etc.
-        reset_target()
+        # QS dictionaries, etc.
+        QView.reset_target()
 
-    # on_reset() callback
+
+    # on_reset() callback invoked when Target-reset packet is received
+    # NOTE: the QS dictionaries are not known at this time yet, so
+    # this callback shouild generally not set filters or current objects
     def on_reset(self):
         # clear the lists
         self._philo_obj   = [0, 0, 0, 0, 0]
         self._philo_state = [0, 0, 0]
 
-    # on_run() callback
+    # on_run() callback invoked when the QF_RUN packet is received
+    # NOTE: the QS dictionaries are typically known at this time yet, so
+    # this callback can set filters or current objects
     def on_run(self):
-        glb_filter("QS_USER_00")
+        QView.glb_filter("QS_USER_00")
 
         # NOTE: the names of objects for current_obj() must match
         # the QS Object Dictionaries produced by the application.
-        current_obj(OBJ_AO, "Table_inst")
+        QView.current_obj(QView.OBJ_AO, "Table_inst")
 
         # turn lists into tuples for better performance
         self._philo_obj = tuple(self._philo_obj)
@@ -70,17 +79,17 @@ class DPP:
 
     # example of a custom command
     def cust_command(self):
-        command(1, 12345)
+        QView.command(1, 12345)
 
     # example of a custom interaction with a canvas object (pause/serve)
     def cust_pause(self, event):
         if QView.canvas.itemcget(self.btn, "image") != str(self.img_UP):
             QView.canvas.itemconfig(self.btn, image=self.img_UP)
-            post("SERVE_SIG")
+            QView.post("SERVE_SIG")
             QView.print_text("Table SERVING")
         else:
             QView.canvas.itemconfig(self.btn, image=self.img_DWN)
-            post("PAUSE_SIG")
+            QView.post("PAUSE_SIG")
             QView.print_text("Table PAUSED")
 
     # Intercept the QS_USER_00 application-specific trace record.
@@ -89,7 +98,7 @@ class DPP:
     #    format-byte, Zero-terminated string (status)
     def QS_USER_00(self, packet):
         # unpack: Timestamp->data[0], Philo-num->data[1], status->data[3]
-        data = qunpack("xxTxBxZ", packet)
+        data = QView.qunpack("xxTxBxZ", packet)
         i = data[1]
         j = ("t", "h", "e").index(data[2][0]) # the first letter
 
@@ -100,4 +109,5 @@ class DPP:
         QView.print_text("%010d Philo %1d is %s"%(data[0], i, data[2]))
 
 #=============================================================================
-QView.customize(DPP()) # set the QView customization
+if __name__ == "__main__":
+    QView.main(DPP())

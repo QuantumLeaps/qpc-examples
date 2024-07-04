@@ -12,9 +12,13 @@
 # information about the addresses of the Philosopher objects and the states
 # of their state machines.
 
-class DPP:
-    def __init__(self):
+from qview import QView
+from tkinter import *
+from tkinter.ttk import * # override the basic Tk widgets with Ttk widgets
 
+class DPP(QView):
+    # on_init() callback
+    def on_init(self):
         # add commands to the Custom menu...
         QView.custom_menu.add_command(label="Custom command",
                                       command=self.cust_command)
@@ -25,9 +29,9 @@ class DPP:
 
         # tuple of activity images (correspond to self._philo_state)
         self._act_img = (
-            PhotoImage(file=HOME_DIR + "/img/thinking.gif"),
-            PhotoImage(file=HOME_DIR + "/img/hungry.gif"),
-            PhotoImage(file=HOME_DIR + "/img/eating.gif"),
+            PhotoImage(file="img/thinking.gif"),
+            PhotoImage(file="img/hungry.gif"),
+            PhotoImage(file="img/eating.gif"),
         )
         # tuple of philo canvas images (correspond to self._philo_obj)
         self._philo_img = (\
@@ -39,8 +43,8 @@ class DPP:
         )
 
         # button images for UP and DOWN
-        self.img_UP  = PhotoImage(file=HOME_DIR + "/img/BTN_UP.gif")
-        self.img_DWN = PhotoImage(file=HOME_DIR + "/img/BTN_DWN.gif")
+        self.img_UP  = PhotoImage(file="img/BTN_UP.gif")
+        self.img_DWN = PhotoImage(file="img/BTN_DWN.gif")
 
         # images of a button for pause/serve
         self.btn = QView.canvas.create_image(200, 120, image=self.img_UP)
@@ -49,15 +53,15 @@ class DPP:
         # request target reset on startup...
         # NOTE: Normally, for an embedded application you would like
         # to start with resetting the Target, to start clean with
-        # Qs dictionaries, etc.
-        reset_target()
+        # QS dictionaries, etc.
+        QView.reset_target()
 
 
     # on_reset() callback invoked when Target-reset packet is received
     # NOTE: the QS dictionaries are not known at this time yet, so
     # this callback shouild generally not set filters or current objects
     def on_reset(self):
-        # (re)set the lists
+        # clear the lists
         self._philo_obj   = [0, 0, 0, 0, 0]
         self._philo_state = [0, 0, 0]
 
@@ -65,11 +69,11 @@ class DPP:
     # NOTE: the QS dictionaries are typically known at this time yet, so
     # this callback can set filters or current objects
     def on_run(self):
-        glb_filter("QS_QEP_TRAN")
+        QView.glb_filter("QS_QEP_TRAN")
 
         # NOTE: the names of objects for current_obj() must match
         # the QS Object Dictionaries produced by the application.
-        current_obj(OBJ_AO, "Table_inst")
+        QView.current_obj(QView.OBJ_AO, "Table_inst")
 
         # turn lists into tuples for better performance
         self._philo_obj = tuple(self._philo_obj)
@@ -78,24 +82,24 @@ class DPP:
 
     # example of a custom command
     def cust_command(self):
-        command(1, 12345)
+        QView.command(1, 12345)
 
     # example of a custom interaction with a canvas object (pause/serve)
     def cust_pause(self, event):
         if QView.canvas.itemcget(self.btn, "image") != str(self.img_UP):
             QView.canvas.itemconfig(self.btn, image=self.img_UP)
-            post("SERVE_SIG")
+            QView.post("SERVE_SIG")
             QView.print_text("Table SERVING")
         else:
             QView.canvas.itemconfig(self.btn, image=self.img_DWN)
-            post("PAUSE_SIG")
+            QView.post("PAUSE_SIG")
             QView.print_text("Table PAUSED")
 
     # Intercept the QS_OBJ_DICT predefined trace record.
     # This record has the following structure:
     # Seq-Num, Record-ID, Object-ptr, Zero-terminated string
     def QS_OBJ_DICT(self, packet):
-        data = qunpack("xxOZ", packet)
+        data = QView.qunpack("xxOZ", packet)
         try:
             # NOTE: the names of objects must match the QS Object Dictionaries
             # produced by the application.
@@ -112,7 +116,7 @@ class DPP:
     # This record has the following structure:
     # Seq-Num, Record-ID, Function-ptr, Zero-terminated string
     def QS_FUN_DICT(self, packet):
-        data = qunpack("xxFZ", packet)
+        data = QView.qunpack("xxFZ", packet)
         try:
             # NOTE: the names of states must match the QS Object Dictionaries
             # produced by the application.
@@ -128,7 +132,7 @@ class DPP:
     # Seq-Num, Record-ID, Timestamp, Signal, Object-ptr,
     #     Function-ptr (source state), Function-ptr (new active state)
     def QS_QEP_TRAN(self, packet):
-        data = qunpack("xxTSOFF", packet)
+        data = QView.qunpack("xxTSOFF", packet)
         try:
             i = self._philo_obj.index(data[2])
             j = self._philo_state.index(data[4])
@@ -143,5 +147,5 @@ class DPP:
             pass # state-entry in a different object
 
 #=============================================================================
-# instantiate the DPP class and set it as the QView customization
-QView.customize(DPP())
+if __name__ == "__main__":
+    QView.main(DPP())

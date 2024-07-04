@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for QUTEST; QP/C on POSIX *Target*
-# Last Updated for Version: 7.2.0
-# Date of the Last Update:  2022-12-21
+# Last Updated for Version: 7.4.0
+# Date of the Last Update:  2024-07-31
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -25,7 +25,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses>.
+# along with this program. If not, see <www.gnu.org/licenses/>.
 #
 # Contact information:
 # <www.state-machine.com/licensing>
@@ -135,9 +135,16 @@ LINK  := gcc    # for C programs
 #LINK  := g++   # for C++ programs
 
 #-----------------------------------------------------------------------------
+# QUTest test script utilities (requires QTOOLS):
+#
+ifeq ("$(wildcard $(QUTEST))","")
+QUTEST := python3 $(QTOOLS)/qutest/qutest.py
+endif
+
+#-----------------------------------------------------------------------------
 # basic utilities:
 
-MKDIR  := mkdir -p
+MKDIR  := mkdir
 RM     := rm -f
 
 #-----------------------------------------------------------------------------
@@ -193,7 +200,7 @@ $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
 run : $(TARGET_EXE)
 	set -e; while true; do \
 		echo "restarting $(TARGET_EXE)"; \
-		$(TARGET_EXE) "" $(HOST); \
+		$(TARGET_EXE) $(HOST); \
 	done
 
 $(BIN_DIR)/%.d : %.cpp
@@ -219,6 +226,7 @@ endif
 
 test :
 	$(QUTEST) -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
+
 clean :
 	-$(RM) $(BIN_DIR)/*.o \
 	$(BIN_DIR)/*.d \
@@ -239,4 +247,3 @@ show :
 	@echo LIBS         = $(LIBS)
 	@echo DEFINES      = $(DEFINES)
 	@echo HOST         = $(HOST)
-

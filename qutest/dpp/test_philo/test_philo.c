@@ -1,6 +1,14 @@
 //============================================================================
 // Test fixture for DPP example
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+// Last updated for version 7.4.0
+// Last updated on  2024-07-31
+//
+//                   Q u a n t u m  L e a P s
+//                   ------------------------
+//                   Modern Embedded Software
+//
+// Copyright (C) 2005 Quantum Leaps, LLC <state-machine.com>.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
@@ -35,9 +43,9 @@
 static QActiveDummy Table_dummy;
 QActive * const AO_Table = &Table_dummy.super;
 
-int main() {
+int main(int argc, char* argv[]) {
     QF_init();       // initialize the framework and the underlying RT kernel
-    BSP_init();      // initialize the BSP
+    BSP_init(argc, argv); // initialize the Board Support Package
 
     QS_OBJ_DICTIONARY(&Table_dummy);
 

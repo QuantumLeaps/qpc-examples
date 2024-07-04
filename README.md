@@ -24,7 +24,8 @@ This repository can be used in several ways:
 +---cmsis-packs    <=== standalone examples
 |   +---dpp_nucleo-c031c6-qk-gcc
 |   +---dpp_nucleo-c031c6-qk-keil
-|   \---dpp_nucleo-c031c6-qk-stm32cube
+|   +---dpp_nucleo-c031c6-qk-stm32cube
+|   \---dpp_nucleo-u545re-qk-stm32cube
 |
 ```
 
@@ -73,13 +74,16 @@ This repository can be used in several ways:
 +---emwin
 |   +---demo_no_wm
 |   \---demo_with_wm
+|
 +---freertos
 |   \---arm-cm
 |       +---dpp_ek-tm4c123gxl
 |       \---dpp_nucleo-h743zi
+|
 +---lwip
 |   \---arm-cm
 |       \---lwip_ek-lm3s6965
+|
 +---msp430
 |   +---blinky_msp-exp430f5529lp
 |   +---blinky_msp-exp430g2
@@ -152,16 +156,18 @@ computer. The interfaces created by QView can visualize the data produced
 by [QP/Spy software tracing system](https://www.state-machine.com/qtools/qpspy.html)
 and can also interact with the embedded target by sending various commands.
 
+> **NOTE** You need to **install** the `qview` package in your Python setup.<br>
+`pip install qview`
+
 The python scripts `qview-dpp/dpp.py` and `qview-dpp/dpp1.py` will allow
 monitoring of all DPP examples running on any supported board (or on the
 host computer). Here is how you can launch the QView monitoring for DPP:
 
 ```
-python %QTOOLS%\qview\qview.py dpp.py
-```
+pythonw dpp.py
 
-> **NOTE** You need the `qview.py` Python script, which in the command-line
-above is assumed to be located in `%QTOOLS%\qview`.
+pythonw dpp1.py
+```
 
 The following screen shot shows QView for the DPP (Dining Philosophers Problem)
 application with the QSPY ouptut in the background.

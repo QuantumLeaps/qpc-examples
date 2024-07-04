@@ -1,12 +1,12 @@
 > **NOTE**
 This file is best viewed in a **markdown viewer**, such as the one built into GitHub. Markdown viewers are also available as plug-ins to popular Internet browsers.
 
-# DPP on NUCLEO-C031C6
-This example demonstrates the [Dining Philosophers Problem (DPP) application](https://www.state-machine.com/qpc/tut_dpp.html) on the STM32 NUCLEO-C031C6 board (ARM Cortex-M0+).
+# DPP on NUCLEO-U545RE
+This example demonstrates the [Dining Philosophers Problem (DPP) application](https://www.state-machine.com/qpc/tut_dpp.html) on the STM32 NUCLEO-U545RE board (ARM Cortex-__M33__).
 
 <p align="center">
-<img src="./stm32-nucleo-c031c6.jpg"/><br>
-<b>STM32 NUCLEO-C031C6</b>
+<img src="./stm32-nucleo-u545re.jpg"/><br>
+<b>STM32 NUCLEO-U545RE</b>
 </p>
 
 > **NOTE**
@@ -43,34 +43,34 @@ This example can be used as a starting point for any other ARM Cortex-M MCU, inc
 
 # Code Organization
 ```
-examples\arm-cm\dpp_nucleo-c031c6
+examples\arm-cm\dpp_nucleo-u545re
 |
-+---qk             // preemptive QK kernel
-|   +---gnu        // GNU-ARM toolchain
++---qk                        // preemptive QK kernel
+|   +---gnu                   // GNU-ARM toolchain
 |   |   \---targetConfigs
 |   |       Makefile          // Makefile for GNU-ARM
-|   +---armclang   // ARM/KEIL toolchain with Compiler 6 (ARM/CLANG)
-|   |       dpp-qk.uvprojx // uVision project
-|   \---iar        // IAR EWARM
-|           dpp-qk.eww     // IAR EW-ARM workspace
+|   +---armclang              // ARM/KEIL toolchain with Compiler 6 (ARM/CLANG)
+|   |       dpp-qk.uvprojx    // uVision project
+|   \---iar                   // IAR EWARM
+|           dpp-qk.eww        // IAR EW-ARM workspace
 |
-\---qv             // cooperative QK kernel
-|   +---gnu        // GNU-ARM toolchain
+\---qv                        // cooperative QK kernel
+|   +---gnu                   // GNU-ARM toolchain
 |   |   \---targetConfigs
 |   |       Makefile          // Makefile for GNU-ARM
-|   +---armclang   // ARM/KEIL toolchain with Compiler 6 (ARM/CLANG)
-|   |       dpp-qv.uvprojx // uVision project
-|   \---iar        // IAR EWARM
-|           dpp-qv.eww     // IAR EW-ARM workspace
+|   +---armclang              // ARM/KEIL toolchain with Compiler 6 (ARM/CLANG)
+|   |       dpp-qv.uvprojx    // uVision project
+|   \---iar                   // IAR EWARM
+|           dpp-qv.eww        // IAR EW-ARM workspace
 |
-+---qxk            // preemptive, dual-mode QXK kernel
-|   +---gnu        // GNU-ARM toolchain
++---qxk                       // preemptive, dual-mode QXK kernel
+|   +---gnu                   // GNU-ARM toolchain
 |   |   \---targetConfigs
 |   |       Makefile          // Makefile for GNU-ARM
-|   +---armclang   // ARM/KEIL toolchain with Compiler 6 (ARM/CLANG)
-|   |       dpp-qxk.uvprojx // uVision project
-|   \---iar        // IAR EWARM
-|           dpp-qxk.eww     // IAR EW-ARM workspace
+|   +---armclang              // ARM/KEIL toolchain with Compiler 6 (ARM/CLANG)
+|   |       dpp-qxk.uvprojx   // uVision project
+|   \---iar                   // IAR EWARM
+|           dpp-qxk.eww       // IAR EW-ARM workspace
 |
 ```
 
@@ -78,7 +78,7 @@ examples\arm-cm\dpp_nucleo-c031c6
 
 ### GNU/ARM
 - open terminal window
-- change to the desired directory (either `examples\arm-cm\dpp_nucleo-c031c6\qk\gnu`, `examples\arm-cm\dpp_nucleo-c031c6\qv\gnu`, or `examples\arm-cm\dpp_nucleo-c031c6\qxk\gnu`)
+- change to the desired directory (either `examples\arm-cm\dpp_nucleo-u545re\qk\gnu`, `examples\arm-cm\dpp_nucleo-u545re\qv\gnu`, or `examples\arm-cm\dpp_nucleo-u545re\qxk\gnu`)
 - to build the default Debug configuration, type:
 
 ```
