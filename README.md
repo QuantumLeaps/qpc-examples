@@ -106,6 +106,17 @@ This repository can be used in several ways:
 |   +---reminder
 |   \---reminder2
 |
++---threadx
+|   \---arm-cm
+|       +---dpp_ek-tm4c123gxl
+|       \---dpp_stm32f429-discovery
++---uc-os2
+|   \---arm-cm
+|       \---dpp_ek-tm4c123gxl
++---zephyr
+|   +---blinky
+|   \---dpp
+|
 +---qutest    <== examples for QUTest testing harness
 |   +---blinky
 |   +---dpp
@@ -124,26 +135,34 @@ This repository can be used in several ways:
 |       +---src
 |       \---test
 |
-+---threadx
-|   \---arm-cm
-|       +---dpp_ek-tm4c123gxl
-|       \---dpp_stm32f429-discovery
-+---uc-os2
-|   \---arm-cm
-|       \---dpp_ek-tm4c123gxl
-+---zephyr
-|   +---blinky
-|   \---dpp
-|
-+---qview-dpp  <== examples for the QView monitoring system
++---qview-dpp   <== examples for QView monitoring (DPP example)
 |   +---img
 |       dpp.py
+|       dpp1.py
+|       qview-dpp.lnk
+|       qview-dpp.lnk
 |
 +---qwin-gui   <== examples for the QWin GUI
 |   +---dpp-gui
 |   \---game-gui
 |
 ```
+
+## Examples for QTest Testing System
+The "qutest" Python package  (included in the
+[QTools collection](https://github.com/QuantumLeaps/qtools))
+is a powerful [testing system](https://www.state-machine.com/qtools/qutest.html).
+It has been specifically designed for deeply embedded systems, but also supports
+unit and integration testing of embedded code on host computers ("dual targeting").
+QUTest is the fundamental tooling for Test-Driven Development (TDD) and Behavior-
+Driven Development (BDD) of QP/C/C++ applications , which is a highly recommended
+best-practice.
+
+The following screen shot show a typical QUTest run with the QSPY ouptut
+in the background.
+
+![](qutest/img/qutest-dpp.webp)
+
 
 ## Examples for QView Monitoring System
 The "qview" Python package (included in the
@@ -174,18 +193,3 @@ application with the QSPY ouptut in the background.
 
 ![](qview-dpp/img/qview-dpp.webp)
 
-
-## Examples for QTest Testing System
-The "qutest" Python package  (included in the
-[QTools collection](https://github.com/QuantumLeaps/qtools))
-is a powerful [testing system](https://www.state-machine.com/qtools/qutest.html).
-It has been specifically designed for deeply embedded systems, but also supports
-unit and integration testing of embedded code on host computers ("dual targeting").
-QUTest is the fundamental tooling for Test-Driven Development (TDD) and Behavior-
-Driven Development (BDD) of QP/C/C++ applications , which is a highly recommended
-best-practice.
-
-The following screen shot show a typical QUTest run with the QSPY ouptut
-in the background.
-
-![](qutest/img/qutest-dpp.webp)

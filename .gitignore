@@ -1,3 +1,6 @@
+# QM sessions
+*.qms
+
 # Prerequisites
 *.d
 

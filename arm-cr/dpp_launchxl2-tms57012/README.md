@@ -5,7 +5,7 @@ This file is best viewed in a **markdown viewer**, such as the one built into Gi
 This example implements the [Dining Philosophers Problem (DPP) application](https://www.state-machine.com/qpc/tut_dpp.html) on the LAUNCHXL2-TMS57012 board (ARM Cortex-R4F). The example blinks the LED on the LAUNCHXL2-TMS57012 board at 1Hz (0.5 seconds on, 0.5 seconds off).
 
 <p align="center">
-<img src="./launchxl2-tms57012.png"/><br>
+<img src="launchxl2-tms57012.webp"/><br>
 <b>LAUNCHXL2-TMS57012 board</b>
 </p>
 

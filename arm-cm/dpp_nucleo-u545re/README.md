@@ -5,7 +5,7 @@ This file is best viewed in a **markdown viewer**, such as the one built into Gi
 This example demonstrates the [Dining Philosophers Problem (DPP) application](https://www.state-machine.com/qpc/tut_dpp.html) on the STM32 NUCLEO-U545RE board (ARM Cortex-__M33__).
 
 <p align="center">
-<img src="./stm32-nucleo-u545re.jpg"/><br>
+<img src="stm32-nucleo-u545re.webp"/><br>
 <b>STM32 NUCLEO-U545RE</b>
 </p>
 

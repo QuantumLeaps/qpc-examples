@@ -6,7 +6,7 @@ This example implements the simple [Blinky application](https://www.state-machin
 on the EK-TM4C123GXL board at 1Hz (0.5 seconds on, 0.5 seconds off).
 
 <p align="center">
-<img src="./ek-tm4c123gxl.jpg"/><br>
+<img src="ek-tm4c123gxl.webp"/><br>
 <b>EK-TM4C123GXL (TivaC LaunchPad)</b>
 </p>
 

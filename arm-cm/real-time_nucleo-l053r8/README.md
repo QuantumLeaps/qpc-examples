@@ -5,7 +5,7 @@ This file is best viewed in a **markdown viewer**, such as the one built into Gi
 This example implements the "Periodic-Sporadic" application on the STM32 NUCLEO-L053R8 board (ARM Cortex-M0+). The example demonstrates various real-time preemption scenarios among active objects in the **QK** and **QV** kernels. The example requires a **logic analyzer**.
 
 <p align="center">
-<img src="./stm32-nucleo-l053r8.jpg"/><br>
+<img src="stm32-nucleo-l053r8.webp"/><br>
 <b>STM32 NUCLEO-L053R8</b>
 </p>
 
