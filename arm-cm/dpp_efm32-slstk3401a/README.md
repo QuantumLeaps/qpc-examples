@@ -5,7 +5,7 @@ This file is best viewed in a **markdown viewer**, such as the one built into Gi
 This example demonstrates the [Dining Philosophers Problem (DPP) application](https://www.state-machine.com/qpc/tut_dpp.html) on the EFM32-SLSTK3401A board (ARM Cortex-M4F).
 
 <p align="center">
-<img src="./efm32-slstk3401a.jpg"/><br>
+<img src="efm32-slstk3401a.webp"/><br>
 <b>EFM32-SLSTK3401A (Pearl Gecko)</b>
 </p>
 

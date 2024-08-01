@@ -5,7 +5,7 @@ This file is best viewed in a **markdown viewer**, such as the one built into Gi
 This example demonstrates the [Blinky application](https://www.state-machine.com/qpc/tut_blinky.html) on the STM32 NUCLEO-C031C6 board (ARM Cortex-M0+).
 
 <p align="center">
-<img src="./stm32-nucleo-c031c6.jpg"/><br>
+<img src="stm32-nucleo-c031c6.webp"/><br>
 <b>STM32 NUCLEO-C031C6</b>
 </p>
 

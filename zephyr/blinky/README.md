@@ -1,10 +1,12 @@
-# Blinky example
+# Blinky example for Zephyr
+
+<p align="center">
+<img src="qp-zephyr.webp"/>
+</p>
 
 # Overview
-
 Blinks an on-board LED once per second. The blinking is performed
  by an Active Object (Blinky) with a state machine.
-
 
 
 # Building and Running (Linux)

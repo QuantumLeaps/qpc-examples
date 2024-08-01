@@ -1,20 +1,23 @@
-![STM32 EFM32-SLSTK3401A](../../../doxygen/images/bd_EFM32-SLSTK3401A.jpg)
-
-Documentation for this example is available in the QP/C Manual at:
-
-- https://www.state-machine.com/qpc/arm-cm_game_efm32-slstk3401a
-
 # About this Example
 This directory contains the "Fly 'n' Shoot" game example application for
 the EFM32-SLSTK3401A board (Pearl Gecko evaluation kit) board. This
 directory contains portable code that should compile with any C compiler
 for ARM Cortex-M.
 
+<p align="center">
+<img src="efm32-slstk3401a.webp"/><br>
+<b>EFM32-SLSTK3401A (Pearl Gecko)</b>
+</p>
+
 The sub-directories contain code and project files, which are specific to
 the particular ARM toolchains, such as ARM (MDK-ARM), GCC, and IAR.
 
 Please refer to the README files in the sub-directories for specific
 instructions how to use and customize the example to your needs.
+
+Documentation for this example is available in the QP/C Manual at:
+
+- https://www.state-machine.com/qpc/tut_game.html
 
 
 # Support Code for EFM32-SLSTK3401A Board

@@ -5,7 +5,7 @@ This file is best viewed in a **markdown viewer**, such as the one built into Gi
 This example demonstrates the [Dining Philosophers Problem (DPP) application](https://www.state-machine.com/qpc/tut_dpp.html) on the EK-TM4C123GLX board (ARM Cortex-M4F).
 
 <p align="center">
-<img src="./ek-tm4c123gxl.jpg"/><br>
+<img src="ek-tm4c123gxl.webp"/><br>
 <b>EK-TM4C123GXL (TivaC LaunchPad)</b>
 </p>
 

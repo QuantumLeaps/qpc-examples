@@ -1,9 +1,11 @@
 # About this project
-
 This project is for KEIL uVision IDE with the GNU-ARM compiler,
 and the NUCLEO-C031C6 board:
 
-![](stm32-nucleo-c031c6.jpg)
+<p align="center">
+<img src="stm32-nucleo-c031c6.webp"/><br>
+<b>STM32 NUCLEO-C031C6</b>
+</p>
 
 This project demonstrates:
 - Using the QP/C Framework from the CMSIS-pack

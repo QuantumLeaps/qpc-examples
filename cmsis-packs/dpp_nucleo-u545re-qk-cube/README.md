@@ -1,9 +1,11 @@
 # About this project
-
 This project is for STM32Cube IDE with CubeMX and the
 **NUCLEO-U545RE-Q** board:
 
-![](stm32-nucleo-u545re.jpg)
+<p align="center">
+<img src="stm32-nucleo-u545re.webp"/><br>
+<b>STM32 NUCLEO-U545RE</b>
+</p>
 
 This project demonstrates:
 - Using the QP/C Framework from the CMSIS-pack

@@ -6,7 +6,7 @@ This example implements the simple [Blinky application](https://www.state-machin
 on the LAUNCHXL2-TMS57012 board at 1Hz (0.5 seconds on, 0.5 seconds off).
 
 <p align="center">
-<img src="./launchxl2-tms57012.png"/><br>
+<img src="launchxl2-tms57012.webp"/><br>
 <b>LAUNCHXL2-TMS57012 board</b>
 </p>
 
