@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 
     // start active objects...
     MyAO_ctor(); // instantiate the MyAO active object
-    QACTIVE_START(AO_MyAO,              // AO to start
+    QActive_start(AO_MyAO,              // AO to start
                   (uint_fast8_t)1,      // QP priority of the AO
                   myAoQueueSto,         // event queue storage
                   Q_DIM(myAoQueueSto),  // queue length [events]

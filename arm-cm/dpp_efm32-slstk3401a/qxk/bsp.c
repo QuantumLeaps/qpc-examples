@@ -265,7 +265,7 @@ void BSP_start(void) {
     static QEvt const *xThread1QueueSto[5];
     static uint64_t xThread1StackSto[64];
     XThread1_ctor();
-    QXTHREAD_START(TH_XThread1,
+    QXThread_start(TH_XThread1,
         1U,                          // QP priority of the thread
         xThread1QueueSto,            // event queue storage
         Q_DIM(xThread1QueueSto),     // event length [events]
@@ -276,7 +276,7 @@ void BSP_start(void) {
     static QEvt const *philoQueueSto[N_PHILO][10];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
-        QACTIVE_START(AO_Philo[n],
+        QActive_start(AO_Philo[n],
             n + 3U,                  // QF-prio.
             philoQueueSto[n],        // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -287,7 +287,7 @@ void BSP_start(void) {
     static QEvt const *xThread2QueueSto[5];
     static uint64_t xThread2StackSto[64];
     XThread2_ctor();
-    QXTHREAD_START(TH_XThread2,
+    QXThread_start(TH_XThread2,
         N_PHILO + 5U,                // QP priority of the thread
         xThread2QueueSto,            // event queue storage
         Q_DIM(xThread2QueueSto),     // event length [events]
@@ -297,7 +297,7 @@ void BSP_start(void) {
 
     static QEvt const *tableQueueSto[N_PHILO];
     Table_ctor();
-    QACTIVE_START(AO_Table,
+    QActive_start(AO_Table,
         N_PHILO + 7U,                // QP prio. of the AO
         tableQueueSto,               // event queue storage
         Q_DIM(tableQueueSto),        // queue length [events]

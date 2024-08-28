@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="5.3.0" links="1">
+<model version="6.2.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
  <documentation>Blinky example</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -118,7 +118,7 @@ int main() {
 
     Blinky_ctor(&amp;Blinky_inst); // explicitly call the &quot;constructor&quot;
     static QEvt const *blinky_queueSto[10];
-    QACTIVE_START(AO_Blinky,
+    QActive_start(AO_Blinky,
                   1U, // priority
                   blinky_queueSto, Q_DIM(blinky_queueSto),
                   (void *)0, 0U, // no stack

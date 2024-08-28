@@ -73,7 +73,7 @@ int main() {
     // start the active objects...
     static QEvt const *tableQueueSto[N_PHILO];
     Table_ctor(); // instantiate the Table active object
-    QACTIVE_START(AO_Table,             // AO to start
+    QActive_start(AO_Table,             // AO to start
                   1U,                   // QF-priority/preemption-threshold
                   tableQueueSto,        // event queue storage
                   Q_DIM(tableQueueSto), // queue length [events]

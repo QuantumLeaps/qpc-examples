@@ -153,7 +153,7 @@ void BSP_start(void) {
 
     static QEvt const *blinkyQueueSto[10];
     Blinky_ctor();
-    QACTIVE_START(AO_Blinky,
+    QActive_start(AO_Blinky,
         1U,                          // QP prio. of the AO
         blinkyQueueSto,              // event queue storage
         Q_DIM(blinkyQueueSto),       // queue length [events]

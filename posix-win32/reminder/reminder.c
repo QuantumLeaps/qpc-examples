@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
 
     // instantiate and start the active objects...
     Sensor_ctor(&l_sensor);
-    QACTIVE_START(&l_sensor.super,
+    QActive_start(&l_sensor.super,
                   1U,
                   l_sensorQSto, Q_DIM(l_sensorQSto),
                   (void *)0, 0U, (QEvt *)0);

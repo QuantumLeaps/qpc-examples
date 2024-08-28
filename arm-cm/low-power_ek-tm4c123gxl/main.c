@@ -51,7 +51,7 @@ int main() {
     // instantiate and start the active objects...
     Blinky0_ctor();
     static QEvt const *l_blinky0QSto[10];  // queue storage for Blinky0
-    QACTIVE_START(AO_Blinky0,     // AO pointer
+    QActive_start(AO_Blinky0,     // AO pointer
                   1U,             // unique QP priority of the AO
                   l_blinky0QSto,  // storage for the AO's queue
                   Q_DIM(l_blinky0QSto), // length of the queue [entries]
@@ -63,7 +63,7 @@ int main() {
     XBlinky1_ctor();
     static uint32_t const *l_xblinky1Stack[64]; // stack for XBlinky1
     QXSemaphore_init(&XSEM_sw1, 0U, 1U); // signaling binary semaphore
-    QXTHREAD_START(&XT_Blinky1,   // extended thread pointer
+    QXThread_start(&XT_Blinky1,   // extended thread pointer
                   2U,             // unique QP priority of the AO
                   (QEvt const **)0, // storage for the AO's queue (not used)
                   0U,             // length of the queue [entries]
@@ -73,7 +73,7 @@ int main() {
 #else // QV or QK kernels
     Blinky1_ctor();
     static QEvt const *l_blinky1QSto[10]; // queue storage for Blinky1
-    QACTIVE_START(AO_Blinky1,     // AO pointer
+    QActive_start(AO_Blinky1,     // AO pointer
                   2U,             // unique QP priority of the AO
                   l_blinky1QSto,  // storage for the AO's queue
                   Q_DIM(l_blinky1QSto), // length of the queue [entries]

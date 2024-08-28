@@ -247,7 +247,7 @@ void BSP_start(void) {
     static QEvt const *philoQueueSto[N_PHILO][10];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
-        QACTIVE_START(AO_Philo[n],
+        QActive_start(AO_Philo[n],
 
             // NOTE: set the preemption-threshold of all Philos to
             // the same level, so that they cannot preempt each other.
@@ -261,7 +261,7 @@ void BSP_start(void) {
 
     static QEvt const *tableQueueSto[N_PHILO];
     Table_ctor();
-    QACTIVE_START(AO_Table,
+    QActive_start(AO_Table,
         N_PHILO + 7U,                // QP prio. of the AO
         tableQueueSto,               // event queue storage
         Q_DIM(tableQueueSto),        // queue length [events]

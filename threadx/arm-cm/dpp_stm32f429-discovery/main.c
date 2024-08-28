@@ -63,7 +63,7 @@ void tx_application_define(void *first_unused_memory) {
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); // instantiate the Philo AO
         QActive_setAttr(AO_Philo[n], THREAD_NAME_ATTR, "Philo");
-        QACTIVE_START(AO_Philo[n],
+        QActive_start(AO_Philo[n],
 
             // NOTE: set the preemption-threshold of all Philos to
             // the same level, so that they cannot preempt each other.
@@ -78,7 +78,7 @@ void tx_application_define(void *first_unused_memory) {
     static ULONG tableStk[200]; // stack for the Table
     Table_ctor(); // instantiate the Table AO
     QActive_setAttr(AO_Table, THREAD_NAME_ATTR, "Table");
-    QACTIVE_START(AO_Table,
+    QActive_start(AO_Table,
         N_PHILO + 1U,
         tableQueueSto, Q_DIM(tableQueueSto),
         tableStk, sizeof(tableStk),

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.1.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="6.2.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
  <documentation>&quot;Reminder&quot; state pattern example #2</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     QF_poolInit(l_smlPoolSto, sizeof(l_smlPoolSto), sizeof(l_smlPoolSto[0]));
 
     // instantiate and start the active objects...
-    QACTIVE_START(&amp;l_cruncher.super,
+    QActive_start(&amp;l_cruncher.super,
                   1U,
                   l_cruncherQSto, Q_DIM(l_cruncherQSto),
                   (void *)0, 0U, (QEvt *)0);

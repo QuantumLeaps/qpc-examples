@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="6.2.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+ <documentation>QMsmTst is a contrived state machine for extensive testing
+of QMsm-style state machines</documentation>
+ <!--${qpc}-->
+ <framework name="qpc"/>
+ <!--${Shared}-->
+ <package name="Shared" stereotype="0x02">
+  <!--${Shared::QMsmTstSignals}-->
+  <attribute name="QMsmTstSignals" type="enum" visibility="0x04" properties="0x00">
+   <code>{
+    A_SIG = Q_USER_SIG,
+    B_SIG,
+    C_SIG,
+    D_SIG,
+    E_SIG,
+    F_SIG,
+    G_SIG,
+    H_SIG,
+    I_SIG,
+    TERMINATE_SIG,
+    IGNORE_SIG,
+    MAX_SIG
+};</code>
+  </attribute>
+  <!--${Shared::the_sm}-->
+  <attribute name="the_sm" type="QAsm * const" visibility="0x00" properties="0x00">
+   <documentation>opaque pointer to the test SM</documentation>
+   <code>= &amp;QMsmTst_inst.super.super;</code>
+  </attribute>
+  <!--${Shared::BSP_display}-->
+  <operation name="BSP_display" type="void" visibility="0x00" properties="0x00">
+   <!--${Shared::BSP_display::msg}-->
+   <parameter name="msg" type="char const *"/>
+  </operation>
+  <!--${Shared::BSP_terminate}-->
+  <operation name="BSP_terminate" type="void" visibility="0x00" properties="0x00">
+   <!--${Shared::BSP_terminate::result}-->
+   <parameter name="result" type="int16_t const"/>
+  </operation>
+  <!--${Shared::QMsmTst_ctor}-->
+  <operation name="QMsmTst_ctor" type="void" visibility="0x00" properties="0x00">
+   <code>QMsmTst *me = &amp;QMsmTst_inst;
+QMsm_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;QMsmTst_initial));</code>
+  </operation>
+  <!--${Shared::QMsmTst_isIn}-->
+  <operation name="QMsmTst_isIn" type="bool" visibility="0x00" properties="0x00">
+   <!--${Shared::QMsmTst_isIn::state_num}-->
+   <parameter name="state_num" type="uint32_t const"/>
+   <code>QMsm * const me = &amp;QMsmTst_inst.super;
+bool stat = false;
+switch (state_num) {
+case 0:
+    stat = QASM_IS_IN(me, Q_STATE_CAST(&amp;QMsmTst_s));
+    break;
+case 1:
+    stat = QASM_IS_IN(me, Q_STATE_CAST(&amp;QMsmTst_s1));
+    break;
+case 2:
+    stat = QASM_IS_IN(me, Q_STATE_CAST(&amp;QMsmTst_s2));
+    break;
+case 11:
+    stat = QASM_IS_IN(me, Q_STATE_CAST(&amp;QMsmTst_sub_sub1));
+    break;
+case 111:
+    stat = QASM_IS_IN(me, Q_STATE_CAST(&amp;QMsmTst_sub_sub11));
+    break;
+case 112:
+    stat = QASM_IS_IN(me, Q_STATE_CAST(&amp;QMsmTst_sub_sub12));
+    break;
+case 12:
+    stat = QASM_IS_IN(me, Q_STATE_CAST(&amp;QMsmTst_sub_sub2));
+    break;
+default:
+    Q_ERROR();
+}
+return stat;</code>
+  </operation>
+ </package>
+ <!--${SMs}-->
+ <package name="SMs" stereotype="0x02">
+  <!--${SMs::QMsmTst}-->
+  <class name="QMsmTst" superclass="qpc::QMsm">
+   <documentation>Contrived QMsm-style test state machine for extensive testing</documentation>
+   <!--${SMs::QMsmTst::foo}-->
+   <attribute name="foo" type="uint8_t" visibility="0x02" properties="0x00"/>
+   <!--${SMs::QMsmTst::inst}-->
+   <attribute name="inst" type="QMsmTst" visibility="0x00" properties="0x01"/>
+   <!--${SMs::QMsmTst::SM}-->
+   <statechart properties="0x03">
+    <!--${SMs::QMsmTst::SM::initial}-->
+    <initial target="../1/6">
+     <action brief="top-init">Q_UNUSED_PAR(par);
+me-&gt;foo = 0U;
+BSP_display(&quot;top-INIT;&quot;);
+
+QS_SIG_DICTIONARY(A_SIG, (void *)0);
+QS_SIG_DICTIONARY(B_SIG, (void *)0);
+QS_SIG_DICTIONARY(C_SIG, (void *)0);
+QS_SIG_DICTIONARY(D_SIG, (void *)0);
+QS_SIG_DICTIONARY(E_SIG, (void *)0);
+QS_SIG_DICTIONARY(F_SIG, (void *)0);
+QS_SIG_DICTIONARY(G_SIG, (void *)0);
+QS_SIG_DICTIONARY(H_SIG, (void *)0);
+QS_SIG_DICTIONARY(I_SIG, (void *)0);</action>
+     <initial_glyph conn="2,4,5,0,74,54,-22,2">
+      <action box="1,-2,13,2"/>
+     </initial_glyph>
+    </initial>
+    <!--${SMs::QMsmTst::SM::s}-->
+    <state name="s">
+     <entry brief="s-ENTRY">BSP_display(&quot;s-ENTRY;&quot;);</entry>
+     <exit brief="s-EXIT">BSP_display(&quot;s-EXIT;&quot;);</exit>
+     <!--${SMs::QMsmTst::SM::s::initial}-->
+     <initial target="../5">
+      <action brief="s-INIT">BSP_display(&quot;s-INIT;&quot;);</action>
+      <initial_glyph conn="4,14,5,0,50,14">
+       <action box="1,-2,11,2"/>
+      </initial_glyph>
+     </initial>
+     <!--${SMs::QMsmTst::SM::s::history}-->
+     <history type="shallow" target="../5">
+      <history_glyph conn="72,24,1,0,-16,4"/>
+     </history>
+     <!--${SMs::QMsmTst::SM::s::E}-->
+     <tran trig="E" target="../5" cpref="../../3/0">
+      <action brief="s-E">BSP_display(&quot;s-E;&quot;);</action>
+      <tran_glyph conn="2,21,3,1,62,15,-5">
+       <action box="1,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <!--${SMs::QMsmTst::SM::s::I}-->
+     <tran trig="I">
+      <action brief="s-I">BSP_display(&quot;s-I;&quot;);</action>
+      <tran_glyph conn="2,24,3,-1,20">
+       <action box="1,-2,12,2"/>
+      </tran_glyph>
+     </tran>
+     <!--${SMs::QMsmTst::SM::s::C}-->
+     <tran trig="C" target="../../2">
+      <action brief="s-C">BSP_display(&quot;s-C;&quot;);</action>
+      <tran_glyph conn="2,18,3,3,72,-4,4">
+       <action box="1,-2,13,2"/>
+      </tran_glyph>
+     </tran>
+     <!--${SMs::QMsmTst::SM::s::s1}-->
+     <smstate name="s1" submachine="../../3">
+      <!--${SMs::QMsmTst::SM::s::s1::xpG}-->
+      <xpseg xpref="../../../3/2" target="../../6" cpref="../../../3/4">
+       <xpseg_glyph conn="58,42,1,1,4,20,-3">
+        <action box="1,0,10,2"/>
+       </xpseg_glyph>
+      </xpseg>
+      <!--${SMs::QMsmTst::SM::s::s1::xpH}-->
+      <xpseg xpref="../../../3/1" target="../..">
+       <xpseg_glyph conn="58,50,1,1,14">
+        <action box="1,0,10,2"/>
+       </xpseg_glyph>
+      </xpseg>
+      <!--${SMs::QMsmTst::SM::s::s1::F}-->
+      <tran trig="F" target="../../6" cpref="../../../3/0">
+       <action brief="s1-F">BSP_display(&quot;s1-F;&quot;);</action>
+       <tran_glyph conn="4,33,3,1,62,35,-7">
+        <action box="1,-2,10,2"/>
+       </tran_glyph>
+      </tran>
+      <smstate_glyph node="4,28,54,28"/>
+     </smstate>
+     <!--${SMs::QMsmTst::SM::s::s2}-->
+     <smstate name="s2" submachine="../../3">
+      <!--${SMs::QMsmTst::SM::s::s2::xpH}-->
+      <xpseg xpref="../../../3/1" target="../..">
+       <xpseg_glyph conn="58,83,1,1,14">
+        <action box="1,0,10,2"/>
+       </xpseg_glyph>
+      </xpseg>
+      <!--${SMs::QMsmTst::SM::s::s2::xpG}-->
+      <xpseg xpref="../../../3/2" target="../../5" cpref="../../../3/4">
+       <xpseg_glyph conn="58,75,1,1,10,-45,-9">
+        <action box="1,0,10,2"/>
+       </xpseg_glyph>
+      </xpseg>
+      <!--${SMs::QMsmTst::SM::s::s2::F}-->
+      <tran trig="F" target="../../5" cpref="../../../3/0">
+       <action brief="s2-F">BSP_display(&quot;s2-F;&quot;);</action>
+       <tran_glyph conn="4,65,3,1,60,-29,-5">
+        <action box="1,-2,10,2"/>
+       </tran_glyph>
+      </tran>
+      <smstate_glyph node="4,60,54,30"/>
+     </smstate>
+     <state_glyph node="2,6,70,88">
+      <entry box="1,2,32,2"/>
+      <exit box="1,4,32,2"/>
+     </state_glyph>
+    </state>
+    <!--${SMs::QMsmTst::SM::t}-->
+    <state name="t">
+     <entry brief="t-ENTRY">BSP_display(&quot;t-ENTRY;&quot;);</entry>
+     <exit brief="t-EXIT">BSP_display(&quot;t-EXIT;&quot;);</exit>
+     <!--${SMs::QMsmTst::SM::t::C}-->
+     <tran trig="C" target="../../1" cpref="../../1/1">
+      <action brief="t-C">BSP_display(&quot;t-C-&gt;H-s;&quot;);</action>
+      <tran_glyph conn="78,20,3,1,14,4,-19">
+       <action box="1,-2,11,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="78,12,12,10">
+      <entry box="1,2,11,2"/>
+      <exit box="1,4,11,2"/>
+     </state_glyph>
+    </state>
+    <!--${SMs::QMsmTst::SM::sub}-->
+    <submachine name="sub">
+     <entry brief="sub-ENTRY">BSP_display(&quot;sub-ENTRY;&quot;);</entry>
+     <exit brief="sub-EXIT">BSP_display(&quot;sub-EXIT;&quot;);</exit>
+     <!--${SMs::QMsmTst::SM::sub::EP-ep1}-->
+     <epseg name="ep1" target="../7">
+      <action brief="sub-ep1">BSP_display(&quot;sub-ep1;&quot;);</action>
+      <epseg_glyph conn="62,24,1,1,-14">
+       <name box="-5,-2,8,2"/>
+       <action box="-7,0,10,2"/>
+      </epseg_glyph>
+     </epseg>
+     <!--${SMs::QMsmTst::SM::sub::XP-xpH}-->
+     <xp name="xpH">
+      <xp_glyph point="62,66,1">
+       <name box="-5,-2,6,2"/>
+      </xp_glyph>
+     </xp>
+     <!--${SMs::QMsmTst::SM::sub::XP-xpG}-->
+     <xp name="xpG">
+      <xp_glyph point="62,43,1">
+       <name box="-5,-2,7,2"/>
+      </xp_glyph>
+     </xp>
+     <!--${SMs::QMsmTst::SM::sub::initial}-->
+     <initial target="../7/5">
+      <action brief="sub-INIT">BSP_display(&quot;sub-INIT;&quot;);</action>
+      <initial_glyph conn="4,10,5,0,34,36">
+       <action box="1,-2,12,2"/>
+      </initial_glyph>
+     </initial>
+     <!--${SMs::QMsmTst::SM::sub::history}-->
+     <history type="deep" target="../7/5">
+      <history_glyph conn="62,8,1,0,-20,38"/>
+     </history>
+     <!--${SMs::QMsmTst::SM::sub::E}-->
+     <tran trig="E" target="../8">
+      <action brief="sub-E">BSP_display(&quot;sub-E;&quot;);</action>
+      <tran_glyph conn="2,13,3,1,50,63,-4">
+       <action box="1,-2,12,2"/>
+      </tran_glyph>
+     </tran>
+     <!--${SMs::QMsmTst::SM::sub::I}-->
+     <tran trig="I">
+      <!--${SMs::QMsmTst::SM::sub::I::[me->foo]}-->
+      <choice>
+       <guard>me-&gt;foo</guard>
+       <action brief="sub-I">me-&gt;foo = 0U;
+BSP_display(&quot;sub-I;&quot;);</action>
+       <choice_glyph conn="14,16,5,-1,18">
+        <action box="1,0,17,2"/>
+       </choice_glyph>
+      </choice>
+      <tran_glyph conn="2,16,3,-1,12">
+       <action box="1,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <!--${SMs::QMsmTst::SM::sub::sub1}-->
+     <state name="sub1">
+      <entry brief="sub1-ENTRY">BSP_display(&quot;sub1-ENTRY;&quot;);</entry>
+      <exit brief="sub1-EXIT">BSP_display(&quot;sub1-EXIT;&quot;);</exit>
+      <!--${SMs::QMsmTst::SM::sub::sub1::initial}-->
+      <initial target="../5">
+       <action brief="sub1-INIT">BSP_display(&quot;sub1-INIT;&quot;);</action>
+       <initial_glyph conn="6,30,5,0,34,16">
+        <action box="1,-2,20,4"/>
+       </initial_glyph>
+      </initial>
+      <!--${SMs::QMsmTst::SM::sub::sub1::A}-->
+      <tran trig="A" target="..">
+       <action brief="sub1-A">BSP_display(&quot;sub1-A;&quot;);</action>
+       <tran_glyph conn="4,33,3,1,46,-3,-2">
+        <action box="1,-2,15,2"/>
+       </tran_glyph>
+      </tran>
+      <!--${SMs::QMsmTst::SM::sub::sub1::B}-->
+      <tran trig="B" target="../5">
+       <action brief="sub1-B">BSP_display(&quot;sub1-B;&quot;);</action>
+       <tran_glyph conn="4,36,3,1,42,12,-2">
+        <action box="1,-2,13,2"/>
+       </tran_glyph>
+      </tran>
+      <!--${SMs::QMsmTst::SM::sub::sub1::D}-->
+      <tran trig="D">
+       <!--${SMs::QMsmTst::SM::sub::sub1::D::[!me->foo]}-->
+       <choice target="../../..">
+        <guard>!me-&gt;foo</guard>
+        <action brief="sub1-D;foo=1">me-&gt;foo = 1U;
+BSP_display(&quot;sub1-D;&quot;);</action>
+        <choice_glyph conn="16,39,5,1,40,-7,6">
+         <action box="1,0,18,2"/>
+        </choice_glyph>
+       </choice>
+       <tran_glyph conn="4,39,3,-1,12">
+        <action box="1,-2,10,2"/>
+       </tran_glyph>
+      </tran>
+      <!--${SMs::QMsmTst::SM::sub::sub1::G}-->
+      <tran trig="G" target="../.." cpref="../../2">
+       <action brief="sub1-G-&gt;xpG">BSP_display(&quot;sub1-G-&gt;xpG;&quot;);</action>
+       <tran_glyph conn="4,43,3,1,57">
+        <action box="1,-2,10,2"/>
+       </tran_glyph>
+      </tran>
+      <!--${SMs::QMsmTst::SM::sub::sub1::sub11}-->
+      <state name="sub11">
+       <entry brief="sub1-ENTRY">BSP_display(&quot;sub11-ENTRY;&quot;);</entry>
+       <exit brief="sub11-EXIT">BSP_display(&quot;sub11-EXIT;&quot;);</exit>
+       <!--${SMs::QMsmTst::SM::sub::sub1::sub11::C}-->
+       <tran trig="C" target="../../6">
+        <action brief="sub11-C">BSP_display(&quot;sub11-C;&quot;);</action>
+        <tran_glyph conn="6,54,3,1,40,6,-2">
+         <action box="1,-2,13,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="6,46,38,10">
+        <entry box="1,2,37,2"/>
+        <exit box="1,4,37,2"/>
+       </state_glyph>
+      </state>
+      <!--${SMs::QMsmTst::SM::sub::sub1::sub12}-->
+      <state name="sub12">
+       <entry brief="sub12-ENTRY">BSP_display(&quot;sub12-ENTRY;&quot;);</entry>
+       <exit brief="sub12-EXIT">BSP_display(&quot;sub12-EXIT;&quot;);</exit>
+       <!--${SMs::QMsmTst::SM::sub::sub1::sub12::H}-->
+       <tran trig="H" target="../../.." cpref="../../../1">
+        <action brief="sub12-H-&gt;xpH">BSP_display(&quot;sub12-H-&gt;xpH;&quot;);</action>
+        <tran_glyph conn="6,66,3,1,55">
+         <action box="1,-2,14,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="6,58,38,10">
+        <entry box="1,2,35,2"/>
+        <exit box="1,4,35,2"/>
+       </state_glyph>
+      </state>
+      <state_glyph node="4,22,44,48">
+       <entry box="1,2,33,2"/>
+       <exit box="1,4,33,2"/>
+      </state_glyph>
+     </state>
+     <!--${SMs::QMsmTst::SM::sub::sub2}-->
+     <state name="sub2">
+      <entry brief="sub2-ENTRY">BSP_display(&quot;sub2-ENTRY;&quot;);</entry>
+      <exit brief="sub2-EXIT">BSP_display(&quot;sub2-EXIT;&quot;);</exit>
+      <state_glyph node="4,74,44,6">
+       <entry box="1,2,21,2"/>
+       <exit box="1,4,21,2"/>
+      </state_glyph>
+     </state>
+     <submachine_diagram size="60,82">
+      <entry box="1,2,39,2"/>
+      <exit box="1,4,39,2"/>
+     </submachine_diagram>
+    </submachine>
+    <state_diagram size="94,96"/>
+   </statechart>
+  </class>
+ </package>
+ <!--${.}-->
+ <directory name=".">
+  <!--${.::cut_qmsm.h}-->
+  <file name="cut_qmsm.h">
+   <text>#ifndef CUT_QMSM_H_
+#define CUT_QMSM_H_
+
+$declare ${Shared}
+
+#endif // CUT_QMSM_H_</text>
+  </file>
+  <!--${.::cut_qmsm.c}-->
+  <file name="cut_qmsm.c">
+   <text>#include &quot;qpc.h&quot;       // QP/C framework
+#include &quot;cut_qmsm.h&quot;  // Code Under Test (CUT)
+
+Q_DEFINE_THIS_FILE
+
+$declare ${SMs::QMsmTst}
+$define ${Shared::the_sm}
+$define ${Shared::QMsmTst_ctor}
+$define ${Shared::QMsmTst_isIn}
+$define ${SMs::QMsmTst}</text>
+  </file>
+ </directory>
+</model>

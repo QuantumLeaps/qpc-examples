@@ -72,7 +72,7 @@ int main() {
 
     // instantiate all dummy AOs...
     QActiveDummy_ctor(&Table_dummy);
-    QACTIVE_START(&Table_dummy,
+    QActive_start(&Table_dummy,
                   1U, // QF-priority/preemption-threshold
                   (QEvt const **)0, 0U, (void *)0, 0U, (void *)0);
 

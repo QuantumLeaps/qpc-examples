@@ -184,7 +184,7 @@ void BSP_start(void) {
     // instantiate and start QP/C active objects...
     Periodic1_ctor();
     static QEvt const *periodic1QSto[10]; // Event queue storage
-    QACTIVE_START(
+    QActive_start(
         AO_Periodic1,          // AO pointer to start
         Q_PRIO(1U, 1U),        // QF-prio/pre-thre.
         periodic1QSto,         // storage for the AO's queue
@@ -194,7 +194,7 @@ void BSP_start(void) {
 
     Sporadic2_ctor();
     static QEvt const *sporadic2QSto[8]; // Event queue storage
-    QACTIVE_START(
+    QActive_start(
         AO_Sporadic2,          // AO pointer to start
         Q_PRIO(2U, 3U),        // QF-prio/pre-thre.
         sporadic2QSto,         // storage for the AO's queue
@@ -204,7 +204,7 @@ void BSP_start(void) {
 
     Sporadic3_ctor();
     static QEvt const *sporadic3QSto[8]; // Event queue storage
-    QACTIVE_START(
+    QActive_start(
         AO_Sporadic3,          // AO pointer to start
         Q_PRIO(3U, 3U),        // QF-prio/pre-thre.
         sporadic3QSto,         // storage for the AO's queue
@@ -214,7 +214,7 @@ void BSP_start(void) {
 
     Periodic4_ctor();
     static QEvt const *periodic4QSto[8]; // Event queue storage
-    QACTIVE_START(
+    QActive_start(
         AO_Periodic4,          // AO pointer to start
         Q_PRIO(4U, 4U),        // QF-prio/pre-thre.
         periodic4QSto,         // storage for the AO's queue

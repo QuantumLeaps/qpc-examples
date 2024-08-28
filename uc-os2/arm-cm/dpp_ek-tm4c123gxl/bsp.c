@@ -284,7 +284,7 @@ void BSP_start(void) {
     static OS_STK philoStack[N_PHILO][128]; // stacks for the Philos
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
-        QACTIVE_START(AO_Philo[n],
+        QActive_start(AO_Philo[n],
             Q_PRIO(n + 1U, n + 4U),  // QP-prio., uC-OS2 prio.
             philoQueueSto[n],        // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -296,7 +296,7 @@ void BSP_start(void) {
     static QEvt const *tableQueueSto[N_PHILO];
     static OS_STK tableStack[128]; // stack for the Table
     Table_ctor();
-    QACTIVE_START(AO_Table,
+    QActive_start(AO_Table,
         Q_PRIO(N_PHILO + 1U, N_PHILO + 4U), // QP-prio., uC-OS2 prio.
         tableQueueSto,           // event queue storage
         Q_DIM(tableQueueSto),    // queue length [events]

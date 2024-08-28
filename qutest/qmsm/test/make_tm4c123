@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for QP/C on TM4C123, QUTEST, GNU-ARM
-# Last Updated for Version: 7.2.0
-# Date of the Last Update:  2022-12-21
+# Last Updated for Version: 7.4.0
+# Date of the Last Update:  2024-09-02
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -25,7 +25,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses>.
+# along with this program. If not, see <www.gnu.org/licenses/>.
 #
 # Contact information:
 # <www.state-machine.com/licensing>
@@ -98,7 +98,7 @@ ASM_SRCS :=
 
 # C source files
 C_SRCS := \
-	qmsmtst.c \
+    cut_qmsm.c \
 	test_qmsm.c \
 	system_TM4C123GH6PM.c \
 	startup_TM4C123GH6PM.c

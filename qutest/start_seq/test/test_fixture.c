@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     // start the active objects...
     Gizmo_ctor();
     static QEvt const *qSto[10]; // event queue storage
-    QACTIVE_START(AO_Gizmo,
+    QActive_start(AO_Gizmo,
                   2U, // QF-priority/preemption-threshold
                   qSto, Q_DIM(qSto),
                   (void *)0, 0U, (void *)0);

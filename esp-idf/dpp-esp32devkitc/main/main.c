@@ -58,7 +58,7 @@ void app_main()
     // start the active objects...
     for (n = 0U; n < N_PHILO; ++n) {
         QActive_setAttr(AO_Philo[n], TASK_NAME_ATTR, "Philo");
-        QACTIVE_START(AO_Philo[n],   // AO to start
+        QActive_start(AO_Philo[n],   // AO to start
             (uint_fast8_t)(n + 1),   // QP priority of the AO
             philoQueueSto[n],        // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -68,7 +68,7 @@ void app_main()
     }
 
     QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
-    QACTIVE_START(AO_Table,          // AO to start
+    QActive_start(AO_Table,          // AO to start
         (uint_fast8_t)(N_PHILO + 1), // QP priority of the AO
         tableQueueSto,               // event queue storage
         Q_DIM(tableQueueSto),        // queue length [events]

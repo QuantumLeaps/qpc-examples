@@ -1,7 +1,7 @@
 //============================================================================
 // Purpose: Fixture for QUTEST
-// Last Updated for Version: 7.3.1
-// Date of the Last Update:  2023-12-12
+// Last Updated for Version: 7.4.0
+// Date of the Last Update:  2024-09-02
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -32,13 +32,15 @@
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"
-#include "qmsmtst.h"
+#include "cut_qmsm.h"
 
 Q_DEFINE_THIS_FILE
 
 enum {
-    BSP_DISPLAY = QS_USER,
-    CMD,
+    BSP_DISPLAY = QS_USER0,
+};
+enum {
+    CMD         = QS_USER1,
 };
 
 //----------------------------------------------------------------------------
@@ -92,8 +94,10 @@ void QS_onCommand(uint8_t cmdId,
     //PRINTF_S("<TARGET> Command id=%d param=%d\n", (int)cmdId, (int)param);
     switch (cmdId) {
         case 0U: {
+            QStateHandler state = QMsm_getStateHandler_(the_sm);
             QS_BEGIN_ID(CMD, 0U) // app-specific record
-            QS_END()
+                QS_FUN(state);
+             QS_END()
             break;
         }
         case 1U: {

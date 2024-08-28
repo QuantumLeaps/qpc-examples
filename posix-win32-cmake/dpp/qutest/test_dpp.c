@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     static QEvt const *philoQueueSto[N_PHILO][10];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); // instantiate all Philosopher active objects
-        QACTIVE_START(AO_Philo[n], // AO to start
+        QActive_start(AO_Philo[n], // AO to start
             n + 1U,                // QF-priority
             philoQueueSto[n],      // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
     static QEvt const *tableQueueSto[N_PHILO];
     Table_ctor(); // instantiate the Table active object
-    QACTIVE_START(AO_Table,        // AO to start
+    QActive_start(AO_Table,        // AO to start
         N_PHILO + 1U,              // QF-priority
         tableQueueSto,             // event queue storage
         Q_DIM(tableQueueSto),      // queue length [events]

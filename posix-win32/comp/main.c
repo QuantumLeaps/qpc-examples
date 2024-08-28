@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 
     // instantiate and start the active objects...
     AlarmClock_ctor();
-    QACTIVE_START(APP_alarmClock, 1U,
+    QActive_start(APP_alarmClock, 1U,
                   l_alarmClockQSto, Q_DIM(l_alarmClockQSto),
                   (void *)0, 0U, (QEvt *)0);
 

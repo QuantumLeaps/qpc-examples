@@ -75,13 +75,13 @@ int main() {
 
     // start the active objects...
     QTicker_ctor(&l_ticker0, 0U); // active object for tick rate 0
-    QACTIVE_START(the_Ticker0,
+    QActive_start(the_Ticker0,
                   1U,                // QP priority
                   0, 0, 0, 0, 0);    // no queue, no stack , no init. event
 
     static QEvt const *tunnelQueueSto[GAME_MINES_MAX + 5];
     Tunnel_ctor_call();
-    QACTIVE_START(AO_Tunnel,
+    QActive_start(AO_Tunnel,
                   2U,                // QP priority
                   tunnelQueueSto,  Q_DIM(tunnelQueueSto), // evt queue
                   (void *)0, 0U,     // no per-thread stack
@@ -89,7 +89,7 @@ int main() {
 
     static QEvt const *shipQueueSto[3];
     Ship_ctor_call();
-    QACTIVE_START(AO_Ship,
+    QActive_start(AO_Ship,
                   3U,                // QP priority
                   shipQueueSto,    Q_DIM(shipQueueSto), // evt queue
                   (void *)0, 0U,     // no per-thread stack
@@ -97,7 +97,7 @@ int main() {
 
     static QEvt const *missileQueueSto[2];
     Missile_ctor_call();
-    QACTIVE_START(AO_Missile,
+    QActive_start(AO_Missile,
                   4U,                // QP priority
                   missileQueueSto, Q_DIM(missileQueueSto), // evt queue
                   (void *)0, 0U,     // no per-thread stack

@@ -352,7 +352,7 @@ void BSP_start(void) {
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); // instantiate all Philosopher active objects
         QActive_setAttr(AO_Philo[n], TASK_NAME_ATTR, "Philo");
-        QACTIVE_START(AO_Philo[n],   // AO to start
+        QActive_start(AO_Philo[n],   // AO to start
             n + 3U,                  // QP prio. of the AO
             philoQueueSto[n],        // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -365,7 +365,7 @@ void BSP_start(void) {
     static StackType_t tableStack[configMINIMAL_STACK_SIZE];
     Table_ctor(); // instantiate the Table active object
     QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
-    QACTIVE_START(AO_Table,          // AO to start
+    QActive_start(AO_Table,          // AO to start
         N_PHILO + 7U,                // QP prio. of the AO
         tableQueueSto,               // event queue storage
         Q_DIM(tableQueueSto),        // queue length [events]

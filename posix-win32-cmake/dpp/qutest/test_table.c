@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
     //
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         QActiveDummy_ctor(&Philo_dummy[n]);
-        QACTIVE_START(&Philo_dummy[n],
+        QActive_start(&Philo_dummy[n],
                      (uint_fast8_t)(n + 1U), // priority
                      (QEvt const **)0, 0U, (void *)0, 0U,
                      (QEvt const *)0);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
     // start the active objects...
     Table_ctor(); // instantiate the Table active object
     static QEvt const *tableQueueSto[N_PHILO];
-    QACTIVE_START(AO_Table,           // AO to start
+    QActive_start(AO_Table,           // AO to start
                   (uint_fast8_t)(N_PHILO + 1), // QP priority of the AO
                   tableQueueSto,        // event queue storage
                   Q_DIM(tableQueueSto), // queue length [events]

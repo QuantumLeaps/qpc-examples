@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for QUTEST-QP/C for Windows and POSIX *HOSTS*
-# Last Updated for Version: 7.2.0
-# Date of the Last Update:  2022-12-21
+# Last Updated for Version: 7.4.0
+# Date of the Last Update:  2024-09-02
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -49,7 +49,7 @@
 #-----------------------------------------------------------------------------
 # project name:
 #
-PROJECT := test_qhsmtst
+PROJECT := test_qmsm
 
 #-----------------------------------------------------------------------------
 # project directories:
@@ -79,8 +79,8 @@ endif
 
 # C source files...
 C_SRCS := \
-	qhsmtst.c \
-	test_qhsm.c
+    cut_qmsm.c \
+	test_qmsm.c
 
 # C++ source files...
 CPP_SRCS :=
@@ -220,8 +220,14 @@ $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
 	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
+ifdef GCOV
+run : $(TARGET_EXE)
+	-$(RM) $(BIN_DIR)/*.gcda
+	$(QUTEST) -e$(TARGET_EXE) -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
+else
 run : $(TARGET_EXE)
 	$(QUTEST) -e$(TARGET_EXE) -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
+endif
 
 $(BIN_DIR)/%.d : %.cpp
 	$(CPP) -MM -MT $(@:.d=.o) $(CPPFLAGS) $< > $@

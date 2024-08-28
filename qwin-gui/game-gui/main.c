@@ -77,7 +77,7 @@ int main() {
     // start the active objects...
     static QEvt const *tunnelQueueSto[(GAME_MINES_MAX + 5)*WIN_FUDGE_FACTOR];
     Tunnel_ctor_call();
-    QACTIVE_START(AO_Tunnel,
+    QActive_start(AO_Tunnel,
                   1U,                // QP priority
                   tunnelQueueSto,  Q_DIM(tunnelQueueSto), // evt queue
                   (void *)0, 0U,     // no per-thread stack
@@ -85,7 +85,7 @@ int main() {
 
     static QEvt const *shipQueueSto[3*WIN_FUDGE_FACTOR];
     Ship_ctor_call();
-    QACTIVE_START(AO_Ship,
+    QActive_start(AO_Ship,
                   2U,                // QP priority
                   shipQueueSto,    Q_DIM(shipQueueSto), // evt queue
                   (void *)0, 0U,     // no per-thread stack
@@ -93,7 +93,7 @@ int main() {
 
     static QEvt const *missileQueueSto[2*WIN_FUDGE_FACTOR];
     Missile_ctor_call();
-    QACTIVE_START(AO_Missile,
+    QActive_start(AO_Missile,
                   3U,                // QP priority
                   missileQueueSto, Q_DIM(missileQueueSto), // evt queue
                   (void *)0, 0U,     // no per-thread stack

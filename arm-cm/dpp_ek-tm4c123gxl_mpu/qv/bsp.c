@@ -632,7 +632,7 @@ void BSP_start(void) {
 #else
         Philo_ctor(n, Philo_sto[n], sizeof(Philo_sto[n]), (void *)0);
 #endif
-        QACTIVE_START(AO_Philo[n],
+        QActive_start(AO_Philo[n],
             n + 3U,                  // QF-prio/pthre. see NOTE1
             philoQueueSto[n],        // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -646,7 +646,7 @@ void BSP_start(void) {
 #else
     Table_ctor(Table_sto, sizeof(Table_sto), (void *)0);
 #endif
-    QACTIVE_START(AO_Table,
+    QActive_start(AO_Table,
         N_PHILO + 7U,                // QP prio. of the AO
         tableQueueSto,               // event queue storage
         Q_DIM(tableQueueSto),        // queue length [events]

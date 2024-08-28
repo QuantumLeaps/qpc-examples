@@ -111,7 +111,7 @@ void BSP_start(void) {
 
     static QEvt const *tableQueueSto[N_PHILO];
     Table_ctor();
-    QACTIVE_START(AO_Table,
+    QActive_start(AO_Table,
         N_PHILO + 7U,            // QP prio. of the AO
         tableQueueSto,           // event queue storage
         Q_DIM(tableQueueSto),    // queue length [events]

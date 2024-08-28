@@ -76,15 +76,15 @@ int main(void) {
     QF_poolInit(l_smlPoolSto, sizeof(l_smlPoolSto), sizeof(l_smlPoolSto[0]));
     QF_poolInit(l_medPoolSto, sizeof(l_medPoolSto), sizeof(l_medPoolSto[0]));
 
-    QACTIVE_START(AO_LwIPMgr, 1,
+    QActive_start(AO_LwIPMgr, 1,
                   l_lwIPMgrQueueSto, Q_DIM(l_lwIPMgrQueueSto),
                   (void *)0, 0, (QEvt *)0);
     for (n = 0; n < N_PHILO; ++n) { // start the active objects...
-        QACTIVE_START(AO_Philo[n], (uint8_t)(n + 2),
+        QActive_start(AO_Philo[n], (uint8_t)(n + 2),
                       l_philoQueueSto[n], Q_DIM(l_philoQueueSto[n]),
                       (void *)0, 0, (QEvt *)0);
     }
-    QACTIVE_START(AO_Table, (uint8_t)(N_PHILO + 2),
+    QActive_start(AO_Table, (uint8_t)(N_PHILO + 2),
                   l_tableQueueSto, Q_DIM(l_tableQueueSto),
                   (void *)0, 0, (QEvt *)0);
 

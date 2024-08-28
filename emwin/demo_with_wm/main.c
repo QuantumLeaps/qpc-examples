@@ -73,13 +73,13 @@ void MainTask(void) {
 
     Philo_ctor(); // instantiate all Philosopher active objects
     for (uint8_t n = 0U; n < N_PHILO; ++n) { // start the active objects...
-        QACTIVE_START(AO_Philo[n], (n + 1U),
+        QActive_start(AO_Philo[n], (n + 1U),
                       l_philoQueueSto[n], Q_DIM(l_philoQueueSto[n]),
                       (void *)0, 1024, (QEvt *)0); // 1K of stack
     }
 
     Table_ctor(); // instantiate the Table active object
-    QACTIVE_START(AO_Table, (N_PHILO + 1U),
+    QActive_start(AO_Table, (N_PHILO + 1U),
                   l_tableQueueSto, Q_DIM(l_tableQueueSto),
                   (void *)0, 1024, (QEvt *)0); // 1K of stack
 

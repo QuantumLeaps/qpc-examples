@@ -44,7 +44,7 @@ int main() {
 
     Blinky_ctor();
     static QEvt const *blinkyeQueueSto[2];
-    QACTIVE_START(AO_Blinky,       // AO to start
+    QActive_start(AO_Blinky,       // AO to start
         1U,                        // QF-priority/preemption-thre.
         blinkyeQueueSto,           // event queue storage
         Q_DIM(blinkyeQueueSto),    // queue length [events]

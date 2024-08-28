@@ -1,7 +1,7 @@
 ##############################################################################
-# Product: Makefile for QP/C on NUCLEO-L053R8 board, QUTEST, GNU-ARM
-# Last Updated for Version: 7.3.1
-# Date of the Last Update:  2023-11-13
+# Product: Makefile for QP/C on EMF32, QUTEST, GNU-ARM
+# Last Updated for Version: 7.4.0
+# Date of the Last Update:  2024-09-02
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -25,7 +25,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses>.
+# along with this program. If not, see <www.gnu.org/licenses/>.
 #
 # Contact information:
 # <www.state-machine.com/licensing>
@@ -33,11 +33,11 @@
 ##############################################################################
 #
 # examples of invoking this Makefile:
-# make -f make_nucleo-l053r8 USB=e: # make, upload to USB drive, run the tests
-# make -f make_nucleo-l053r8 USB=f: TESTS=philo*.py  # make and run the selected tests
-# make -f make_nucleo-l053r8 HOST=localhost:7705 # connect to host:port
-# make -f make_nucleo-l053r8 norun   # only make but not run the tests
-# make -f make_nucleo-l053r8 clean   # cleanup the build
+# make -f make_efm32  # make and run the tests in the current directory
+# make -f make_efm32 TESTS=philo*.py  # make and run the selected tests
+# make -f make_efm32 HOST=localhost:7705 # connect to host:port
+# make -f make_efm32 norun   # only make but not run the tests
+# make -f make_efm32 clean   # cleanup the build
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
@@ -48,9 +48,9 @@
 #-----------------------------------------------------------------------------
 # project name, target name, target directory:
 #
-PROJECT := test_qhsmtst
-TARGET  := nucleo-l053r8
-TARGET_DIR := ..\..\..\..\3rd_party\nucleo-l053r8\qutest
+PROJECT := test_qhsm
+TARGET  := efm32
+TARGET_DIR := ..\..\..\..\3rd_party\efm32pg1b\qutest
 
 #-----------------------------------------------------------------------------
 # project directories:
@@ -77,8 +77,8 @@ VPATH := . \
 	$(QPC)/src/qf \
 	$(QPC)/src/qs \
 	$(QP_PORT_DIR) \
-	$(QPC)/3rd_party/nucleo-l053r8 \
-	$(QPC)/3rd_party/nucleo-l053r8/gnu
+	$(QPC)/3rd_party/efm32pg1b \
+	$(QPC)/3rd_party/efm32pg1b/gnu
 
 # list of all include directories needed by this project
 INCLUDES  = -I. \
@@ -87,7 +87,7 @@ INCLUDES  = -I. \
 	-I$(QPC)/include \
 	-I$(QP_PORT_DIR) \
 	-I$(QPC)/3rd_party/CMSIS/Include \
-	-I$(QPC)/3rd_party/nucleo-l053r8
+	-I$(QPC)/3rd_party/efm32pg1b
 
 #-----------------------------------------------------------------------------
 # project files:
@@ -98,10 +98,14 @@ ASM_SRCS :=
 
 # C source files
 C_SRCS := \
-	qhsmtst.c \
+    cut_qhsm.c \
 	test_qhsm.c \
-	system_stm32l0xx.c \
-	startup_stm32l053xx.c
+	startup_efm32pg1b.c \
+	system_efm32pg1b.c \
+	em_cmu.c \
+	em_emu.c \
+	em_gpio.c \
+	em_usart.c
 
 # C++ source files
 CPP_SRCS :=
@@ -135,16 +139,16 @@ LIB_DIRS  :=
 LIBS      :=
 
 # defines
-DEFINES   := -DSTM32L053xx
+DEFINES   := -DEFM32PG1B200F256GM48=1
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...
 # ARM_CPU:   [cortex-m0 | cortex-m0plus | cortex-m1 | cortex-m3 | cortex-m4]
 # ARM_FPU:   [ | vfp]
 # FLOAT_ABI: [ | soft | softfp | hard]
 #
-ARM_CPU   := -mcpu=cortex-m0plus
-ARM_FPU   :=
-FLOAT_ABI :=
+ARM_CPU   := -mcpu=cortex-m4
+ARM_FPU   := -mfpu=vfp
+FLOAT_ABI := -mfloat-abi=softfp
 
 #-----------------------------------------------------------------------------
 # GNU-ARM toolset (NOTE: You need to adjust to your machine)
@@ -166,12 +170,11 @@ LINK  := $(GNU_ARM)/bin/arm-none-eabi-gcc
 BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 
 #-----------------------------------------------------------------------------
-# NOTE: The symbol USB must be provided for the NUCLEO board
-# has enumerated as USB drive f:
+# FLASH tool (NOTE: Requires the JLINK utility)
+# see $(TARGET_DIR)\flash.bat
 #
-ifeq ($(USB),)
-$(error USB drive not provided for the NUCLEO board.)
-endif
+
+FLASH := $(TARGET_DIR)\flash.bat
 
 ##############################################################################
 # Typically you should not need to change anything below this line
@@ -181,8 +184,6 @@ endif
 
 MKDIR := mkdir
 RM    := rm
-CP    := cp
-SLEEP := sleep
 
 #-----------------------------------------------------------------------------
 # QUTest test script utilities (requires QTOOLS):
@@ -248,15 +249,14 @@ endif
 
 $(TARGET_BIN) : $(TARGET_ELF)
 	$(BIN) -O binary $< $@
-	$(CP) $@ $(USB)
-	$(SLEEP) 2
+	$(FLASH) $@
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
 	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 flash :
-	$(CP) $(TARGET_BIN) $(USB)
+	$(FLASH) $(TARGET_BIN)
 
 run : $(TARGET_BIN)
 	$(QUTEST) -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
