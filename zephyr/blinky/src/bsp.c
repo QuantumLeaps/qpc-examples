@@ -1,7 +1,7 @@
 //============================================================================
 // Product: Blinky example, Zephyr RTOS kernel
-// Last updated for: @ref qpc_7_3_0
-// Last updated on  2023-08-24
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -106,7 +106,7 @@ void BSP_start(void) {
 
     // instantiate and start AOs/threads...
 
-    static QEvt const *blinkyQueueSto[10];
+    static QEvtPtr blinkyQueueSto[10];
     static K_THREAD_STACK_DEFINE(blinkyStack, 1024);
     Blinky_ctor();
     QActive_start(AO_Blinky,

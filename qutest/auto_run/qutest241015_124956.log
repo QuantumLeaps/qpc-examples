@@ -1,0 +1,98 @@
+Run ID    : 241015_124956
+Target    : remote
+
+==================================[Group  1]==================================
+test_mpu.py
+
+@uid{TQP701}
+This test group verifies the memory access protection,
+specifically the protection of various memory regions.
+All tests run during the QS_TEST_PAUSE() in
+the test_sched.c fixture.
+
+[ 1]--------------------------------------------------------------------------
+
+NULL-read -> ASSERT
+
+                                                             [ PASS (  0.1s) ]
+[ 2]--------------------------------------------------------------------------
+NULL-write -> ASSERT
+                                                             [ PASS (  0.1s) ]
+[ 3]--------------------------------------------------------------------------
+Below-Start Flash-read -> ASSERT
+                                                             [ PASS (  0.1s) ]
+[ 4]--------------------------------------------------------------------------
+Start-of Flash-read
+                                                             [ PASS (  0.1s) ]
+[ 5]^-------------------------------------------------------------------------
+Middle-of Flash-read
+                                                             [ PASS (  0.1s) ]
+[ 6]^-------------------------------------------------------------------------
+End-of Flash-read
+                                                             [ PASS (  0.1s) ]
+[ 7]^ - - - - - - - - - - - - - - - - - - -- - - - - - - - - - - - - - - - - -
+After-End Flash-read-> ASSERT
+                                                                   [ SKIPPED ]
+[ 8]--------------------------------------------------------------------------
+Middle-of Flash-write -> ASSERT
+                                                             [ PASS (  0.1s) ]
+[ 9]--------------------------------------------------------------------------
+Below-Start SRAM-read -> ASSERT
+                                                             [ PASS (  0.1s) ]
+[10]--------------------------------------------------------------------------
+Start-of SRAM-read
+                                                             [ PASS (  0.1s) ]
+[11]^-------------------------------------------------------------------------
+Middle-of SRAM-read
+                                                             [ PASS (  0.0s) ]
+[12]^-------------------------------------------------------------------------
+End-of SRAM-read
+                                                             [ PASS (  0.0s) ]
+[13]^-------------------------------------------------------------------------
+Below-Start SRAM-write -> ASSERT
+                                                             [ PASS (  0.0s) ]
+[14]- - - - - - - - - - - - - - - - - - - -- - - - - - - - - - - - - - - - - -
+Middle-of SRAM-write
+                                                                   [ SKIPPED ]
+[15]--------------------------------------------------------------------------
+After-End SRAM-write -> ASSERT
+                                                             [ PASS (  0.1s) ]
+
+==================================[Group  2]==================================
+test_sched.py
+@uid{TST-QP-QK_02}
+This test group verifies the preemption scenarios
+in the QK preemptive kernel
+
+[16]--------------------------------------------------------------------------
+SCENARIO: ao->ao->ao (NO PTS)
+
+   GIVEN: priorities: (1,0), (2,0), (3,0)
+    WHEN: post TEST0_SIG to aoB[1]
+    THEN: expect the given event exchange
+                                                             [ PASS (  0.2s) ]
+[17]--------------------------------------------------------------------------
+SCENARIO: ao->ao->ao (PTS1)
+
+   GIVEN: priorities: (1,3), (2,3), (3,0)
+    WHEN: post TEST0_SIG to aoB[1]
+    THEN: expect the given event exchange
+                                                             [ PASS (  0.2s) ]
+[18]--------------------------------------------------------------------------
+SCENARIO: ao->ao->ao (PTS2)
+
+   GIVEN: priorities: (1,0), (2,3), (3,0)
+    WHEN: post TEST0_SIG to aoB[1]
+    THEN: expect the given event exchange
+                                                             [ PASS (  0.2s) ]
+
+==================================[ SUMMARY ]=================================
+
+Target ID : 241015_124951 (QP-Ver=800)
+Log file  : C:\qp-dev\qpc\examples\qutest\auto_run/qutest241015_124956.log
+Groups    : 2
+Tests     : 18
+Skipped   : {QUTest._num_skipped} [{QUTest._str_skipped} ]
+Failed    : 0
+
+==============================[  OK  (  3.1s) ]===============================

@@ -1,7 +1,7 @@
 //============================================================================
 // Purpose: Fixture for QUTEST
-// Last Updated for Version: 7.2.0
-// Date of the Last Update:  2022-12-22
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -38,12 +38,11 @@
 Q_DEFINE_THIS_FILE
 
 //............................................................................
-int main(int argc, char *argv[]) {
-
+int main() {
     QF_init();  // initialize the framework
 
     // initialize the QS software tracing
-    if (QS_INIT(argc > 1 ? argv[1] : (void *)0) == 0U) {
+    if (!QS_INIT((void *)0)) {
         Q_ERROR(); // no point in continuing if QS initialization fails
     }
 
@@ -60,7 +59,7 @@ int main(int argc, char *argv[]) {
 
     // start the active objects...
     Gizmo_ctor();
-    static QEvt const *qSto[10]; // event queue storage
+    static QEvtPtr qSto[10]; // event queue storage
     QActive_start(AO_Gizmo,
                   2U, // QF-priority/preemption-threshold
                   qSto, Q_DIM(qSto),

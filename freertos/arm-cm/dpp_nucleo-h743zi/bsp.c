@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example, NUCLEO-H743ZI board, FreeRTOS kernel
-// Last updated for version 7.3.2
-// Last updated on  2023-12-13
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -326,12 +326,12 @@ void BSP_start(void) {
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // start the active objects/threads...
-    static QEvt const *philoQueueSto[N_PHILO][N_PHILO];
+    static QEvtPtr philoQueueSto[N_PHILO][N_PHILO];
     static StackType_t philoStack[N_PHILO][configMINIMAL_STACK_SIZE];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); // instantiate all Philosopher active objects
         QActive_setAttr(AO_Philo[n], TASK_NAME_ATTR, "Philo");
-        QActive_start(AO_Philo[n],   // AO to start
+        QActive_start(AO_Philo[n],  // AO to start
             Q_PRIO(n + 3U, 3U),      // QP prio., FreeRTOS prio.
             philoQueueSto[n],        // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -340,11 +340,11 @@ void BSP_start(void) {
             (QEvt *)0);              // initialization event (not used)
     }
 
-    static QEvt const *tableQueueSto[N_PHILO];
+    static QEvtPtr tableQueueSto[N_PHILO];
     static StackType_t tableStack[configMINIMAL_STACK_SIZE];
     Table_ctor(); // instantiate the Table active object
     QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
-    QActive_start(AO_Table,          // AO to start
+    QActive_start(AO_Table,         // AO to start
         Q_PRIO(N_PHILO + 7U, 7U),    // QP prio., FreeRTOS prio.
         tableQueueSto,               // event queue storage
         Q_DIM(tableQueueSto),        // queue length [events]

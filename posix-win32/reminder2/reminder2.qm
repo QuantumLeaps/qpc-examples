@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.2.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="7.0.0" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>&quot;Reminder&quot; state pattern example #2</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -110,7 +110,7 @@ QACTIVE_POST(&amp;me-&gt;super, &amp;reminder-&gt;super, me);</action>
       </tran_glyph>
      </tran>
      <state_glyph node="2,6,42,26">
-      <entry box="1,2,6,2"/>
+      <entry box="0,3,6,2"/>
      </state_glyph>
     </state>
     <!--${Components::Cruncher::SM::final}-->
@@ -118,7 +118,7 @@ QACTIVE_POST(&amp;me-&gt;super, &amp;reminder-&gt;super, me);</action>
      <entry brief="stop">PRINTF_S(&quot;%s\n&quot;, &quot;final-ENTRY;&quot;);
          QF_stop(); // terminate the application</entry>
      <state_glyph node="2,36,30,10">
-      <entry box="1,2,6,2"/>
+      <entry box="0,3,6,2"/>
      </state_glyph>
     </state>
     <state_diagram size="50,48"/>
@@ -155,8 +155,6 @@ $define${Components::Cruncher}
 
 // Local-scope objects -----------------------------------------------------
 static Cruncher l_cruncher; // the Cruncher active object
-QEvt const *l_cruncherQSto[10]; // Event queue storage for Cruncher AO
-static QF_MPOOL_EL(ReminderEvt) l_smlPoolSto[20]; // storage for small pool
 
 //..........................................................................
 int main(int argc, char *argv[]) {
@@ -164,9 +162,6 @@ int main(int argc, char *argv[]) {
            &quot;Press 'e' to echo the current value...\n&quot;
            &quot;Press ESC to quit...\n&quot;,
            QP_VERSION_STR);
-    fflush(stdout);
-
-    Cruncher_ctor(&amp;l_cruncher);
 
     BSP_init(argc, argv); // initialize the BSP
 
@@ -174,12 +169,15 @@ int main(int argc, char *argv[]) {
 
     // publish-subscribe not used, no call to QF_psInit()
 
-    QF_poolInit(l_smlPoolSto, sizeof(l_smlPoolSto), sizeof(l_smlPoolSto[0]));
+    static QF_MPOOL_EL(ReminderEvt) smlPoolSto[20]; // small pool storage
+    QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     // instantiate and start the active objects...
+    Cruncher_ctor(&amp;l_cruncher);
+    QEvtPtr cruncherQSto[10]; // event queue storage for Cruncher AO
     QActive_start(&amp;l_cruncher.super,
                   1U,
-                  l_cruncherQSto, Q_DIM(l_cruncherQSto),
+                  cruncherQSto, Q_DIM(cruncherQSto),
                   (void *)0, 0U, (QEvt *)0);
 
     return QF_run(); // run the QF application

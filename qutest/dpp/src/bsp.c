@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example, BSP for QUTest
-// Last updated for version 7.4.0
-// Last updated on  2024-07-31
+// Last updated for version 8.0.0
+// Last updated on  2024-09-30
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -42,11 +42,11 @@ enum {
 };
 
 //............................................................................
-void BSP_init(int argc, char** argv) {
+void BSP_init(void) {
     BSP_randomSeed(1234U);
 
     // initialize the QS software tracing
-    if (!QS_INIT(argc <= 1 ? (void*)0 : argv[1])) {
+    if (!QS_INIT((void*)0)) {
         Q_ERROR();
     }
 

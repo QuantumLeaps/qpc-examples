@@ -1,7 +1,7 @@
 //============================================================================
 // Product: Blinky example, NUCLEO-C031C6 board, QV kernel
-// Last updated for version 7.3.0
-// Last updated on  2023-08-15
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -54,13 +54,13 @@
 //============================================================================
 // Error handler and ISRs...
 
-Q_NORETURN Q_onError(char const *module, int_t const id) {
-    // NOTE: this implementation of the assertion handler is intended only
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    // NOTE: this implementation of the error handler is intended only
     // for debugging and MUST be changed for deployment of the application
     // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, (uint32_t)10000U);
+    QS_ASSERTION(module, id, 10000U);
 
 #ifndef NDEBUG
     // light up the user LED
@@ -135,7 +135,7 @@ void BSP_start(void) {
 
     // instantiate and start AOs/threads...
 
-    static QEvt const *blinkyQueueSto[10];
+    static QEvtPtr blinkyQueueSto[10];
     Blinky_ctor();
     QActive_start(AO_Blinky,
         1U,                          // QP prio. of the AO

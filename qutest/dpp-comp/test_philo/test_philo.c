@@ -1,7 +1,7 @@
 //============================================================================
 // Product: QUTEST fixture for the DPP example
-// Last updated for version 7.3.0
-// Last updated on  2023-06-23
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -72,9 +72,9 @@ int main() {
 
     // instantiate all dummy AOs...
     QActiveDummy_ctor(&Table_dummy);
-    QActive_start(&Table_dummy,
+    QActive_start(AO_Table,
                   1U, // QF-priority/preemption-threshold
-                  (QEvt const **)0, 0U, (void *)0, 0U, (void *)0);
+                  (QEvtPtr *)0, 0U, (void *)0, 0U, (void *)0);
 
     return QF_run(); // run the QF application
 }

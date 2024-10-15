@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example, EK-TM4C123GLX board, uC/OS-II RTOS
-// Last updated for @ref qpc_7_3_2
-// Last updated on  2023-12-13
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -280,7 +280,7 @@ void BSP_start(void) {
     // the lowest priority levels are reserved for the internal
     // uC-OS2 tasks.
 
-    static QEvt const *philoQueueSto[N_PHILO][10];
+    static QEvtPtr philoQueueSto[N_PHILO][10];
     static OS_STK philoStack[N_PHILO][128]; // stacks for the Philos
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
@@ -293,7 +293,7 @@ void BSP_start(void) {
             (void *)0);              // no initialization param
     }
 
-    static QEvt const *tableQueueSto[N_PHILO];
+    static QEvtPtr tableQueueSto[N_PHILO];
     static OS_STK tableStack[128]; // stack for the Table
     Table_ctor();
     QActive_start(AO_Table,

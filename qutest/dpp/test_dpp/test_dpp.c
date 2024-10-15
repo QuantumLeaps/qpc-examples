@@ -1,7 +1,7 @@
 //============================================================================
 // Product: QUTEST fixture for the DPP components
-// Last updated for version 7.4.0
-// Last updated on  2024-07-31
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -38,9 +38,9 @@
 //Q_DEFINE_THIS_FILE
 
 //============================================================================
-int main(int argc, char* argv[]) {
-    QF_init();       // initialize the framework and the underlying RT kernel
-    BSP_init(argc, argv); // initialize the Board Support Package
+int main() {
+    QF_init();  // initialize the framework and the underlying RT kernel
+    BSP_init(); // initialize the Board Support Package
 
     // pause execution of the test and wait for the test script to continue
     QS_TEST_PAUSE();
@@ -54,10 +54,10 @@ int main(int argc, char* argv[]) {
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // start the active objects...
-    static QEvt const *philoQueueSto[N_PHILO][10];
+    static QEvtPtr philoQueueSto[N_PHILO][10];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); // instantiate all Philosopher active objects
-        QActive_start(AO_Philo[n], // AO to start
+        QActive_start(AO_Philo[n],// AO to start
             n + 1U,                // QF-priority
             philoQueueSto[n],      // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -66,9 +66,9 @@ int main(int argc, char* argv[]) {
             (void *)0);            // initialization param
     }
 
-    static QEvt const *tableQueueSto[N_PHILO];
+    static QEvtPtr tableQueueSto[N_PHILO];
     Table_ctor(); // instantiate the Table active object
-    QActive_start(AO_Table,        // AO to start
+    QActive_start(AO_Table,       // AO to start
         N_PHILO + 1U,              // QF-priority
         tableQueueSto,             // event queue storage
         Q_DIM(tableQueueSto),      // queue length [events]

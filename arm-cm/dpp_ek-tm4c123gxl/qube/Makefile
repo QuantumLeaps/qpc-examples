@@ -88,8 +88,7 @@ LIB_DIRS  :=
 LIBS      :=
 
 # defines...
-# QP_API_VERSION controls the QP API compatibility; 9999 means the latest API
-DEFINES   := -DQP_API_VERSION=9999
+DEFINES   := $(DEF)
 
 ifeq (,$(CONF))
 	CONF := dbg

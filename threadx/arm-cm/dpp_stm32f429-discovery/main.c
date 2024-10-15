@@ -1,7 +1,7 @@
 //============================================================================
 // QP example for ThreadX
-// Last updated for: @ref qpc_7_3_0
-// Last updated on  2023-08-22
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -58,7 +58,7 @@ void tx_application_define(void *first_unused_memory) {
 
     // start the active objects/threads...
 
-    static QEvt const *philoQueueSto[N_PHILO][10];
+    static QEvtPtr philoQueueSto[N_PHILO][10];
     static ULONG philoStk[N_PHILO][200]; // stacks for the Philosophers
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); // instantiate the Philo AO
@@ -74,7 +74,7 @@ void tx_application_define(void *first_unused_memory) {
             (void *)0);
     }
 
-    static QEvt const *tableQueueSto[N_PHILO];
+    static QEvtPtr tableQueueSto[N_PHILO];
     static ULONG tableStk[200]; // stack for the Table
     Table_ctor(); // instantiate the Table AO
     QActive_setAttr(AO_Table, THREAD_NAME_ATTR, "Table");

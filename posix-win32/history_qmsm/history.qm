@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.2.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="6.2.3" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
  <documentation>Demonstration of transitions to shallow history and deep history in QMsm-style state machines.</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -12,7 +12,7 @@
    <statechart properties="0x01">
     <!--${SMs::ToastOven::SM::initial}-->
     <initial target="../1">
-     <action>(void)par; // unused parameter </action>
+     <action>(void)par; // unused parameter</action>
      <initial_glyph conn="3,2,5,1,53,4,-4">
       <action box="2,-2,13,4"/>
      </initial_glyph>
@@ -21,14 +21,14 @@
     <state name="doorClosed">
      <entry>PRINTF_S(&quot;%s;&quot;, &quot;door-Closed&quot;);</entry>
      <!--${SMs::ToastOven::SM::doorClosed::initial}-->
-     <initial target="../7">
-      <initial_glyph conn="40,10,4,0,10">
+     <initial target="../8">
+      <initial_glyph conn="40,10,4,0,14">
        <action box="0,-2,6,2"/>
       </initial_glyph>
      </initial>
      <!--${SMs::ToastOven::SM::doorClosed::history}-->
-     <history type="shallow" target="../7">
-      <history_glyph conn="52,18,1,0,-8,2"/>
+     <history type="shallow" target="../8">
+      <history_glyph conn="52,14,1,0,-8,10"/>
      </history>
      <!--${SMs::ToastOven::SM::doorClosed::TERMINATE}-->
      <tran trig="TERMINATE" target="../../3">
@@ -43,36 +43,66 @@
       </tran_glyph>
      </tran>
      <!--${SMs::ToastOven::SM::doorClosed::TOAST}-->
-     <tran trig="TOAST" target="../8" cpref="../../4/0">
-      <tran_glyph conn="11,38,2,2,-5">
+     <tran trig="TOAST" target="../7/2">
+      <tran_glyph conn="12,38,2,2,-6">
        <action box="0,-2,6,2"/>
       </tran_glyph>
      </tran>
      <!--${SMs::ToastOven::SM::doorClosed::BAKE}-->
-     <tran trig="BAKE" target="../8" cpref="../../4/1">
-      <tran_glyph conn="26,38,2,2,-5">
+     <tran trig="BAKE" target="../7/3">
+      <tran_glyph conn="28,38,2,2,-6">
        <action box="0,-2,6,2"/>
       </tran_glyph>
      </tran>
      <!--${SMs::ToastOven::SM::doorClosed::OFF}-->
-     <tran trig="OFF" target="../7">
-      <tran_glyph conn="44,38,2,2,-10">
+     <tran trig="OFF" target="../8">
+      <tran_glyph conn="44,38,2,2,-6">
        <action box="0,-2,6,2"/>
       </tran_glyph>
      </tran>
+     <!--${SMs::ToastOven::SM::doorClosed::heating}-->
+     <state name="heating">
+      <entry>PRINTF_S(&quot;%s;&quot;, &quot;heater-On&quot;);</entry>
+      <exit>PRINTF_S(&quot;%s;&quot;, &quot;heater-Off&quot;);</exit>
+      <!--${SMs::ToastOven::SM::doorClosed::heating::initial}-->
+      <initial target="../2">
+       <action>PRINTF_S(&quot;%s;&quot;, &quot;heating-init&quot;);</action>
+       <initial_glyph conn="6,18,5,0,6,6">
+        <action box="0,-2,10,2"/>
+       </initial_glyph>
+      </initial>
+      <!--${SMs::ToastOven::SM::doorClosed::heating::history}-->
+      <history type="deep" target="../3">
+       <history_glyph conn="36,18,1,0,-8,6"/>
+      </history>
+      <!--${SMs::ToastOven::SM::doorClosed::heating::toasting}-->
+      <state name="toasting">
+       <entry>PRINTF_S(&quot;%s;&quot;, &quot;toasting&quot;);</entry>
+       <state_glyph node="6,24,12,8">
+        <entry box="1,2,11,2"/>
+       </state_glyph>
+      </state>
+      <!--${SMs::ToastOven::SM::doorClosed::heating::baking}-->
+      <state name="baking">
+       <entry>PRINTF_S(&quot;%s;&quot;, &quot;baking&quot;);</entry>
+       <state_glyph node="22,24,12,8">
+        <entry box="1,2,11,2"/>
+       </state_glyph>
+      </state>
+      <state_glyph node="4,10,32,24">
+       <entry box="1,2,20,2"/>
+       <exit box="1,4,20,2"/>
+      </state_glyph>
+     </state>
      <!--${SMs::ToastOven::SM::doorClosed::off}-->
      <state name="off">
       <entry>PRINTF_S(&quot;%s;&quot;, &quot;toaster-Off&quot;);</entry>
-      <state_glyph node="38,20,12,8">
-       <entry box="1,2,5,2"/>
+      <state_glyph node="38,24,12,8">
+       <entry box="1,2,11,2"/>
       </state_glyph>
      </state>
-     <!--${SMs::ToastOven::SM::doorClosed::on}-->
-     <smstate name="on" submachine="../../4">
-      <smstate_glyph node="4,10,29,22"/>
-     </smstate>
      <state_glyph node="2,4,50,34">
-      <entry box="1,2,5,2"/>
+      <entry box="1,2,24,2"/>
      </state_glyph>
     </state>
     <!--${SMs::ToastOven::SM::doorOpen}-->
@@ -80,8 +110,8 @@
      <entry>PRINTF_S(&quot;%s;&quot;, &quot;door-Open,lamp-On&quot;);</entry>
      <exit>PRINTF_S(&quot;%s;&quot;, &quot;lamp-Off&quot;);</exit>
      <!--${SMs::ToastOven::SM::doorOpen::CLOSE}-->
-     <tran trig="CLOSE" target="../../1/8" cpref="../../4/3">
-      <tran_glyph conn="60,14,3,1,-26">
+     <tran trig="CLOSE" target="../../1" cpref="../../1/1">
+      <tran_glyph conn="60,14,3,1,-7">
        <action box="-6,-2,7,2"/>
       </tran_glyph>
      </tran>
@@ -92,8 +122,8 @@
       </tran_glyph>
      </tran>
      <!--${SMs::ToastOven::SM::doorOpen::OFF}-->
-     <tran trig="OFF" target="../../1" cpref="../../1/1">
-      <tran_glyph conn="60,18,3,1,-7">
+     <tran trig="OFF" target="../../1/7" cpref="../../1/7/1">
+      <tran_glyph conn="60,18,3,1,-23">
        <action box="-4,-2,10,2"/>
       </tran_glyph>
      </tran>
@@ -111,53 +141,6 @@ exit(0);</entry>
       <entry box="1,2,5,2"/>
      </state_glyph>
     </state>
-    <!--${SMs::ToastOven::SM::heating}-->
-    <submachine name="heating">
-     <entry>PRINTF_S(&quot;%s;&quot;, &quot;heater-On&quot;);</entry>
-     <exit>PRINTF_S(&quot;%s;&quot;, &quot;heater-Off&quot;);</exit>
-     <!--${SMs::ToastOven::SM::heating::EP-toast}-->
-     <epseg name="toast" target="../4">
-      <epseg_glyph conn="10,26,2,2,-6">
-       <name box="1,-2,10,2"/>
-       <action box="1,0,10,2"/>
-      </epseg_glyph>
-     </epseg>
-     <!--${SMs::ToastOven::SM::heating::EP-bake}-->
-     <epseg name="bake" target="../5">
-      <epseg_glyph conn="26,26,2,2,-6">
-       <name box="1,-2,10,2"/>
-       <action box="1,0,10,2"/>
-      </epseg_glyph>
-     </epseg>
-     <!--${SMs::ToastOven::SM::heating::initial}-->
-     <initial target="../4">
-      <initial_glyph conn="4,10,5,0,7,2">
-       <action box="0,-2,10,2"/>
-      </initial_glyph>
-     </initial>
-     <!--${SMs::ToastOven::SM::heating::history}-->
-     <history type="shallow" target="../5">
-      <history_glyph conn="34,6,1,0,-8,6"/>
-     </history>
-     <!--${SMs::ToastOven::SM::heating::toasting}-->
-     <state name="toasting">
-      <entry>PRINTF_S(&quot;%s;&quot;, &quot;toasting&quot;);</entry>
-      <state_glyph node="4,12,14,8">
-       <entry box="1,2,5,2"/>
-      </state_glyph>
-     </state>
-     <!--${SMs::ToastOven::SM::heating::baking}-->
-     <state name="baking">
-      <entry>PRINTF_S(&quot;%s;&quot;, &quot;baking&quot;);</entry>
-      <state_glyph node="20,12,12,8">
-       <entry box="1,2,5,2"/>
-      </state_glyph>
-     </state>
-     <submachine_diagram size="32,24">
-      <entry box="1,2,13,2"/>
-      <exit box="1,4,13,2"/>
-     </submachine_diagram>
-    </submachine>
     <state_diagram size="81,40"/>
    </statechart>
   </class>

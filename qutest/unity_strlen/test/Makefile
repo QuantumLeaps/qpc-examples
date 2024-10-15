@@ -78,7 +78,7 @@ LIB_DIRS :=
 LIBS     :=
 
 # defines...
-DEFINES  :=
+DEFINES  := $(DEF)
 
 #-----------------------------------------------------------------------------
 # external dependencies

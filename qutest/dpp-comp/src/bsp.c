@@ -40,7 +40,6 @@ Q_DEFINE_THIS_MODULE("bsp")
 // Local objects -------------------------------------------------------------
 static uint32_t l_rnd; // random seed
 
-
 enum {
     BSP_CALL = QS_USER,
 };

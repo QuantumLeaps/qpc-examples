@@ -1,7 +1,7 @@
 //============================================================================
 // Purpose: example QUTEST fixture for the mock example from Unity
-// Last updated for: @ref qpc_7_3_0
-// Date of the Last Update:  2023-05-25
+// Last updated for: version 8.0.0
+// Date of the Last Update:  2024-09-25
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -40,12 +40,11 @@ Q_DEFINE_THIS_FILE
 static char string[128];
 
 //----------------------------------------------------------------------------
-int main(int argc, char *argv[]) {
-
+int main() {
     QF_init();  // initialize the framework
 
     // initialize the QS software tracing
-    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+    if (!QS_INIT((void*)0)) {
         Q_ERROR();
     }
 

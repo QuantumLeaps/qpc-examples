@@ -1,7 +1,7 @@
 //============================================================================
 // Product: Blinky example, EK-TM4C123GXL board, QK kernel
-// Last updated for version 7.3.0
-// Last updated on  2023-08-15
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -154,7 +154,7 @@ void BSP_start(void) {
 
     // instantiate and start AOs/threads...
 
-    static QEvt const *blinkyQueueSto[10];
+    static QEvtPtr blinkyQueueSto[10];
     Blinky_ctor();
     QActive_start(AO_Blinky,
         1U,                          // QP prio. of the AO

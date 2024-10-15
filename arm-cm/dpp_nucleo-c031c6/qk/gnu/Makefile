@@ -133,7 +133,6 @@ LIBS      :=
 
 # defines
 DEFINES   := -DSTM32C031xx \
-	-DQF_ON_CONTEXT_SW \
 	$(DEF)
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...

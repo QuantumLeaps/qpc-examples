@@ -90,7 +90,7 @@ LIB_DIRS :=
 LIBS     :=
 
 # defines...
-DEFINES  :=
+DEFINES  := $(DEF)
 
 # 	default to CONF=spy
 ifeq (,$(CONF))

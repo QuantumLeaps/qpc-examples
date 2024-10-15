@@ -1,7 +1,7 @@
 //============================================================================
 // Product: "Blinky" example
-// Last updated for version 7.1.1
-// Last updated on  2022-09-22
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -47,7 +47,7 @@ int main() {
 
     // instantiate and start the active objects...
     Blinky_ctor();
-    static QEvt const *l_blinkyQSto[10]; // Event queue storage for Blinky
+    static QEvtPtr l_blinkyQSto[10]; // Event queue storage for Blinky
     QActive_start(AO_Blinky,      // AO pointer to start
                   2U,             // QF-priority/preemption-threshold
                   l_blinkyQSto,   // storage for the AO's queue

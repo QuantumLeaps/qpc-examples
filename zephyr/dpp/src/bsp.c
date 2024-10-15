@@ -1,7 +1,7 @@
 //============================================================================
 // Product: "Dining Philosophers Problem" example, Zephyr RTOS kernel
-// Last updated for: @ref qpc_7_3_2
-// Last updated on  2023-12-13
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -133,7 +133,7 @@ void BSP_start(void) {
 
     // instantiate and start AOs/threads...
 
-    static QEvt const *philoQueueSto[N_PHILO][10];
+    static QEvtPtr philoQueueSto[N_PHILO][10];
     static K_THREAD_STACK_DEFINE(philoStack[N_PHILO], 512);
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
@@ -146,7 +146,7 @@ void BSP_start(void) {
             (void *)0);              // no initialization param
     }
 
-    static QEvt const *tableQueueSto[N_PHILO];
+    static QEvtPtr tableQueueSto[N_PHILO];
     static K_THREAD_STACK_DEFINE(tableStack, 1024);
     Table_ctor();
     QActive_start(AO_Table,

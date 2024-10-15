@@ -31,8 +31,8 @@ typedef struct {
 } largePool;
 static QF_MPOOL_EL(largePool) largePoolSto[CONFIG_QPC_LARGE_POOL_SIZE];
 
-static QEvt const *tableQueueSto[N_PHILO];
-static QEvt const *philoQueueSto[N_PHILO][N_PHILO];
+static QEvtPtr tableQueueSto[N_PHILO];
+static QEvtPtr philoQueueSto[N_PHILO][N_PHILO];
 static QSubscrList subscrSto[MAX_PUB_SIG];
 static StackType_t philoStack[N_PHILO][2048];
 static StackType_t tableStack[2048];

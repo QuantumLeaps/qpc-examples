@@ -1,7 +1,7 @@
 //============================================================================
 // Purpose: Fixture for QUTEST
-// Last updated for version 7.3.0
-// Last updated on  2025-05-25
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -38,12 +38,11 @@
 Q_DEFINE_THIS_FILE
 
 //............................................................................
-int main(int argc, char *argv[]) {
-
+int main() {
     QF_init();  // initialize the framework
 
     // initialize the QS software tracing
-    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+    if (!QS_INIT((void*)0)) {
         Q_ERROR();
     }
 
@@ -63,7 +62,7 @@ int main(int argc, char *argv[]) {
 
     // start the active objects...
     Blinky_ctor();
-    static QEvt const *blinkyQSto[10]; // event queue storage for Blinky
+    static QEvtPtr blinkyQSto[10]; // event queue storage for Blinky
     QActive_start(AO_Blinky,
                   2U, // QF-priority/preemption-threshold
                   blinkyQSto, Q_DIM(blinkyQSto),

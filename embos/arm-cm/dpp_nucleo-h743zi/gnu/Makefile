@@ -151,8 +151,10 @@ LIB_DIRS  := -L$(QPC)/3rd_party/embOS-gnu/Start/Lib
 LIBS      := -losT7VLR
 
 # defines
-DEFINES   := -DSTM32H743xx -DUSE_HAL_DRIVER -DUSE_STM32H7XX_NUCLEO_144 \
-	-DQF_ON_CONTEXT_SW
+DEFINES   := -DSTM32H743xx \
+	-DUSE_HAL_DRIVER \
+	-DUSE_STM32H7XX_NUCLEO_144 \
+	$(DEF)
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...
 # ARM_CPU:   [cortex-m0 | cortex-m0plus | cortex-m1 | cortex-m3 | cortex-m4]

@@ -53,10 +53,10 @@ int main(int argc, char *argv[]) {
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // start the active objects...
-    static QEvt const *philoQueueSto[N_PHILO][10];
+    static QEvtPtr philoQueueSto[N_PHILO][10];
     uint8_t n = 2U;
     Philo_ctor(n); // instantiate all Philosopher active objects
-    QActive_start(AO_Philo[n],           // AO to start
+    QActive_start(AO_Philo[n],          // AO to start
                   n + 1U,                // QP priority of the AO
                   philoQueueSto[n],      // event queue storage
                   Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -66,9 +66,9 @@ int main(int argc, char *argv[]) {
 
     // instantiate Table AO as a dummy collaborator
     QActiveDummy_ctor(&Table_dummy);
-    QActive_start(&Table_dummy,
+    QActive_start(&Table_dummy.super,
                   N_PHILO + 1U, // QP priority of the dummy
-                  (QEvt const **)0, 0U, (void *)0, 0U, (void *)0);
+                  (QEvtPtr *)0, 0U, (void *)0, 0U, (void *)0);
 
     return QF_run(); // run the QF application
 }

@@ -1,13 +1,13 @@
 ##############################################################################
 # Product: Makefile for QP/C on EK-TM4C123GXL, QXK kernel, GNU-ARM
-# Last Updated for Version: 7.3.0
-# Date of the Last Update:  2023-09-07
+# Last Updated for Version: 7.5.0
+# Date of the Last Update:  2024-09-20
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+# Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
 #
 # This program is open source software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as published
@@ -138,7 +138,7 @@ LIB_DIRS  :=
 LIBS      :=
 
 # defines
-DEFINES   := -DQP_CONFIG
+DEFINES   := $(DEF)
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...
 # ARM_CPU:   [cortex-m0 | cortex-m0plus | cortex-m1 | cortex-m3 | cortex-m4]
@@ -146,8 +146,8 @@ DEFINES   := -DQP_CONFIG
 # FLOAT_ABI: [ | soft | softfp | hard]
 #
 ARM_CPU   := -mcpu=cortex-m4
-ARM_FPU   := -mfpu=vfp
-FLOAT_ABI := -mfloat-abi=softfp
+ARM_FPU   := -mfpu=fpv4-sp-d16
+FLOAT_ABI := -mfloat-abi=hard
 
 #-----------------------------------------------------------------------------
 # GNU-ARM toolset (NOTE: You need to adjust to your machine)

@@ -1,7 +1,7 @@
 //============================================================================
 // Product: Reminder state pattern example
-// Last updated for version 7.3.0
-// Last updated on  2023-05-28
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -207,7 +207,6 @@ QState Sensor_busy(Sensor * const me, QEvt const * const e) {
 
 // Local-scope objects -----------------------------------------------------
 static Sensor l_sensor; // the Sensor active object
-static QEvt const *l_sensorQSto[10]; // Event queue storage for Sensor
 
 //............................................................................
 int main(int argc, char *argv[]) {
@@ -224,9 +223,10 @@ int main(int argc, char *argv[]) {
 
     // instantiate and start the active objects...
     Sensor_ctor(&l_sensor);
+    static QEvtPtr sensorQSto[10]; // Event queue storage for Sensor
     QActive_start(&l_sensor.super,
                   1U,
-                  l_sensorQSto, Q_DIM(l_sensorQSto),
+                  sensorQSto, Q_DIM(sensorQSto),
                   (void *)0, 0U, (QEvt *)0);
 
     return QF_run(); // run the QF application

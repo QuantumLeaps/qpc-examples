@@ -1,7 +1,7 @@
 //============================================================================
 // Product: QUTEST fixture for the DPP components
-// Last updated for version 7.4.0
-// Last updated on  2024-07-31
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -48,12 +48,12 @@ QActive * const AO_Philo[N_PHILO] = {
 };
 
 //============================================================================
-int main(int argc, char* argv[]) {
-    QF_init();       // initialize the framework and the underlying RT kernel
-    BSP_init(argc, argv); // initialize the Board Support Package
+int main() {
+    QF_init();  // initialize the framework and the underlying RT kernel
+    BSP_init(); // initialize the Board Support Package
 
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
-       QS_OBJ_ARR_DICTIONARY(&Philo_dummy[n], n);
+        QS_OBJ_ARR_DICTIONARY(&Philo_dummy[n], n);
     }
 
     // pause execution of the test and wait for the test script to continue
@@ -70,22 +70,20 @@ int main(int argc, char* argv[]) {
     // start and setup dummy AOs...
     // NOTE: You need to start dummy AOs, if you wish to subscribe
     //      them to events.
-    //
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         QActiveDummy_ctor(&Philo_dummy[n]);
-        QActive_start(&Philo_dummy[n],
+        QActive_start(&Philo_dummy[n].super,
                      (uint_fast8_t)(n + 1U), // priority
-                     (QEvt const **)0, 0U, (void *)0, 0U,
+                     (QEvtPtr *)0, 0U, (void *)0, 0U,
                      (QEvt const *)0);
         QActive_subscribe(AO_Philo[n], EAT_SIG);
     }
 
-
     // start the active objects...
     Table_ctor(); // instantiate the Table active object
-    static QEvt const *tableQueueSto[N_PHILO];
+    static QEvtPtr tableQueueSto[N_PHILO];
     QActive_start(AO_Table,           // AO to start
-                  (uint_fast8_t)(N_PHILO + 1), // QP priority of the AO
+                  (uint_fast8_t)(N_PHILO + 1U), // QP priority of the AO
                   tableQueueSto,        // event queue storage
                   Q_DIM(tableQueueSto), // queue length [events]
                   (void *)0,            // stack storage (not used)

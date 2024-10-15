@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example, NUCLEO-L053R8 board, QXK kernel
-// Last updated for version 7.3.2
-// Last updated on  2023-12-13
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -244,7 +244,7 @@ void BSP_start(void) {
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // instantiate and start AOs/threads...
-    static QEvt const *xThread1QueueSto[5];
+    static QEvtPtr xThread1QueueSto[5];
     static uint64_t xThread1StackSto[64];
     XThread1_ctor();
     QXThread_start(TH_XThread1,
@@ -255,7 +255,7 @@ void BSP_start(void) {
         sizeof(xThread1StackSto),    // stack size [bytes]
         (void *)0);                  // no initialization param
 
-    static QEvt const *philoQueueSto[N_PHILO][10];
+    static QEvtPtr philoQueueSto[N_PHILO][10];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
         QActive_start(AO_Philo[n],
@@ -266,7 +266,7 @@ void BSP_start(void) {
             (void *)0);              // no initialization param
     }
 
-    static QEvt const *xThread2QueueSto[5];
+    static QEvtPtr xThread2QueueSto[5];
     static uint64_t xThread2StackSto[64];
     XThread2_ctor();
     QXThread_start(TH_XThread2,
@@ -277,7 +277,7 @@ void BSP_start(void) {
         sizeof(xThread2StackSto),    // stack size [bytes]
         (void *)0);                  // no initialization param
 
-    static QEvt const *tableQueueSto[N_PHILO];
+    static QEvtPtr tableQueueSto[N_PHILO];
     Table_ctor();
     QActive_start(AO_Table,
         N_PHILO + 7U,                // QP prio. of the AO

@@ -10,10 +10,7 @@ static void trace_LedBar_percent(uint8_t percent) {
 }
 
 //----------------------------------------------------------------------------
-int main(int argc, char *argv[]) {
-    (void)argc; // unused parameter
-    (void)argv; // unused parameter
-
+int main() {
     trace_LedBar_percent(100U);
     trace_LedBar_percent(19U);
     trace_LedBar_percent(20U);

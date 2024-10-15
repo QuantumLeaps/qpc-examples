@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP with lwIP application
-// Last updated for version 6.4.0
-// Last updated on  2019-02-08
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -38,10 +38,10 @@
 //Q_DEFINE_THIS_FILE
 
 // Local-scope objects -----------------------------------------------------
-static QEvt const *l_tableQueueSto[N_PHILO];
-static QEvt const *l_philoQueueSto[N_PHILO][N_PHILO];
-static QEvt const *l_lwIPMgrQueueSto[10];
-static QSubscrList   l_subscrSto[MAX_PUB_SIG];
+static QEvtPtr l_tableQueueSto[N_PHILO];
+static QEvtPtr l_philoQueueSto[N_PHILO][N_PHILO];
+static QEvtPtr l_lwIPMgrQueueSto[10];
+static QSubscrList l_subscrSto[MAX_PUB_SIG];
 
 static QF_MPOOL_EL(TableEvt) l_smlPoolSto[20]; // small event pool
 static QF_MPOOL_EL(TextEvt)  l_medPoolSto[4];  // med.  event pool

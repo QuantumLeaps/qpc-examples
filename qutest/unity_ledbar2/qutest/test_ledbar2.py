@@ -64,7 +64,7 @@ expect("@timestamp USER+000 LedBar2_setPercent 10 20")
 expect("@timestamp Trg-Done QS_RX_COMMAND")
 
 
-test("LedBar2 50% two on FLAWED")
+test("LedBar2 50% two on (should FAIL)")
 current_obj(OBJ_AP, 'led_power')
 poke(0, 4, pack('<LL', 23, 17)) # change return values for Led 0,1
 command(0, 50) # call LedBar2_setPercent(30)
@@ -83,7 +83,7 @@ expect("@timestamp USER+000 LedBar2_setPercent 40 50")
 expect("@timestamp Trg-Done QS_RX_COMMAND")
 
 
-test("LedBar2 99% four on FLAWED")
+test("LedBar2 99% four on (should FAIL)")
 command(0, 99) # call LedBar_setPercent(99)
 expect("@timestamp SPI_MOD SPI_beginTransaction")
 expect("@timestamp LED_MOD Led_on 10 0")

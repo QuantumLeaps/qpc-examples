@@ -1,7 +1,7 @@
 //============================================================================
 // Product: "Fly 'n' Shoot" game example
-// Last updated for version 7.3.0
-// Last updated on  2023-09-06
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -79,7 +79,7 @@ int main() {
                   1U,                // QP priority
                   0, 0, 0, 0, 0);    // no queue, no stack , no init. event
 
-    static QEvt const *tunnelQueueSto[GAME_MINES_MAX + 5];
+    static QEvtPtr tunnelQueueSto[GAME_MINES_MAX + 5];
     Tunnel_ctor_call();
     QActive_start(AO_Tunnel,
                   2U,                // QP priority
@@ -87,7 +87,7 @@ int main() {
                   (void *)0, 0U,     // no per-thread stack
                   (QEvt *)0);        // no initialization event
 
-    static QEvt const *shipQueueSto[3];
+    static QEvtPtr shipQueueSto[3];
     Ship_ctor_call();
     QActive_start(AO_Ship,
                   3U,                // QP priority
@@ -95,7 +95,7 @@ int main() {
                   (void *)0, 0U,     // no per-thread stack
                   (QEvt *)0);        // no initialization event
 
-    static QEvt const *missileQueueSto[2];
+    static QEvtPtr missileQueueSto[2];
     Missile_ctor_call();
     QActive_start(AO_Missile,
                   4U,                // QP priority

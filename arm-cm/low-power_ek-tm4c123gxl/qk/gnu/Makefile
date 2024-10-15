@@ -133,7 +133,7 @@ LIB_DIRS  :=
 LIBS      :=
 
 # defines
-DEFINES   := -DQP_CONFIG
+DEFINES   := $(DEF)
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...
 # ARM_CPU:   [cortex-m0 | cortex-m0plus | cortex-m1 | cortex-m3 | cortex-m4]

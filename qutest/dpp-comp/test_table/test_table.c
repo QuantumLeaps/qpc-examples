@@ -1,7 +1,7 @@
 //============================================================================
 // Product: QUTEST fixture for the DPP components
-// Last updated for version 7.3.0
-// Last updated on  2023-07-27
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -71,9 +71,9 @@ int main() {
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     // start the active objects...
-    static QEvt const *tableQueueSto[N_PHILO];
+    static QEvtPtr tableQueueSto[N_PHILO];
     Table_ctor(); // instantiate the Table active object
-    QActive_start(AO_Table,             // AO to start
+    QActive_start(AO_Table,            // AO to start
                   1U,                   // QF-priority/preemption-threshold
                   tableQueueSto,        // event queue storage
                   Q_DIM(tableQueueSto), // queue length [events]
