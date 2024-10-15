@@ -2555,7 +2555,6 @@
                 <option>
                     <name>CCDefines</name>
                     <state>Q_SPY</state>
-                    <state>QP_CONFIG</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>

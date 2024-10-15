@@ -1,7 +1,7 @@
 //============================================================================
 // Product: QUTEST fixture for the DPP components
-// Last updated for version 7.3.0
-// Last updated on  2023-06-23
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
         QActiveDummy_ctor(&Philo_dummy[n]);
         QActive_start(&Philo_dummy[n],
                      (uint_fast8_t)(n + 1U), // priority
-                     (QEvt const **)0, 0U, (void *)0, 0U,
+                     (QEvtPtr *)0, 0U, (void *)0, 0U,
                      (QEvt const *)0);
         QActive_subscribe(AO_Philo[n], EAT_SIG);
     }
@@ -84,8 +84,8 @@ int main(int argc, char *argv[]) {
 
     // start the active objects...
     Table_ctor(); // instantiate the Table active object
-    static QEvt const *tableQueueSto[N_PHILO];
-    QActive_start(AO_Table,           // AO to start
+    static QEvtPtr tableQueueSto[N_PHILO];
+    QActive_start(AO_Table,            // AO to start
                   (uint_fast8_t)(N_PHILO + 1), // QP priority of the AO
                   tableQueueSto,        // event queue storage
                   Q_DIM(tableQueueSto), // queue length [events]

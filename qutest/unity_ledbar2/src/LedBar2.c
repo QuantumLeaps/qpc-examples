@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 #include "LedBar2.h"
 #include "Led.h"
 #include "Spi.h"

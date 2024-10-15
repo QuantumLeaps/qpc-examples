@@ -10,7 +10,7 @@
       <TargetName>dpp-dbg</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6210000::V6.21::ARMCLANG</pCCUsed>
+      <pCCUsed>6220000::V6.22::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -338,7 +338,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>QP_CONFIG,STM32U545xx</Define>
+              <Define>STM32U545xx</Define>
               <Undefine></Undefine>
               <IncludePath>..\..;..\..\..\..\..\include;..\..\..\..\..\ports\arm-cm\qxk\armclang;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\nucleo-u545re</IncludePath>
             </VariousControls>
@@ -415,11 +415,6 @@
               <FilePath>..\..\main.c</FilePath>
             </File>
             <File>
-              <FileName>qp_config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\qp_config.h</FilePath>
-            </File>
-            <File>
               <FileName>xthread1.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\xthread1.c</FilePath>
@@ -428,6 +423,11 @@
               <FileName>xthread2.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\xthread2.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\qp_config.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -994,7 +994,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>NDEBUG,QP_CONFIG,STM32U545xx</Define>
+              <Define>NDEBUG,STM32U545xx</Define>
               <Undefine></Undefine>
               <IncludePath>..\..;..\..\..\..\..\include;..\..\..\..\..\ports\arm-cm\qxk\armclang;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\nucleo-u545re</IncludePath>
             </VariousControls>
@@ -1071,11 +1071,6 @@
               <FilePath>..\..\main.c</FilePath>
             </File>
             <File>
-              <FileName>qp_config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\qp_config.h</FilePath>
-            </File>
-            <File>
               <FileName>xthread1.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\xthread1.c</FilePath>
@@ -1084,6 +1079,11 @@
               <FileName>xthread2.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\xthread2.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\qp_config.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1322,7 +1322,7 @@
       <TargetName>dpp-spy</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6210000::V6.21::ARMCLANG</pCCUsed>
+      <pCCUsed>6220000::V6.22::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -1650,7 +1650,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>Q_SPY,QP_CONFIG,STM32U545xx</Define>
+              <Define>Q_SPY,STM32U545xx</Define>
               <Undefine></Undefine>
               <IncludePath>..\..;..\..\..\..\..\include;..\..\..\..\..\ports\arm-cm\qxk\armclang;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\nucleo-u545re</IncludePath>
             </VariousControls>
@@ -1727,11 +1727,6 @@
               <FilePath>..\..\main.c</FilePath>
             </File>
             <File>
-              <FileName>qp_config.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\qp_config.h</FilePath>
-            </File>
-            <File>
               <FileName>xthread1.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\xthread1.c</FilePath>
@@ -1740,6 +1735,11 @@
               <FileName>xthread2.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\xthread2.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\qp_config.h</FilePath>
             </File>
           </Files>
         </Group>

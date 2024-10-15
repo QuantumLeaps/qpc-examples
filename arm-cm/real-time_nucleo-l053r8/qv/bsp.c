@@ -1,7 +1,7 @@
 //============================================================================
 // BSP for "real-time" Example
-// Last updated for version 7.3.1
-// Last updated on  2023-10-03
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -188,7 +188,7 @@ void BSP_init(void) {
 void BSP_start(void) {
     // instantiate and start QP/C active objects...
     Periodic1_ctor();
-    static QEvt const *periodic1QSto[10]; // Event queue storage
+    static QEvtPtr periodic1QSto[10]; // Event queue storage
     QActive_start(
         AO_Periodic1,          // AO pointer to start
         1U,                    // QF-prio
@@ -198,7 +198,7 @@ void BSP_start(void) {
         BSP_getEvtPeriodic1(0U)); // initialization param
 
     Sporadic2_ctor();
-    static QEvt const *sporadic2QSto[8]; // Event queue storage
+    static QEvtPtr sporadic2QSto[8]; // Event queue storage
     QActive_start(
         AO_Sporadic2,          // AO pointer to start
         2U,                    // QF-prio
@@ -208,7 +208,7 @@ void BSP_start(void) {
         (void const *)0);      // initialization param -- not used
 
     Sporadic3_ctor();
-    static QEvt const *sporadic3QSto[8]; // Event queue storage
+    static QEvtPtr sporadic3QSto[8]; // Event queue storage
     QActive_start(
         AO_Sporadic3,          // AO pointer to start
         3U,                    // QF-prio
@@ -218,7 +218,7 @@ void BSP_start(void) {
         (void const *)0);      // initialization param -- not used
 
     Periodic4_ctor();
-    static QEvt const *periodic4QSto[8]; // Event queue storage
+    static QEvtPtr periodic4QSto[8]; // Event queue storage
     QActive_start(
         AO_Periodic4,          // AO pointer to start
         4U,                    // QF-prio

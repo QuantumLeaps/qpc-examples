@@ -1,7 +1,7 @@
 ##############################################################################
 # Product: Makefile for QP/C on EK-TM4C123GXL, QK kernel, GNU-ARM
-# Last Updated for Version: 7.3.3
-# Date of the Last Update:  2024-01-29
+# Last Updated for Version: 7.5.0
+# Date of the Last Update:  2024-09-20
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -133,7 +133,7 @@ LIB_DIRS  :=
 LIBS      :=
 
 # defines
-DEFINES   := -DQP_CONFIG
+DEFINES   := $(DEF)
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...
 # ARM_CPU:   [cortex-m0 | cortex-m0plus | cortex-m1 | cortex-m3 | cortex-m4]

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.2.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="6.2.3" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
  <documentation>&quot;Deferred Event&quot; state pattern example</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -21,7 +21,7 @@
    <!--${Components::TServer::requestQueue}-->
    <attribute name="requestQueue" type="QEQueue" visibility="0x02" properties="0x00"/>
    <!--${Components::TServer::requestQSto[3]}-->
-   <attribute name="requestQSto[3]" type="QEvt const *" visibility="0x02" properties="0x00"/>
+   <attribute name="requestQSto[3]" type="QEvtPtr" visibility="0x02" properties="0x00"/>
    <!--${Components::TServer::activeRequest}-->
    <attribute name="activeRequest" type="RequestEvt const *" visibility="0x00" properties="0x00"/>
    <!--${Components::TServer::receivedEvt}-->
@@ -38,7 +38,7 @@
    <operation name="ctor" type="void" visibility="0x00" properties="0x00">
     <code>QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;TServer_initial));
 QEQueue_init(&amp;me-&gt;requestQueue,
-              me-&gt;requestQSto, Q_DIM(me-&gt;requestQSto));
+             me-&gt;requestQSto, Q_DIM(me-&gt;requestQSto));
 QTimeEvt_ctorX(&amp;me-&gt;receivedEvt,   &amp;me-&gt;super, RECEIVED_SIG,   0U);
 QTimeEvt_ctorX(&amp;me-&gt;authorizedEvt, &amp;me-&gt;super, AUTHORIZED_SIG, 0U);</code>
    </operation>
@@ -48,7 +48,6 @@ QTimeEvt_ctorX(&amp;me-&gt;authorizedEvt, &amp;me-&gt;super, AUTHORIZED_SIG, 0U)
     <initial target="../1">
      <action>(void)par; // unused parameter
 me-&gt;activeRequest = (RequestEvt const *)0; // no active request yet
-
 
 QS_OBJ_DICTIONARY(&amp;TServer_inst);
 QS_OBJ_DICTIONARY(&amp;TServer_inst.receivedEvt);
@@ -145,7 +144,7 @@ QTimeEvt_armX(&amp;me-&gt;receivedEvt, BSP_TICKS_PER_SEC, 0U);</entry>
       <!--${Components::TServer::SM::busy::receiving::RECEIVED}-->
       <tran trig="RECEIVED" target="../../3">
        <tran_glyph conn="6,58,3,1,44,10,-4">
-        <action box="0,-2,8,2"/>
+        <action box="0,-2,25,2"/>
        </tran_glyph>
       </tran>
       <state_glyph node="6,48,40,14">
@@ -165,7 +164,7 @@ QTimeEvt_armX(&amp;me-&gt;authorizedEvt, 2U*BSP_TICKS_PER_SEC, 0U);</entry>
       <!--${Components::TServer::SM::busy::authorizing::AUTHORIZED}-->
       <tran trig="AUTHORIZED" target="../../../1">
        <tran_glyph conn="6,76,3,1,54,-62,-28">
-        <action box="0,-2,14,2"/>
+        <action box="0,-2,25,2"/>
        </tran_glyph>
       </tran>
       <state_glyph node="6,66,40,14">
@@ -174,7 +173,7 @@ QTimeEvt_armX(&amp;me-&gt;authorizedEvt, 2U*BSP_TICKS_PER_SEC, 0U);</entry>
       </state_glyph>
      </state>
      <state_glyph node="2,30,54,54">
-      <exit box="1,2,6,2"/>
+      <exit box="0,3,29,2"/>
      </state_glyph>
     </state>
     <!--${Components::TServer::SM::final}-->
@@ -217,10 +216,6 @@ $define${Components::TServer}
 
 // test harness ============================================================
 
-// Local-scope objects -------------------------------------------------------
-static QEvt const *l_tserverQSto[10]; // Event queue storage for TServer
-static QF_MPOOL_EL(RequestEvt) l_smlPoolSto[20]; // storage for small pool
-
 //..........................................................................
 int main(int argc, char *argv[]) {
     PRINTF_S(&quot;Deferred Event state pattern\nQP version: %s\n&quot;
@@ -235,7 +230,8 @@ int main(int argc, char *argv[]) {
     // publish-subscribe not used, no call to QF_psInit()
 
     // initialize event pools...
-    QF_poolInit(l_smlPoolSto, sizeof(l_smlPoolSto), sizeof(l_smlPoolSto[0]));
+    static QF_MPOOL_EL(RequestEvt) smlPoolSto[20]; // storage for small pool
+    QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     QS_SIG_DICTIONARY(NEW_REQUEST_SIG, (void *)0); // global signals
     QS_SIG_DICTIONARY(RECEIVED_SIG,    (void *)0);
@@ -244,9 +240,10 @@ int main(int argc, char *argv[]) {
 
     // start the active objects...
     TServer_ctor(&amp;TServer_inst);
+    static QEvtPtr tserverQSto[10]; // Event queue storage for TServer
     QActive_start((QActive *)&amp;TServer_inst,
                   1U,
-                  l_tserverQSto, Q_DIM(l_tserverQSto),
+                  tserverQSto, Q_DIM(tserverQSto),
                   (void *)0, 0U, (void *)0);
 
     return QF_run(); // run the QF application

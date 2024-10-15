@@ -1,7 +1,7 @@
 //============================================================================
 // Product: Console-based BSP
-// Last Updated for Version: 7.3.0
-// Date of the Last Update:  2023-05-25
+// Last Updated for Version: 8.0.0
+// Date of the Last Update:  2024-09-16
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -28,8 +28,8 @@
 // along with this program. If not, see <www.gnu.org/licenses/>.
 //
 // Contact information:
-// <www.state-machine.com/>
-// <info@state-machine.com/>
+// <www.state-machine.com/licensing>
+// <info@state-machine.com>
 //============================================================================
 #include "qpc.h"
 #include "bsp.h"
@@ -69,13 +69,12 @@ void QF_onCleanup(void) {
 }
 //............................................................................
 void QF_onClockTick(void) {
-    int key;
     QTIMEEVT_TICK_X(0U, &l_QF_onClockTick); // perform QF clock tick processing
 
     QS_RX_INPUT(); // handle the QS-RX input
     QS_OUTPUT();   // handle the QS output
 
-    key = QF_consoleGetKey();
+    int key = QF_consoleGetKey();
     if (key != 0) { // any key pressed?
         BSP_onKeyboardInput((uint8_t)key);
     }
@@ -107,7 +106,7 @@ void QS_onCommand(uint8_t cmdId,
 
 //............................................................................
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    FPRINTF_S(stderr, "ERROR in %s, line %d", module, id);
+    FPRINTF_S(stderr, "ERROR in %s:%d", module, id);
     QF_onCleanup();
     exit(-1);
 }

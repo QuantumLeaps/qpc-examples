@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example
-// Last updated for version 7.4.0
-// Last updated on  2024-07-31
+// Last updated for version 8.0.0
+// Last updated on  2024-09-30
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -34,7 +34,7 @@
 
 #define BSP_TICKS_PER_SEC    100U
 
-void BSP_init(int argc, char** argv);
+void BSP_init(void);
 void BSP_start(void);
 void BSP_displayPaused(uint8_t paused);
 void BSP_displayPhilStat(uint8_t n, char const *stat);

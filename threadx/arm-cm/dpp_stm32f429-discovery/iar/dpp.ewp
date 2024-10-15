@@ -347,6 +347,7 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
+                    <state>$PROJ_DIR$\..</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\ports\threadx</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\common\inc</state>
@@ -1151,7 +1152,7 @@
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
-                    <state>8.50.6.28950</state>
+                    <state>9.32.1.54977</state>
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
@@ -1428,6 +1429,7 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
+                    <state>$PROJ_DIR$\..</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\ports\threadx</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\common\inc</state>
@@ -2232,7 +2234,7 @@
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
-                    <state>8.50.6.28950</state>
+                    <state>9.32.1.54977</state>
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
@@ -2509,6 +2511,7 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
+                    <state>$PROJ_DIR$\..</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\ports\threadx</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\common\inc</state>
@@ -3244,9 +3247,6 @@
             <data />
         </settings>
     </configuration>
-    <mfc>
-        <configuration>Release</configuration>
-    </mfc>
     <group>
         <name>Application</name>
         <file>
@@ -3826,7 +3826,7 @@
         <group>
             <name>port</name>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\ports\cortex_m4\iar\src\tx_initialize_low_level.s</name>
+                <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\ports\cortex_m4\iar\example_build\tx_initialize_low_level.s</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\ports\cortex_m4\iar\src\tx_thread_context_restore.s</name>

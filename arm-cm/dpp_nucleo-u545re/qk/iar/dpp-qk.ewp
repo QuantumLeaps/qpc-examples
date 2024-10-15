@@ -226,7 +226,6 @@
                 </option>
                 <option>
                     <name>CCDefines</name>
-                    <state>QP_CONFIG</state>
                     <state>STM32U545xx</state>
                 </option>
                 <option>
@@ -1307,7 +1306,6 @@
                 <option>
                     <name>CCDefines</name>
                     <state>NDEBUG</state>
-                    <state>QP_CONFIG</state>
                     <state>STM32U545xx</state>
                 </option>
                 <option>
@@ -2388,7 +2386,6 @@
                 <option>
                     <name>CCDefines</name>
                     <state>Q_SPY</state>
-                    <state>QP_CONFIG</state>
                     <state>STM32U545xx</state>
                 </option>
                 <option>

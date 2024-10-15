@@ -131,9 +131,8 @@ LIB_DIRS  :=
 LIBS      :=
 
 # defines
-DEFINES   := -DSTM32C031xx
-	-DQK_USE_IRQ_NUM=31 \
-	-DQK_USE_IRQ_HANDLER=Reserved31_IRQHandler
+DEFINES   := -DSTM32C031xx \
+	$(DEF)
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...
 # ARM_CPU:   [cortex-m0 | cortex-m0plus | cortex-m1 | cortex-m3 | cortex-m4]

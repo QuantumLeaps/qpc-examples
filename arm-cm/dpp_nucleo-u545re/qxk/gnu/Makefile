@@ -138,7 +138,6 @@ LIBS      :=
 
 # defines
 DEFINES   := -DSTM32U545xx \
-	-DQP_CONFIG \
 	$(DEF)
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...

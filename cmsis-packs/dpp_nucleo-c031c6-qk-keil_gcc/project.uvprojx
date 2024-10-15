@@ -243,7 +243,7 @@
             <uThumb>1</uThumb>
             <VariousControls>
               <MiscControls>-std=c11 -pedantic -Wall -Wextra -ffunction-sections -fdata-sections</MiscControls>
-              <Define>QP_CONFIG</Define>
+              <Define></Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -565,7 +565,7 @@
             <uThumb>1</uThumb>
             <VariousControls>
               <MiscControls>-std=c11 -pedantic -Wall -Wextra -ffunction-sections -fdata-sections</MiscControls>
-              <Define>Q_SPY,QP_CONFIG</Define>
+              <Define>Q_SPY</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
@@ -887,7 +887,7 @@
             <uThumb>1</uThumb>
             <VariousControls>
               <MiscControls>-std=c11 -pedantic -Wall -Wextra -ffunction-sections -fdata-sections</MiscControls>
-              <Define>QP_CONFIG</Define>
+              <Define></Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>

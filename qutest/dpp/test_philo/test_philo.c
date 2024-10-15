@@ -1,8 +1,7 @@
 //============================================================================
 // Test fixture for DPP example
-// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
-// Last updated for version 7.4.0
-// Last updated on  2024-07-31
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -43,9 +42,9 @@
 static QActiveDummy Table_dummy;
 QActive * const AO_Table = &Table_dummy.super;
 
-int main(int argc, char* argv[]) {
-    QF_init();       // initialize the framework and the underlying RT kernel
-    BSP_init(argc, argv); // initialize the Board Support Package
+int main() {
+    QF_init();  // initialize the framework and the underlying RT kernel
+    BSP_init(); // initialize the Board Support Package
 
     QS_OBJ_DICTIONARY(&Table_dummy);
 
@@ -61,10 +60,10 @@ int main(int argc, char* argv[]) {
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // start the active objects...
-    static QEvt const *philoQueueSto[N_PHILO][10];
+    static QEvtPtr philoQueueSto[N_PHILO][10];
     uint8_t n = 2U;
     Philo_ctor(n); // instantiate all Philosopher active objects
-    QActive_start(AO_Philo[n],           // AO to start
+    QActive_start(AO_Philo[n],          // AO to start
                   n + 1U,                // QP priority of the AO
                   philoQueueSto[n],      // event queue storage
                   Q_DIM(philoQueueSto[n]), // queue length [events]
@@ -74,9 +73,9 @@ int main(int argc, char* argv[]) {
 
     // instantiate Table AO as a dummy collaborator
     QActiveDummy_ctor(&Table_dummy);
-    QActive_start(&Table_dummy,
+    QActive_start(&Table_dummy.super,
                   N_PHILO + 1U, // QP priority of the dummy
-                  (QEvt const **)0, 0U, (void *)0, 0U, (void *)0);
+                  (QEvtPtr *)0, 0U, (void *)0, 0U, (void *)0);
 
     return QF_run(); // run the QF application
 }

@@ -1,7 +1,7 @@
 //============================================================================
 // Product: Blinky example
-// Last updated for version 7.1.1
-// Last updated on  2022-09-22
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -43,8 +43,8 @@ int main() {
     BSP_init();   // initialize the Board Support Package
 
     Blinky_ctor();
-    static QEvt const *blinkyeQueueSto[2];
-    QActive_start(AO_Blinky,       // AO to start
+    static QEvtPtr blinkyeQueueSto[2];
+    QActive_start(AO_Blinky,      // AO to start
         1U,                        // QF-priority/preemption-thre.
         blinkyeQueueSto,           // event queue storage
         Q_DIM(blinkyeQueueSto),    // queue length [events]

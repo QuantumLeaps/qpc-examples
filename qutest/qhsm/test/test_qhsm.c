@@ -1,7 +1,7 @@
 //============================================================================
 // Purpose: Fixture for QUTEST
-// Last Updated for Version: 7.4.0
-// Date of the Last Update:  2024-09-02
+// Last Updated for Version: 8.0.0
+// Date of the Last Update:  2024-09-25
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -44,11 +44,11 @@ enum {
 };
 
 //----------------------------------------------------------------------------
-int main(int argc, char *argv[]) {
+int main() {
     QF_init();    // initialize the framework
 
     // initialize the QS software tracing
-    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+    if (!QS_INIT((void*)0)) {
         Q_ERROR();
     }
 
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     QS_USR_DICTIONARY(BSP_DISPLAY);
     QS_USR_DICTIONARY(CMD);
 
-    QHsmTst_ctor(); // instantiate the QHsmTst object
+    TstSM_ctor(); // instantiate the TstSM object
 
     return QF_run();
 }
@@ -101,7 +101,7 @@ void QS_onCommand(uint8_t cmdId,
             break;
         }
         case 1U: {
-            bool ret = QHsmTst_isIn(param1);
+            bool ret = TstSM_isIn(param1);
             QS_BEGIN_ID(CMD, 0U) // app-specific record
                 QS_U8(0U, ret ? 1 : 0);
                 QS_U8(0U, (uint8_t)param1);

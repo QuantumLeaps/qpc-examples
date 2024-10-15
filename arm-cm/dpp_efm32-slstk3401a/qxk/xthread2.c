@@ -74,6 +74,8 @@ XThread2 XThread2_inst;
 
 //............................................................................
 static void XThread2_run(QXThread * const thr) {
+    Q_UNUSED_PAR(thr);
+
     QS_OBJ_DICTIONARY(TH_XThread2);
     QS_OBJ_DICTIONARY(&TH_XThread2->timeEvt);
     QS_OBJ_DICTIONARY(&TH_sema);

@@ -1,7 +1,7 @@
 ##############################################################################
-# Product: Makefile for QUTEST-QP/C for Windows and POSIX *HOSTS*
-# Last Updated for Version: 7.2.0
-# Date of the Last Update:  2022-12-21
+# Makefile for the Unity test harness v2.5.2, for Windows, Linux, MacOS
+# Last updated for version 7.2.0
+# Last updated on  2022-11-13
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
@@ -33,12 +33,9 @@
 ##############################################################################
 #
 # examples of invoking this Makefile:
-# make         # make and run the Python tests in the current directory
-# make TESTS=test*.py  # make and run the selected tests in the curr. dir.
-# make HOST=localhost:7705 # connect to host:port
+# make         # make and run the tests in the current directory
 # make norun   # only make but not run the tests
 # make clean   # cleanup the build
-# make debug   # only run tests in DEBUG mode
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
@@ -56,22 +53,14 @@ PROJECT := test_mock
 #
 
 # list of all source directories used by this project
-VPATH := . \
-	../src
+VPATH = . \
+	../src \
+	mocks
 
 # list of all include directories needed by this project
 INCLUDES := -I. \
-	-I../src
-
-# location of the QP/C framework (if not provided in an env. variable)
-ifeq ($(QPC),)
-QPC := ../../../..
-endif
-
-# make sure that QTOOLS env. variable is defined...
-ifeq ("$(wildcard $(QTOOLS))","")
-$(error QTOOLS not found. Please install QTools and define QTOOLS env. variable)
-endif
+	-I../src \
+	-Imocks
 
 #-----------------------------------------------------------------------------
 # project files:
@@ -80,8 +69,9 @@ endif
 # C source files...
 C_SRCS := \
 	LedBar.c \
-	spy_Led.c \
-	test_LedBar.c
+	MockLed.c \
+	TestLedBar.c \
+	TestLedBar_Runner.c
 
 # C++ source files...
 CPP_SRCS :=
@@ -90,50 +80,38 @@ LIB_DIRS :=
 LIBS     :=
 
 # defines...
-DEFINES  :=
+DEFINES  := $(DEF)
 
 #-----------------------------------------------------------------------------
-# add QP/C framework:
-#
-C_SRCS += \
-	qep_hsm.c \
-	qep_msm.c \
-	qf_act.c \
-	qf_actq.c \
-	qf_defer.c \
-	qf_dyn.c \
-	qf_mem.c \
-	qf_ps.c \
-	qf_qact.c \
-	qf_qeq.c \
-	qf_qmact.c \
-	qf_time.c \
-	qs.c \
-	qs_64bit.c \
-	qs_rx.c \
-	qs_fp.c \
-	qutest.c \
-	qutest_port.c
+# external dependencies
 
-
-ifeq ($(OS),Windows_NT)
-
-QP_PORT_DIR := $(QPC)/ports/win32-qutest
-LIBS += -lws2_32
-
-else
-
-QP_PORT_DIR := $(QPC)/ports/posix-qutest
-#QP_PORT_DIR := $(QPC)/ports/posix
-LIBS += -lpthread
-
+# make sure that QTOOLS env. variable is defined...
+ifeq ("$(wildcard $(QTOOLS))","")
+$(error QTOOLS not found. Please install QTools and define QTOOLS env. variable)
 endif
+
+# location of the QP/C framework (if not provided in an env. variable)
+ifeq ($(QPC),)
+QPC := ../../../..
+endif
+
+# location of the QTOOLS directory (if not provided in an environment var.)
+ifeq ($(QTOOLS),)
+QTOOLS := c:/qp/qtools
+endif
+
+# location of the Unity unit testing harness
+ifeq ($(UNITY),)
+UNITY := $(QTOOLS)/unity
+endif
+
+# add QP/C, Unity/CMock to the build...
+VPATH    += $(UNITY)/src $(UNITY)/extras/cmock/src
+INCLUDES += -I$(QPC)/include -I$(UNITY)/src -I$(UNITY)/extras/cmock/src
+C_SRCS   += unity.c cmock.c
 
 #============================================================================
 # Typically you should not need to change anything below this line
-
-VPATH    += $(QPC)/src/qf $(QPC)/src/qs $(QP_PORT_DIR)
-INCLUDES += -I$(QPC)/include -I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
 # GNU toolset:
@@ -147,13 +125,6 @@ CC    := gcc
 CPP   := g++
 LINK  := gcc    # for C programs
 #LINK  := g++   # for C++ programs
-
-#-----------------------------------------------------------------------------
-# QUTest test script utilities (requires QTOOLS):
-#
-ifeq ("$(wildcard $(QUTEST))","")
-QUTEST := python3 $(QTOOLS)/qutest/qutest.py
-endif
 
 #-----------------------------------------------------------------------------
 # basic utilities (depends on the OS this Makefile runs on):
@@ -188,12 +159,6 @@ ifndef GCC_OLD
 	LINKFLAGS := -no-pie
 endif
 
-ifdef GCOV
-	CFLAGS    += -fprofile-arcs -ftest-coverage
-	CPPFLAGS  += -fprofile-arcs -ftest-coverage
-	LINKFLAGS += -lgcov --coverage
-endif
-
 #-----------------------------------------------------------------------------
 C_OBJS       := $(patsubst %.c,%.o,   $(C_SRCS))
 CPP_OBJS     := $(patsubst %.cpp,%.o, $(CPP_SRCS))
@@ -208,7 +173,7 @@ CPP_DEPS_EXT := $(patsubst %.o,%.d, $(CPP_OBJS_EXT))
 # rules
 #
 
-.PHONY : norun debug clean show
+.PHONY : run norun clean show
 
 ifeq ($(MAKECMDGOALS),norun)
 all : $(TARGET_EXE)
@@ -218,11 +183,10 @@ all : $(TARGET_EXE) run
 endif
 
 $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
-	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
+	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(LIBS)
 
 run : $(TARGET_EXE)
-	$(QUTEST) -e$(TARGET_EXE) -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
+	$(TARGET_EXE)
 
 $(BIN_DIR)/%.d : %.cpp
 	$(CPP) -MM -MT $(@:.d=.o) $(CPPFLAGS) $< > $@
@@ -248,11 +212,10 @@ endif
   endif
 endif
 
-debug :
-	$(QUTEST) -edebug -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
-
 clean :
-	-$(RM) $(BIN_DIR)/*.*
+	-$(RM) $(BIN_DIR)/*.o \
+	$(BIN_DIR)/*.d \
+	$(TARGET_EXE)
 
 show :
 	@echo PROJECT      = $(PROJECT)
@@ -269,7 +232,7 @@ show :
 	@echo LIBS         = $(LIBS)
 	@echo DEFINES      = $(DEFINES)
 	@echo QTOOLS       = $(QTOOLS)
-	@echo HOST         = $(HOST)
 	@echo QUTEST       = $(QUTEST)
+	@echo HOST         = $(HOST)
 	@echo TESTS        = $(TESTS)
 

@@ -338,8 +338,8 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>QP_CONFIG</Define>
-              <Undefine></Undefine>
+                <Define></Define>
+                <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
           </Cads>
@@ -759,7 +759,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>Q_SPY,QP_CONFIG</Define>
+              <Define>Q_SPY</Define>
               <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>

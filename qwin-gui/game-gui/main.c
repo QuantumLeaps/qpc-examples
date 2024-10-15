@@ -1,7 +1,7 @@
 //============================================================================
 // Product: "Fly 'n' Shoot" game example for Windows
-// Last updated for version 7.3.0
-// Last updated on  2023-09-06
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -75,7 +75,7 @@ int main() {
     QS_SIG_DICTIONARY(GAME_OVER_SIG,      (void *)0);
 
     // start the active objects...
-    static QEvt const *tunnelQueueSto[(GAME_MINES_MAX + 5)*WIN_FUDGE_FACTOR];
+    static QEvtPtr tunnelQueueSto[(GAME_MINES_MAX + 5)*WIN_FUDGE_FACTOR];
     Tunnel_ctor_call();
     QActive_start(AO_Tunnel,
                   1U,                // QP priority
@@ -83,7 +83,7 @@ int main() {
                   (void *)0, 0U,     // no per-thread stack
                   (QEvt *)0);        // no initialization event
 
-    static QEvt const *shipQueueSto[3*WIN_FUDGE_FACTOR];
+    static QEvtPtr shipQueueSto[3*WIN_FUDGE_FACTOR];
     Ship_ctor_call();
     QActive_start(AO_Ship,
                   2U,                // QP priority
@@ -91,7 +91,7 @@ int main() {
                   (void *)0, 0U,     // no per-thread stack
                   (QEvt *)0);        // no initialization event
 
-    static QEvt const *missileQueueSto[2*WIN_FUDGE_FACTOR];
+    static QEvtPtr missileQueueSto[2*WIN_FUDGE_FACTOR];
     Missile_ctor_call();
     QActive_start(AO_Missile,
                   3U,                // QP priority

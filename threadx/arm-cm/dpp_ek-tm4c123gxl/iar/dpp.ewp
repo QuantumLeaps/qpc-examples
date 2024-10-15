@@ -62,7 +62,7 @@
                 </option>
                 <option>
                     <name>RTDescription</name>
-                    <state>Use the normal configuration of the C/C++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
+                    <state>A compact configuration of the C/C++14 runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
                 </option>
                 <option>
                     <name>OGProductVersion</name>
@@ -347,6 +347,7 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
+                    <state>$PROJ_DIR$\..</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\ports\threadx</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\common\inc</state>
@@ -1150,7 +1151,7 @@
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
-                    <state>8.50.6.28950</state>
+                    <state>9.32.1.54977</state>
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
@@ -1427,6 +1428,7 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
+                    <state>$PROJ_DIR$\..</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\ports\threadx</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\common\inc</state>
@@ -2230,7 +2232,7 @@
                 </option>
                 <option>
                     <name>OGLastSavedByProductVersion</name>
-                    <state>9.10.2.39304</state>
+                    <state>9.32.1.54977</state>
                 </option>
                 <option>
                     <name>OGChipSelectEditMenu</name>
@@ -2507,6 +2509,7 @@
                 </option>
                 <option>
                     <name>CCIncludePath2</name>
+                    <state>$PROJ_DIR$\..</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\ports\threadx</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\common\inc</state>
@@ -2977,7 +2980,7 @@
                 </option>
                 <option>
                     <name>IlinkProgramEntryLabelSelect</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkProgramEntryLabel</name>
@@ -3241,9 +3244,6 @@
             <data />
         </settings>
     </configuration>
-    <mfc>
-        <configuration>Release</configuration>
-    </mfc>
     <group>
         <name>Application</name>
         <file>
@@ -3811,7 +3811,7 @@
                 <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\ports\cortex_m4\iar\src\tx_iar.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\ports\cortex_m4\iar\src\tx_initialize_low_level.s</name>
+                <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\ports\cortex_m4\iar\example_build\tx_initialize_low_level.s</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\threadx\ports\cortex_m4\iar\src\tx_thread_context_restore.s</name>

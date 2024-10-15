@@ -1,7 +1,7 @@
 //============================================================================
 // Product: "Orthogonal Component" example, Console based
-// Last updated for version 6.4.0
-// Last updated on  2019-02-08
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -42,8 +42,6 @@
 
 //............................................................................
 int main(int argc, char *argv[]) {
-    static QEvt const *l_alarmClockQSto[10]; // queue storage for AlarmClock
-    static QF_MPOOL_EL(TimeEvt) l_smlPoolSto[10]; // storage for small pool
 
     PRINTF_S("Orthogonal Component pattern\nQP version: %s\n"
            "Press 'o' to turn the Alarm ON\n"
@@ -61,12 +59,14 @@ int main(int argc, char *argv[]) {
     // publish-subscribe not used, no call to QActive_psInit()
 
     // initialize event pools...
-    QF_poolInit(l_smlPoolSto, sizeof(l_smlPoolSto), sizeof(l_smlPoolSto[0]));
+    static QF_MPOOL_EL(TimeEvt) smlPoolSto[10]; // storage for small pool
+    QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     // instantiate and start the active objects...
     AlarmClock_ctor();
+    static QEvtPtr alarmClockQSto[10]; // queue storage for AlarmClock
     QActive_start(APP_alarmClock, 1U,
-                  l_alarmClockQSto, Q_DIM(l_alarmClockQSto),
+                  alarmClockQSto, Q_DIM(alarmClockQSto),
                   (void *)0, 0U, (QEvt *)0);
 
     return QF_run(); // run the QF application

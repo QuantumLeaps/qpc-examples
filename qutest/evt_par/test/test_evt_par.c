@@ -1,7 +1,7 @@
 //============================================================================
 // Purpose: example event QUTEST fixture
-// Last Updated for Version: 7.3.0
-// Date of the Last Update:  2023-05-25
+// Last updated for version 8.0.0
+// Last updated on  2024-09-19
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -37,15 +37,11 @@
 Q_DEFINE_THIS_FILE
 
 //............................................................................
-int main(int argc, char *argv[]) {
-    static QSubscrList subscrSto[MAX_PUB_SIG];
-    static QF_MPOOL_EL(MyEvt3) smlPoolSto[10];
-    static QEvt const *myAoQueueSto[10];
-
+int main() {
     QF_init();   // initialize the framework
 
     // initialize the QS software tracing
-    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+    if (!QS_INIT((void*)0)) {
         Q_ERROR();
     }
 
@@ -55,14 +51,17 @@ int main(int argc, char *argv[]) {
     QS_TEST_PAUSE();
 
     // initialize publish-subscribe...
+    static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // initialize event pools...
+    static QF_MPOOL_EL(MyEvt3) smlPoolSto[10];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     // start active objects...
     MyAO_ctor(); // instantiate the MyAO active object
-    QActive_start(AO_MyAO,              // AO to start
+    static QEvtPtr myAoQueueSto[10];
+    QActive_start(AO_MyAO,             // AO to start
                   (uint_fast8_t)1,      // QP priority of the AO
                   myAoQueueSto,         // event queue storage
                   Q_DIM(myAoQueueSto),  // queue length [events]

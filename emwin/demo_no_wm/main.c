@@ -1,7 +1,7 @@
 //============================================================================
 // Product: main function for emWin/uC/GUI, Win32 simulation
-// Last updated for version 7.3.0
-// Last updated on  2023-07-20
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -40,8 +40,8 @@
 //Q_DEFINE_THIS_FILE
 
 // Local-scope objects -----------------------------------------------------
-static QEvt const *l_tableQueueSto[N_PHILO];
-static QEvt const *l_philoQueueSto[N_PHILO][N_PHILO];
+static QEvtPtr l_tableQueueSto[N_PHILO];
+static QEvtPtr l_philoQueueSto[N_PHILO][N_PHILO];
 static QSubscrList   l_subscrSto[MAX_PUB_SIG];
 
 static union SmallEvent {

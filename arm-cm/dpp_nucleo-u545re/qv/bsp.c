@@ -1,7 +1,7 @@
 //============================================================================
 // Product: DPP example, NUCLEO-U545RE-Q board, QV kernel
-// Last updated for version 7.4.0
-// Last updated on  2024-06-24
+// Last updated for version 8.0.0
+// Last updated on  2024-09-27
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -54,6 +54,17 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 #define READ_REG(REG)         ((REG))
 #define MODIFY_REG(REG, CLEARMASK, SETMASK) \
     WRITE_REG((REG), ((READ_REG(REG) & (~(CLEARMASK))) | (SETMASK)))
+
+#define CONST_MPU_RBAR(BASE, SH, RO, NP, XN) \
+  ((BASE) + \
+      ((((SH) << MPU_RBAR_SH_Pos) & MPU_RBAR_SH_Msk) | \
+      ((ARM_MPU_AP_(RO, NP) << MPU_RBAR_AP_Pos) & MPU_RBAR_AP_Msk) | \
+      (((XN) << MPU_RBAR_XN_Pos) & MPU_RBAR_XN_Msk)))
+
+#define CONST_MPU_RLAR(LIMIT, IDX) \
+    ((LIMIT) - 32U + \
+       ((((IDX) << MPU_RLAR_AttrIndx_Pos) & MPU_RLAR_AttrIndx_Msk) | \
+        MPU_RLAR_EN_Msk))
 
 // Local-scope objects -----------------------------------------------------
 static uint32_t l_rndSeed;
@@ -176,33 +187,46 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 
 //============================================================================
 // BSP functions...
-
 static void STM32U545RE_MPU_setup(void) {
-    MPU->CTRL = 0U;  // disable the MPU
+    // Set Attr 0
+    ARM_MPU_SetMemAttr(0UL,
+        ARM_MPU_ATTR(     // Normal memory
+            // Outer Write-Through non-transient
+            ARM_MPU_ATTR_MEMORY_(1UL, 0UL, 1UL, 0UL),
+            // Inner Write-Through non-transient
+            ARM_MPU_ATTR_MEMORY_(1UL, 0UL, 1UL, 0UL))
+    );
 
-    MPU->RNR = 0U; // region 0 (for ROM: read-only, can-execute)
-    MPU->RBAR = (0x08000000U & MPU_RBAR_BASE_Msk)  | (0x3U << MPU_RBAR_AP_Pos);
-    MPU->RLAR = (0x08080000U & MPU_RLAR_LIMIT_Msk) | MPU_RLAR_EN_Msk;
+    MPU->RNR = 0U; // region #0 (for ROM: read-only, can-execute)
+    MPU->RBAR = CONST_MPU_RBAR(0x08000000U,
+        ARM_MPU_SH_OUTER,
+        ARM_MPU_AP_RO,
+        ARM_MPU_AP_NP,
+        ARM_MPU_EX);
+    MPU->RLAR = CONST_MPU_RLAR(0x08080000U, 0U);
 
-    MPU->RNR = 1U; // region 1 (for RAM1: read-write, execute-never)
-    MPU->RBAR = (0x20000000U & MPU_RBAR_BASE_Msk)  | (0x1U << MPU_RBAR_AP_Pos)
-                | MPU_RBAR_XN_Msk;
-    MPU->RLAR = (0x20040000U & MPU_RLAR_LIMIT_Msk) | MPU_RLAR_EN_Msk;
+    MPU->RNR = 1U; // region #1 (for RAM1: read-write, execute-never)
+    MPU->RBAR = CONST_MPU_RBAR(0x20000000U,
+        ARM_MPU_SH_OUTER,
+        ARM_MPU_AP_RW,
+        ARM_MPU_AP_NP,
+        ARM_MPU_XN);
+    MPU->RLAR = CONST_MPU_RLAR(0x20040000U, 0U);
 
-    MPU->RNR = 2U; // region 2 (for RAM2: read-write, execute-never)
-    MPU->RBAR = (0x28000000U & MPU_RBAR_BASE_Msk)  | (0x1U << MPU_RBAR_AP_Pos)
-                | MPU_RBAR_XN_Msk;
-    MPU->RLAR = (0x28004000U & MPU_RLAR_LIMIT_Msk) | MPU_RLAR_EN_Msk;
+    MPU->RNR = 2U; // region #2 (for RAM2: read-write, execute-never)
+    MPU->RBAR = CONST_MPU_RBAR(0x28000000U,
+        ARM_MPU_SH_OUTER,
+        ARM_MPU_AP_RW,
+        ARM_MPU_AP_NP,
+        ARM_MPU_XN);
+    MPU->RLAR = CONST_MPU_RLAR(0x28004000U, 0U);
 
-    MPU->RNR  = 7U; // region 7 (no access: for NULL pointer protection)
-    MPU->RBAR = (0x00000000U & MPU_RBAR_BASE_Msk)  | MPU_RBAR_XN_Msk;
-    MPU->RLAR = (0x00080000U & MPU_RLAR_LIMIT_Msk) | MPU_RLAR_EN_Msk;
+    // Enable MPU with all region definitions
     __DMB();
+    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_HFNMIENA_Msk | MPU_CTRL_ENABLE_Msk;
 
-    MPU->CTRL = MPU_CTRL_ENABLE_Msk | MPU_CTRL_PRIVDEFENA_Msk;
-
+    // Enable MemManage Faults
     SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
-
     __DSB();
     __ISB();
 }
@@ -238,7 +262,7 @@ void BSP_init(void) {
     MODIFY_REG(GPIOA->PUPDR,
                GPIO_PUPDR_PUPD0 << (LD2_PIN * GPIO_PUPDR_PUPD1_Pos),
                0U << (LD2_PIN * GPIO_PUPDR_PUPD1_Pos)); // PUSHPULL
-     MODIFY_REG(GPIOA->MODER,
+    MODIFY_REG(GPIOA->MODER,
                GPIO_MODER_MODE0 << (LD2_PIN * GPIO_MODER_MODE1_Pos),
                1U << (LD2_PIN * GPIO_MODER_MODE1_Pos)); // MODE_1
 
@@ -284,7 +308,7 @@ void BSP_start(void) {
 
     // instantiate and start AOs/threads...
 
-    static QEvt const *philoQueueSto[N_PHILO][10];
+    static QEvtPtr philoQueueSto[N_PHILO][10];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
         QActive_start(AO_Philo[n],
@@ -299,7 +323,7 @@ void BSP_start(void) {
             (void *)0);              // no initialization param
     }
 
-    static QEvt const *tableQueueSto[N_PHILO];
+    static QEvtPtr tableQueueSto[N_PHILO];
     Table_ctor();
     QActive_start(AO_Table,
         N_PHILO + 7U,                // QP prio. of the AO

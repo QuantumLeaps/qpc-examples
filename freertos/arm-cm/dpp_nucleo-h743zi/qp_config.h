@@ -1,7 +1,7 @@
 //============================================================================
 // QP configuration file example
-// Last updated for version: 7.4.0
-// Last updated on: 2024-06-06
+// Last updated for version: 8.0.0
+// Last updated on: 2024-09-25
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -34,17 +34,10 @@
 
 //-------- <<< Use Configuration Wizard in Context Menu >>> -----------------
 
-// <n>NOTE: Requires command-line macro: QP_CONFIG
-// <i>This qp_config.h header file is activated only when the macro
-// <i>QP_CONFIG is defined on the command-line to the compiler
-// <n>-------------------------------------------
-
 // <o>QP API compatibility version (QP_API_VERSION)
 //   <0=>  0   (Maximum compatibility)
-//   <580=>580 (QP 5.8.0 or newer)
-//   <660=>660 (QP 6.6.0 or newer)
 //   <691=>691 (QP 6.9.1 or newer)
-//   <700=>700 (QP 7.0.0 or newer)
+//   <734=>7.3.4 (QP 7.3.4 or newer)
 //   <9999=>9999 (Latest only)
 // <i>QP API backwards compatibility with the QP/C API version.
 // <i>Lower QP_API_VERSION values enable backwards compatibility
@@ -158,7 +151,6 @@
 // <o>Event queue counter size (QF_EQUEUE_CTR_SIZE)
 //   <1U=>1 (default)
 //   <2U=>2
-//   <4U=>4
 // <i>Size of event queue counter [bytes]
 // <i>Default: 1 (255 events maximum in a queue)
 #define QF_EQUEUE_CTR_SIZE  1U
@@ -208,5 +200,7 @@
 #define QS_CTR_SIZE 2U
 
 // </h>
+
+//------------- <<< end of configuration section >>> -----------------------
 
 #endif // QP_CONFIG_H_

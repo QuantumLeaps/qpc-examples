@@ -1,7 +1,7 @@
 //============================================================================
 // Product: "Low-Power" example
-// Last updated for version 7.3.0
-// Last updated on  2023-08-25
+// Last updated for version 8.0.0
+// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -50,7 +50,7 @@ int main() {
 
     // instantiate and start the active objects...
     Blinky0_ctor();
-    static QEvt const *l_blinky0QSto[10];  // queue storage for Blinky0
+    static QEvtPtr l_blinky0QSto[10];  // queue storage for Blinky0
     QActive_start(AO_Blinky0,     // AO pointer
                   1U,             // unique QP priority of the AO
                   l_blinky0QSto,  // storage for the AO's queue
@@ -65,14 +65,14 @@ int main() {
     QXSemaphore_init(&XSEM_sw1, 0U, 1U); // signaling binary semaphore
     QXThread_start(&XT_Blinky1,   // extended thread pointer
                   2U,             // unique QP priority of the AO
-                  (QEvt const **)0, // storage for the AO's queue (not used)
+                  (QEvtPtr *)0, // storage for the AO's queue (not used)
                   0U,             // length of the queue [entries]
                   l_xblinky1Stack,  // stack storage (must provide in QXK)
                   sizeof(l_xblinky1Stack), // stack size [bytes]
                   (void *)0);     // initial param (not used)
 #else // QV or QK kernels
     Blinky1_ctor();
-    static QEvt const *l_blinky1QSto[10]; // queue storage for Blinky1
+    static QEvtPtr l_blinky1QSto[10]; // queue storage for Blinky1
     QActive_start(AO_Blinky1,     // AO pointer
                   2U,             // unique QP priority of the AO
                   l_blinky1QSto,  // storage for the AO's queue

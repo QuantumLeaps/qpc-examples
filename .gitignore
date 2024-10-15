@@ -4,6 +4,9 @@
 # Prerequisites
 *.d
 
+# QUTest log files
+*.log
+
 # Object files
 *.o
 *.ko
@@ -38,6 +41,7 @@
 *.i*86
 *.x86_64
 *.hex
+*.bin
 
 # Debug files
 *.dSYM/
@@ -48,6 +52,7 @@
 # Kernel Module Compile Results
 *.mod*
 *.cmd
+__pycache__/
 .tmp_versions/
 modules.order
 Module.symvers
