@@ -5,14 +5,6 @@ This uC-OS2 version has been released under the permissive Apache License,
 Version 2.0 (see GitHub https://github.com/SiliconLabs/uC-OS2 ).
 
 
-The Blinky Example
-------------------
-The sub-folder blinky_ek-tm4c123gxl contains a simple "Blinky" example for
-the EK-TM4C123GLX board (Cortex-M4F). This example shows a bare-bones
-application coded by hand and without many features. The example contains
-projects for the ARM (MDK-ARM) compiler and the IAR compiler.
-
-
 The DPP Examples
 ----------------
 The sub-folders dpp_ek-tm4c123gxl and dpp_nucleo-l152re demonstrate

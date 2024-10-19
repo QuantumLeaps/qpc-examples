@@ -28,18 +28,18 @@ poke(0, 1, pack('<B', 1)) # status:=1
 WHEN("Test sequence contunues AO_Gizmo is started")
 glb_filter(GRP_ALL)
 continue_test()
-expect("===RTC===> St-Init  Obj=AO_Gizmo,State=QHsm_top->Gizmo_init")
+expect("===RTC===> St-Init  Obj=AO_Gizmo,State=QHsm_top->Gizmo_initialize")
 expect("@timestamp AO-Post  Sdr=AO_Gizmo,Obj=AO_Gizmo,Evt<Sig=START_SIG,*")
-expect("===RTC===> St-Entry Obj=AO_Gizmo,State=Gizmo_init")
-expect("@timestamp Init===> Obj=AO_Gizmo,State=Gizmo_init")
+expect("===RTC===> St-Entry Obj=AO_Gizmo,State=Gizmo_initialize")
+expect("@timestamp Init===> Obj=AO_Gizmo,State=Gizmo_initialize")
 
 THEN('''After QF_run(), AO_Gizmo receives START event,
 which triggers transition to Gizmo_on_mains''')
 expect_run()
 expect("@timestamp AO-GetL  Obj=AO_Gizmo,Evt<Sig=START_SIG,*")
-expect("@timestamp Disp===> Obj=AO_Gizmo,Sig=START_SIG,State=Gizmo_init")
+expect("@timestamp Disp===> Obj=AO_Gizmo,Sig=START_SIG,State=Gizmo_initialize")
 expect("@timestamp USER+005 START")
-expect("@timestamp ===>Tran Obj=AO_Gizmo,Sig=START_SIG,State=Gizmo_init->Gizmo_on_mains")
+expect("@timestamp ===>Tran Obj=AO_Gizmo,Sig=START_SIG,State=Gizmo_initialize->Gizmo_on_mains")
 
 #------------------------------------------------------------------------------
 SCENARIO('''
@@ -53,15 +53,15 @@ poke(0, 1, pack('<B', 0))  # status:=0
 WHEN("Test sequence contunues AO_Gizmo is started")
 glb_filter(GRP_ALL)
 continue_test()
-expect("===RTC===> St-Init  Obj=AO_Gizmo,State=QHsm_top->Gizmo_init")
+expect("===RTC===> St-Init  Obj=AO_Gizmo,State=QHsm_top->Gizmo_initialize")
 expect("@timestamp AO-Post  Sdr=AO_Gizmo,Obj=AO_Gizmo,Evt<Sig=START_SIG,*")
-expect("===RTC===> St-Entry Obj=AO_Gizmo,State=Gizmo_init")
-expect("@timestamp Init===> Obj=AO_Gizmo,State=Gizmo_init")
+expect("===RTC===> St-Entry Obj=AO_Gizmo,State=Gizmo_initialize")
+expect("@timestamp Init===> Obj=AO_Gizmo,State=Gizmo_initialize")
 
 THEN('''After QF_run(), AO_Gizmo receives START event,
 which triggers transition to Gizmo_on_battery''')
 expect_run()
 expect("@timestamp AO-GetL  Obj=AO_Gizmo,Evt<Sig=START_SIG,*")
-expect("@timestamp Disp===> Obj=AO_Gizmo,Sig=START_SIG,State=Gizmo_init")
+expect("@timestamp Disp===> Obj=AO_Gizmo,Sig=START_SIG,State=Gizmo_initialize")
 expect("@timestamp USER+005 START")
-expect("@timestamp ===>Tran Obj=AO_Gizmo,Sig=START_SIG,State=Gizmo_init->Gizmo_on_battery")
+expect("@timestamp ===>Tran Obj=AO_Gizmo,Sig=START_SIG,State=Gizmo_initialize->Gizmo_on_battery")

@@ -14,16 +14,16 @@
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>TM4C123GH6PM</Device>
-          <Vendor>Texas Instruments</Vendor>
-          <PackID>Keil.TM4C_DFP.1.1.0</PackID>
-          <PackURL>http://www.keil.com/pack/</PackURL>
-          <Cpu>IROM(0x00000000,0x040000) IRAM(0x20000000,0x008000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
+          <Device>STM32U545RETxQ</Device>
+          <Vendor>STMicroelectronics</Vendor>
+          <PackID>Keil.STM32U5xx_DFP.2.2.1</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
+          <Cpu>IRAM(0x20000000,0x00040000) IRAM2(0x28000000,0x00004000) IROM(0x08000000,0x00080000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP TZ CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0TM4C123_256 -FS00 -FL040000 -FP0($$Device:TM4C123GH6PM$Flash\TM4C123_256.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC8000 -FN2 -FF0STM32U5xx_512K_0800 -FS08000000 -FL080000 -FF1STM32U5xx_512K_0C00 -FS1C000000 -FL180000 -FP0($$Device:STM32U545RETxQ$CMSIS\Flash\STM32U5xx_512K_0800.FLM) -FP1($$Device:STM32U545RETxQ$CMSIS\Flash\STM32U5xx_512K_0C00.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:TM4C123GH6PM$Device\Include\TM4C123\TM4C123.h</RegisterFile>
+          <RegisterFile>$$Device:STM32U545RETxQ$Drivers\CMSIS\Device\ST\STM32U5xx\Include\stm32u5xx.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -33,7 +33,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:TM4C123GH6PM$SVD\TM4C123\TM4C123GH6PM.svd</SFDFile>
+          <SFDFile>$$Device:STM32U545RETxQ$CMSIS\SVD\STM32U545.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -49,7 +49,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\dbg\</OutputDirectory>
-          <OutputName>dpp</OutputName>
+          <OutputName>dpp-qk</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -82,14 +82,14 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>fromelf --bin --output .\dbg\dpp.bin .\dbg\dpp.axf</UserProg1Name>
+            <UserProg1Name>fromelf --bin --output .\dbg\dpp-qk.bin .\dbg\dpp-qk.axf</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
             <nStopA2X>0</nStopA2X>
           </AfterMake>
-          <SelectedForBatchBuild>1</SelectedForBatchBuild>
+          <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
         </TargetCommonOption>
         <CommonProperty>
@@ -109,14 +109,14 @@
           <ComprImg>1</ComprImg>
         </CommonProperty>
         <DllOption>
-          <SimDllName>SARMCM3.DLL</SimDllName>
-          <SimDllArguments>  -MPU</SimDllArguments>
-          <SimDlgDll>DCM.DLL</SimDlgDll>
-          <SimDlgDllArguments>-pCM4</SimDlgDllArguments>
-          <TargetDllName>SARMCM3.DLL</TargetDllName>
+          <SimDllName></SimDllName>
+          <SimDllArguments></SimDllArguments>
+          <SimDlgDll></SimDlgDll>
+          <SimDlgDllArguments></SimDlgDllArguments>
+          <TargetDllName>SARMV8M.DLL</TargetDllName>
           <TargetDllArguments> -MPU</TargetDllArguments>
           <TargetDlgDll>TCM.DLL</TargetDlgDll>
-          <TargetDlgDllArguments>-pCM4</TargetDlgDllArguments>
+          <TargetDlgDllArguments>-pCM33</TargetDlgDllArguments>
         </DllOption>
         <DebugOption>
           <OPTHX>
@@ -134,10 +134,10 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4097</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\UL2CM3.DLL</Flash2>
+          <Flash2>BIN\UL2V8M.DLL</Flash2>
           <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
@@ -174,7 +174,7 @@
             <AdsLsxf>1</AdsLsxf>
             <RvctClst>0</RvctClst>
             <GenPPlst>0</GenPPlst>
-            <AdsCpuType>"Cortex-M4"</AdsCpuType>
+            <AdsCpuType>"Cortex-M33"</AdsCpuType>
             <RvctDeviceName></RvctDeviceName>
             <mOS>0</mOS>
             <uocRom>0</uocRom>
@@ -187,7 +187,7 @@
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
             <nBranchProt>0</nBranchProt>
-            <hadIRAM2>0</hadIRAM2>
+            <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
             <useUlib>0</useUlib>
@@ -195,7 +195,7 @@
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
             <RoSelD>3</RoSelD>
-            <RwSelD>3</RwSelD>
+            <RwSelD>4</RwSelD>
             <CodeSel>0</CodeSel>
             <OptFeed>0</OptFeed>
             <NoZi1>0</NoZi1>
@@ -212,7 +212,7 @@
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
             <Im1Chk>1</Im1Chk>
-            <Im2Chk>0</Im2Chk>
+            <Im2Chk>1</Im2Chk>
             <OnChipMemories>
               <Ocm1>
                 <Type>0</Type>
@@ -247,12 +247,12 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x40000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x40000</Size>
+                <StartAddress>0x8000000</StartAddress>
+                <Size>0x80000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -276,8 +276,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x40000</Size>
+                <StartAddress>0x8000000</StartAddress>
+                <Size>0x80000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -302,19 +302,19 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x40000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
+                <StartAddress>0x28000000</StartAddress>
+                <Size>0x4000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
             <RvctStartVector></RvctStartVector>
           </ArmAdsMisc>
           <Cads>
             <interw>0</interw>
-            <Optim>7</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -326,7 +326,7 @@
             <wLevel>3</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>1</uSurpInc>
-            <uC99>1</uC99>
+            <uC99>0</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
@@ -338,9 +338,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define></Define>
+              <Define>STM32U545xx</Define>
               <Undefine></Undefine>
-              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\uc-os2;..\..\..\..\..\3rd_party\uC-OS2\Source;..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\ARM;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\ek-tm4c123gxl</IncludePath>
+              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\uc-os2;..\..\..\..\..\3rd_party\uC-OS2\Source;..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\ARM;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\nucleo-u545re</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -382,7 +382,7 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Applicatioin</GroupName>
+          <GroupName>Source Code</GroupName>
           <Files>
             <File>
               <FileName>bsp.c</FileName>
@@ -390,19 +390,9 @@
               <FilePath>..\bsp.c</FilePath>
             </File>
             <File>
-              <FileName>qstamp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
-            </File>
-            <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>dpp.h</FileName>
+              <FileName>app_cfg.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\dpp.h</FilePath>
+              <FilePath>..\app_cfg.h</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -410,64 +400,64 @@
               <FilePath>..\bsp.h</FilePath>
             </File>
             <File>
-              <FileName>philo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\philo.c</FilePath>
-            </File>
-            <File>
-              <FileName>table.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\table.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_cfg.h</FileName>
+              <FileName>dpp.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\app_cfg.h</FilePath>
+              <FilePath>..\dpp.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\main.c</FilePath>
             </File>
             <File>
               <FileName>os_cfg.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\os_cfg.h</FilePath>
             </File>
+            <File>
+              <FileName>philo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\philo.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\qp_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>table.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\table.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>ek-tm4c123gxl</GroupName>
+          <GroupName>nucleo-u545re</GroupName>
           <Files>
             <File>
-              <FileName>system_TM4C123GH6PM.c</FileName>
+              <FileName>stm32u5xx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\stm32u5xx.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32u545xx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\stm32u545xx.h</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32u5xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\system_TM4C123GH6PM.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\system_stm32u5xx.c</FilePath>
             </File>
             <File>
-              <FileName>TM4C123GH6PM.h</FileName>
+              <FileName>system_stm32u5xx.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\TM4C123GH6PM.h</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\system_stm32u5xx.h</FilePath>
             </File>
             <File>
-              <FileName>gpio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>rom.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\rom.h</FilePath>
-            </File>
-            <File>
-              <FileName>sysctl.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\sysctl.h</FilePath>
-            </File>
-            <File>
-              <FileName>system_TM4C123GH6PM.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\system_TM4C123GH6PM.h</FilePath>
-            </File>
-            <File>
-              <FileName>startup_TM4C123GH6PM.s</FileName>
+              <FileName>startup_stm32u545retxq.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\arm\startup_TM4C123GH6PM.s</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\arm\startup_stm32u545retxq.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -500,6 +490,11 @@
               <FilePath>..\..\..\..\..\src\qf\qf_dyn.c</FilePath>
             </File>
             <File>
+              <FileName>qf_mem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
+            </File>
+            <File>
               <FileName>qf_ps.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_ps.c</FilePath>
@@ -524,11 +519,6 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_time.c</FilePath>
             </File>
-            <File>
-              <FileName>qf_mem.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -538,6 +528,16 @@
               <FileName>qf_port.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\ports\uc-os2\qf_port.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_port.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\ports\uc-os2\qp_port.h</FilePath>
+            </File>
+            <File>
+              <FileName>qs_port.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\ports\uc-os2\qs_port.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -633,20 +633,25 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
             </File>
+            <File>
+              <FileName>qstamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>uC-OS2</GroupName>
           <Files>
             <File>
+              <FileName>os.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os.h</FilePath>
+            </File>
+            <File>
               <FileName>os_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_core.c</FilePath>
-            </File>
-            <File>
-              <FileName>os_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_task.c</FilePath>
             </File>
             <File>
               <FileName>os_flag.c</FileName>
@@ -679,6 +684,11 @@
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_sem.c</FilePath>
             </File>
             <File>
+              <FileName>os_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_task.c</FilePath>
+            </File>
+            <File>
               <FileName>os_time.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_time.c</FilePath>
@@ -688,16 +698,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_tmr.c</FilePath>
             </File>
+            <File>
+              <FileName>ucos_ii.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\ucos_ii.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>uC-OS2_port</GroupName>
           <Files>
-            <File>
-              <FileName>os_cpu_c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\os_cpu_c.c</FilePath>
-            </File>
             <File>
               <FileName>os_cpu.h</FileName>
               <FileType>5</FileType>
@@ -713,6 +723,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\ARM\os_dbg.c</FilePath>
             </File>
+            <File>
+              <FileName>os_cpu_c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\os_cpu_c.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -721,20 +736,20 @@
       <TargetName>dpp-rel</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6160000::V6.16::ARMCLANG</pCCUsed>
+      <pCCUsed>6220000::V6.22::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>TM4C123GH6PM</Device>
-          <Vendor>Texas Instruments</Vendor>
-          <PackID>Keil.TM4C_DFP.1.1.0</PackID>
-          <PackURL>http://www.keil.com/pack/</PackURL>
-          <Cpu>IROM(0x00000000,0x040000) IRAM(0x20000000,0x008000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
+          <Device>STM32U545RETxQ</Device>
+          <Vendor>STMicroelectronics</Vendor>
+          <PackID>Keil.STM32U5xx_DFP.2.2.1</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
+          <Cpu>IRAM(0x20000000,0x00040000) IRAM2(0x28000000,0x00004000) IROM(0x08000000,0x00080000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP TZ CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0TM4C123_256 -FS00 -FL040000 -FP0($$Device:TM4C123GH6PM$Flash\TM4C123_256.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC8000 -FN2 -FF0STM32U5xx_512K_0800 -FS08000000 -FL080000 -FF1STM32U5xx_512K_0C00 -FS1C000000 -FL180000 -FP0($$Device:STM32U545RETxQ$CMSIS\Flash\STM32U5xx_512K_0800.FLM) -FP1($$Device:STM32U545RETxQ$CMSIS\Flash\STM32U5xx_512K_0C00.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:TM4C123GH6PM$Device\Include\TM4C123\TM4C123.h</RegisterFile>
+          <RegisterFile>$$Device:STM32U545RETxQ$Drivers\CMSIS\Device\ST\STM32U5xx\Include\stm32u5xx.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -744,7 +759,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:TM4C123GH6PM$SVD\TM4C123\TM4C123GH6PM.svd</SFDFile>
+          <SFDFile>$$Device:STM32U545RETxQ$CMSIS\SVD\STM32U545.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -760,7 +775,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\rel\</OutputDirectory>
-          <OutputName>dpp</OutputName>
+          <OutputName>dpp-qk</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -793,14 +808,14 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>fromelf --bin --output .\rel\dpp.bin .\rel\dpp.axf</UserProg1Name>
+            <UserProg1Name>fromelf --bin --output .\rel\dpp-qk.bin .\rel\dpp-qk.axf</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
             <nStopA2X>0</nStopA2X>
           </AfterMake>
-          <SelectedForBatchBuild>1</SelectedForBatchBuild>
+          <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
         </TargetCommonOption>
         <CommonProperty>
@@ -820,14 +835,14 @@
           <ComprImg>1</ComprImg>
         </CommonProperty>
         <DllOption>
-          <SimDllName>SARMCM3.DLL</SimDllName>
-          <SimDllArguments>  -MPU</SimDllArguments>
-          <SimDlgDll>DCM.DLL</SimDlgDll>
-          <SimDlgDllArguments>-pCM4</SimDlgDllArguments>
-          <TargetDllName>SARMCM3.DLL</TargetDllName>
+          <SimDllName></SimDllName>
+          <SimDllArguments></SimDllArguments>
+          <SimDlgDll></SimDlgDll>
+          <SimDlgDllArguments></SimDlgDllArguments>
+          <TargetDllName>SARMV8M.DLL</TargetDllName>
           <TargetDllArguments> -MPU</TargetDllArguments>
           <TargetDlgDll>TCM.DLL</TargetDlgDll>
-          <TargetDlgDllArguments>-pCM4</TargetDlgDllArguments>
+          <TargetDlgDllArguments>-pCM33</TargetDlgDllArguments>
         </DllOption>
         <DebugOption>
           <OPTHX>
@@ -848,7 +863,7 @@
             <DriverSelection>4097</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\UL2CM3.DLL</Flash2>
+          <Flash2>BIN\UL2V8M.DLL</Flash2>
           <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
@@ -885,7 +900,7 @@
             <AdsLsxf>1</AdsLsxf>
             <RvctClst>0</RvctClst>
             <GenPPlst>0</GenPPlst>
-            <AdsCpuType>"Cortex-M4"</AdsCpuType>
+            <AdsCpuType>"Cortex-M33"</AdsCpuType>
             <RvctDeviceName></RvctDeviceName>
             <mOS>0</mOS>
             <uocRom>0</uocRom>
@@ -898,7 +913,7 @@
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
             <nBranchProt>0</nBranchProt>
-            <hadIRAM2>0</hadIRAM2>
+            <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
             <useUlib>0</useUlib>
@@ -906,7 +921,7 @@
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
             <RoSelD>3</RoSelD>
-            <RwSelD>3</RwSelD>
+            <RwSelD>4</RwSelD>
             <CodeSel>0</CodeSel>
             <OptFeed>0</OptFeed>
             <NoZi1>0</NoZi1>
@@ -958,12 +973,12 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x40000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x40000</Size>
+                <StartAddress>0x8000000</StartAddress>
+                <Size>0x80000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -987,8 +1002,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x40000</Size>
+                <StartAddress>0x8000000</StartAddress>
+                <Size>0x80000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -1013,19 +1028,19 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x40000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
+                <StartAddress>0x28000000</StartAddress>
+                <Size>0x4000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
             <RvctStartVector></RvctStartVector>
           </ArmAdsMisc>
           <Cads>
             <interw>0</interw>
-            <Optim>7</Optim>
+            <Optim>6</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -1037,7 +1052,7 @@
             <wLevel>3</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>1</uSurpInc>
-            <uC99>1</uC99>
+            <uC99>0</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
@@ -1049,9 +1064,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>NDEBUG</Define>
+              <Define>NDEBUG,STM32U545xx</Define>
               <Undefine></Undefine>
-              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\uc-os2;..\..\..\..\..\3rd_party\uC-OS2\Source;..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\ARM;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\ek-tm4c123gxl</IncludePath>
+              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\uc-os2;..\..\..\..\..\3rd_party\uC-OS2\Source;..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\ARM;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\nucleo-u545re</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1073,7 +1088,7 @@
             </VariousControls>
           </Aads>
           <LDads>
-            <umfTarg>1</umfTarg>
+            <umfTarg>0</umfTarg>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
             <noStLib>0</noStLib>
@@ -1082,7 +1097,7 @@
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile>dpp-qv.sct</ScatterFile>
+            <ScatterFile>dpp.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc>--entry Reset_Handler</Misc>
@@ -1093,7 +1108,7 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Applicatioin</GroupName>
+          <GroupName>Source Code</GroupName>
           <Files>
             <File>
               <FileName>bsp.c</FileName>
@@ -1101,19 +1116,9 @@
               <FilePath>..\bsp.c</FilePath>
             </File>
             <File>
-              <FileName>qstamp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
-            </File>
-            <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>dpp.h</FileName>
+              <FileName>app_cfg.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\dpp.h</FilePath>
+              <FilePath>..\app_cfg.h</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -1121,64 +1126,64 @@
               <FilePath>..\bsp.h</FilePath>
             </File>
             <File>
-              <FileName>philo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\philo.c</FilePath>
-            </File>
-            <File>
-              <FileName>table.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\table.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_cfg.h</FileName>
+              <FileName>dpp.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\app_cfg.h</FilePath>
+              <FilePath>..\dpp.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\main.c</FilePath>
             </File>
             <File>
               <FileName>os_cfg.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\os_cfg.h</FilePath>
             </File>
+            <File>
+              <FileName>philo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\philo.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\qp_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>table.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\table.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>ek-tm4c123gxl</GroupName>
+          <GroupName>nucleo-u545re</GroupName>
           <Files>
             <File>
-              <FileName>system_TM4C123GH6PM.c</FileName>
+              <FileName>stm32u5xx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\stm32u5xx.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32u545xx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\stm32u545xx.h</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32u5xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\system_TM4C123GH6PM.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\system_stm32u5xx.c</FilePath>
             </File>
             <File>
-              <FileName>TM4C123GH6PM.h</FileName>
+              <FileName>system_stm32u5xx.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\TM4C123GH6PM.h</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\system_stm32u5xx.h</FilePath>
             </File>
             <File>
-              <FileName>gpio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>rom.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\rom.h</FilePath>
-            </File>
-            <File>
-              <FileName>sysctl.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\sysctl.h</FilePath>
-            </File>
-            <File>
-              <FileName>system_TM4C123GH6PM.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\system_TM4C123GH6PM.h</FilePath>
-            </File>
-            <File>
-              <FileName>startup_TM4C123GH6PM.s</FileName>
+              <FileName>startup_stm32u545retxq.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\arm\startup_TM4C123GH6PM.s</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\arm\startup_stm32u545retxq.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -1211,6 +1216,11 @@
               <FilePath>..\..\..\..\..\src\qf\qf_dyn.c</FilePath>
             </File>
             <File>
+              <FileName>qf_mem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
+            </File>
+            <File>
               <FileName>qf_ps.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_ps.c</FilePath>
@@ -1235,11 +1245,6 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_time.c</FilePath>
             </File>
-            <File>
-              <FileName>qf_mem.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -1249,6 +1254,16 @@
               <FileName>qf_port.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\ports\uc-os2\qf_port.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_port.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\ports\uc-os2\qp_port.h</FilePath>
+            </File>
+            <File>
+              <FileName>qs_port.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\ports\uc-os2\qs_port.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1344,20 +1359,25 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
             </File>
+            <File>
+              <FileName>qstamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>uC-OS2</GroupName>
           <Files>
             <File>
+              <FileName>os.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os.h</FilePath>
+            </File>
+            <File>
               <FileName>os_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_core.c</FilePath>
-            </File>
-            <File>
-              <FileName>os_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_task.c</FilePath>
             </File>
             <File>
               <FileName>os_flag.c</FileName>
@@ -1390,6 +1410,11 @@
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_sem.c</FilePath>
             </File>
             <File>
+              <FileName>os_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_task.c</FilePath>
+            </File>
+            <File>
               <FileName>os_time.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_time.c</FilePath>
@@ -1399,16 +1424,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_tmr.c</FilePath>
             </File>
+            <File>
+              <FileName>ucos_ii.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\ucos_ii.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>uC-OS2_port</GroupName>
           <Files>
-            <File>
-              <FileName>os_cpu_c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\os_cpu_c.c</FilePath>
-            </File>
             <File>
               <FileName>os_cpu.h</FileName>
               <FileType>5</FileType>
@@ -1424,6 +1449,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\ARM\os_dbg.c</FilePath>
             </File>
+            <File>
+              <FileName>os_cpu_c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\os_cpu_c.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -1432,20 +1462,20 @@
       <TargetName>dpp-spy</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6160000::V6.16::ARMCLANG</pCCUsed>
+      <pCCUsed>6220000::V6.22::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>TM4C123GH6PM</Device>
-          <Vendor>Texas Instruments</Vendor>
-          <PackID>Keil.TM4C_DFP.1.1.0</PackID>
-          <PackURL>http://www.keil.com/pack/</PackURL>
-          <Cpu>IROM(0x00000000,0x040000) IRAM(0x20000000,0x008000) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
+          <Device>STM32U545RETxQ</Device>
+          <Vendor>STMicroelectronics</Vendor>
+          <PackID>Keil.STM32U5xx_DFP.2.2.1</PackID>
+          <PackURL>https://www.keil.com/pack/</PackURL>
+          <Cpu>IRAM(0x20000000,0x00040000) IRAM2(0x28000000,0x00004000) IROM(0x08000000,0x00080000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP TZ CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD20000000 -FC1000 -FN1 -FF0TM4C123_256 -FS00 -FL040000 -FP0($$Device:TM4C123GH6PM$Flash\TM4C123_256.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2V8M(-S0 -C0 -P0 -FD20000000 -FC8000 -FN2 -FF0STM32U5xx_512K_0800 -FS08000000 -FL080000 -FF1STM32U5xx_512K_0C00 -FS1C000000 -FL180000 -FP0($$Device:STM32U545RETxQ$CMSIS\Flash\STM32U5xx_512K_0800.FLM) -FP1($$Device:STM32U545RETxQ$CMSIS\Flash\STM32U5xx_512K_0C00.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:TM4C123GH6PM$Device\Include\TM4C123\TM4C123.h</RegisterFile>
+          <RegisterFile>$$Device:STM32U545RETxQ$Drivers\CMSIS\Device\ST\STM32U5xx\Include\stm32u5xx.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -1455,7 +1485,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:TM4C123GH6PM$SVD\TM4C123\TM4C123GH6PM.svd</SFDFile>
+          <SFDFile>$$Device:STM32U545RETxQ$CMSIS\SVD\STM32U545.svd</SFDFile>
           <bCustSvd>0</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -1471,7 +1501,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\spy\</OutputDirectory>
-          <OutputName>dpp</OutputName>
+          <OutputName>dpp-qk</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -1504,14 +1534,14 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>fromelf --bin --output .\spy\dpp.bin .\spy\dpp.axf</UserProg1Name>
+            <UserProg1Name>fromelf --bin --output .\spy\dpp-qk.bin .\spy\dpp-qk.axf</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
             <nStopA2X>0</nStopA2X>
           </AfterMake>
-          <SelectedForBatchBuild>1</SelectedForBatchBuild>
+          <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
         </TargetCommonOption>
         <CommonProperty>
@@ -1531,14 +1561,14 @@
           <ComprImg>1</ComprImg>
         </CommonProperty>
         <DllOption>
-          <SimDllName>SARMCM3.DLL</SimDllName>
-          <SimDllArguments>  -MPU</SimDllArguments>
-          <SimDlgDll>DCM.DLL</SimDlgDll>
-          <SimDlgDllArguments>-pCM4</SimDlgDllArguments>
-          <TargetDllName>SARMCM3.DLL</TargetDllName>
+          <SimDllName></SimDllName>
+          <SimDllArguments></SimDllArguments>
+          <SimDlgDll></SimDlgDll>
+          <SimDlgDllArguments></SimDlgDllArguments>
+          <TargetDllName>SARMV8M.DLL</TargetDllName>
           <TargetDllArguments> -MPU</TargetDllArguments>
           <TargetDlgDll>TCM.DLL</TargetDlgDll>
-          <TargetDlgDllArguments>-pCM4</TargetDlgDllArguments>
+          <TargetDlgDllArguments>-pCM33</TargetDlgDllArguments>
         </DllOption>
         <DebugOption>
           <OPTHX>
@@ -1556,10 +1586,10 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4097</DriverSelection>
+            <DriverSelection>4096</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\UL2CM3.DLL</Flash2>
+          <Flash2>BIN\UL2V8M.DLL</Flash2>
           <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
@@ -1596,7 +1626,7 @@
             <AdsLsxf>1</AdsLsxf>
             <RvctClst>0</RvctClst>
             <GenPPlst>0</GenPPlst>
-            <AdsCpuType>"Cortex-M4"</AdsCpuType>
+            <AdsCpuType>"Cortex-M33"</AdsCpuType>
             <RvctDeviceName></RvctDeviceName>
             <mOS>0</mOS>
             <uocRom>0</uocRom>
@@ -1609,7 +1639,7 @@
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
             <nBranchProt>0</nBranchProt>
-            <hadIRAM2>0</hadIRAM2>
+            <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
             <useUlib>0</useUlib>
@@ -1617,7 +1647,7 @@
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
             <RoSelD>3</RoSelD>
-            <RwSelD>3</RwSelD>
+            <RwSelD>4</RwSelD>
             <CodeSel>0</CodeSel>
             <OptFeed>0</OptFeed>
             <NoZi1>0</NoZi1>
@@ -1669,12 +1699,12 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x40000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x40000</Size>
+                <StartAddress>0x8000000</StartAddress>
+                <Size>0x80000</Size>
               </IROM>
               <XRAM>
                 <Type>0</Type>
@@ -1698,8 +1728,8 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x40000</Size>
+                <StartAddress>0x8000000</StartAddress>
+                <Size>0x80000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -1724,19 +1754,19 @@
               <OCR_RVCT9>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x8000</Size>
+                <Size>0x40000</Size>
               </OCR_RVCT9>
               <OCR_RVCT10>
                 <Type>0</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x0</Size>
+                <StartAddress>0x28000000</StartAddress>
+                <Size>0x4000</Size>
               </OCR_RVCT10>
             </OnChipMemories>
             <RvctStartVector></RvctStartVector>
           </ArmAdsMisc>
           <Cads>
             <interw>0</interw>
-            <Optim>7</Optim>
+            <Optim>1</Optim>
             <oTime>0</oTime>
             <SplitLS>0</SplitLS>
             <OneElfS>1</OneElfS>
@@ -1748,7 +1778,7 @@
             <wLevel>3</wLevel>
             <uThumb>0</uThumb>
             <uSurpInc>1</uSurpInc>
-            <uC99>1</uC99>
+            <uC99>0</uC99>
             <uGnu>0</uGnu>
             <useXO>0</useXO>
             <v6Lang>3</v6Lang>
@@ -1760,9 +1790,9 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>Q_SPY</Define>
+              <Define>Q_SPY,STM32U545xx</Define>
               <Undefine></Undefine>
-              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\uc-os2;..\..\..\..\..\3rd_party\uC-OS2\Source;..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\ARM;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\ek-tm4c123gxl</IncludePath>
+              <IncludePath>..;..\..\..\..\..\include;..\..\..\..\..\ports\uc-os2;..\..\..\..\..\3rd_party\uC-OS2\Source;..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\ARM;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\nucleo-u545re</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1784,7 +1814,7 @@
             </VariousControls>
           </Aads>
           <LDads>
-            <umfTarg>1</umfTarg>
+            <umfTarg>0</umfTarg>
             <Ropi>0</Ropi>
             <Rwpi>0</Rwpi>
             <noStLib>0</noStLib>
@@ -1793,7 +1823,7 @@
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0x20000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile></ScatterFile>
+            <ScatterFile>dpp.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc>--entry Reset_Handler</Misc>
@@ -1804,7 +1834,7 @@
       </TargetOption>
       <Groups>
         <Group>
-          <GroupName>Applicatioin</GroupName>
+          <GroupName>Source Code</GroupName>
           <Files>
             <File>
               <FileName>bsp.c</FileName>
@@ -1812,19 +1842,9 @@
               <FilePath>..\bsp.c</FilePath>
             </File>
             <File>
-              <FileName>qstamp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
-            </File>
-            <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>dpp.h</FileName>
+              <FileName>app_cfg.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\dpp.h</FilePath>
+              <FilePath>..\app_cfg.h</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -1832,64 +1852,64 @@
               <FilePath>..\bsp.h</FilePath>
             </File>
             <File>
-              <FileName>philo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\philo.c</FilePath>
-            </File>
-            <File>
-              <FileName>table.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\table.c</FilePath>
-            </File>
-            <File>
-              <FileName>app_cfg.h</FileName>
+              <FileName>dpp.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\app_cfg.h</FilePath>
+              <FilePath>..\dpp.h</FilePath>
+            </File>
+            <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\main.c</FilePath>
             </File>
             <File>
               <FileName>os_cfg.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\os_cfg.h</FilePath>
             </File>
+            <File>
+              <FileName>philo.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\philo.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\qp_config.h</FilePath>
+            </File>
+            <File>
+              <FileName>table.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\table.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
-          <GroupName>ek-tm4c123gxl</GroupName>
+          <GroupName>nucleo-u545re</GroupName>
           <Files>
             <File>
-              <FileName>system_TM4C123GH6PM.c</FileName>
+              <FileName>stm32u5xx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\stm32u5xx.h</FilePath>
+            </File>
+            <File>
+              <FileName>stm32u545xx.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\stm32u545xx.h</FilePath>
+            </File>
+            <File>
+              <FileName>system_stm32u5xx.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\system_TM4C123GH6PM.c</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\system_stm32u5xx.c</FilePath>
             </File>
             <File>
-              <FileName>TM4C123GH6PM.h</FileName>
+              <FileName>system_stm32u5xx.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\TM4C123GH6PM.h</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\system_stm32u5xx.h</FilePath>
             </File>
             <File>
-              <FileName>gpio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>rom.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\rom.h</FilePath>
-            </File>
-            <File>
-              <FileName>sysctl.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\sysctl.h</FilePath>
-            </File>
-            <File>
-              <FileName>system_TM4C123GH6PM.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\system_TM4C123GH6PM.h</FilePath>
-            </File>
-            <File>
-              <FileName>startup_TM4C123GH6PM.s</FileName>
+              <FileName>startup_stm32u545retxq.s</FileName>
               <FileType>2</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\arm\startup_TM4C123GH6PM.s</FilePath>
+              <FilePath>..\..\..\..\..\3rd_party\nucleo-u545re\arm\startup_stm32u545retxq.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -1922,6 +1942,11 @@
               <FilePath>..\..\..\..\..\src\qf\qf_dyn.c</FilePath>
             </File>
             <File>
+              <FileName>qf_mem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
+            </File>
+            <File>
               <FileName>qf_ps.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_ps.c</FilePath>
@@ -1946,11 +1971,6 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qf\qf_time.c</FilePath>
             </File>
-            <File>
-              <FileName>qf_mem.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\src\qf\qf_mem.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -1960,6 +1980,16 @@
               <FileName>qf_port.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\ports\uc-os2\qf_port.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_port.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\ports\uc-os2\qp_port.h</FilePath>
+            </File>
+            <File>
+              <FileName>qs_port.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\ports\uc-os2\qs_port.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1986,20 +2016,25 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\src\qs\qs_rx.c</FilePath>
             </File>
+            <File>
+              <FileName>qstamp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\src\qs\qstamp.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>uC-OS2</GroupName>
           <Files>
             <File>
+              <FileName>os.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os.h</FilePath>
+            </File>
+            <File>
               <FileName>os_core.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_core.c</FilePath>
-            </File>
-            <File>
-              <FileName>os_task.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_task.c</FilePath>
             </File>
             <File>
               <FileName>os_flag.c</FileName>
@@ -2032,6 +2067,11 @@
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_sem.c</FilePath>
             </File>
             <File>
+              <FileName>os_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_task.c</FilePath>
+            </File>
+            <File>
               <FileName>os_time.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_time.c</FilePath>
@@ -2041,16 +2081,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\os_tmr.c</FilePath>
             </File>
+            <File>
+              <FileName>ucos_ii.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Source\ucos_ii.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>uC-OS2_port</GroupName>
           <Files>
-            <File>
-              <FileName>os_cpu_c.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\os_cpu_c.c</FilePath>
-            </File>
             <File>
               <FileName>os_cpu.h</FileName>
               <FileType>5</FileType>
@@ -2065,6 +2105,11 @@
               <FileName>os_dbg.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\ARM\os_dbg.c</FilePath>
+            </File>
+            <File>
+              <FileName>os_cpu_c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\3rd_party\uC-OS2\Ports\ARM-Cortex-M\ARMv7-M\os_cpu_c.c</FilePath>
             </File>
           </Files>
         </Group>

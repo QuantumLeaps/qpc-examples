@@ -31,6 +31,8 @@ option(QPC_CFG_DEBUG     "set to ON, to enable debug settings. (default: ON)" ON
 # update CMAKE_MODULE_PATH
 list(PREPEND CMAKE_MODULE_PATH ${QPC_SDK_PATH}/3rd_party/cmake ${CMAKE_SOURCE_DIR}/Source/cmake ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_SOURCE_DIR} ${HOME_PATH}/cmake)
 
+# set the qpc include path to find our local `qp_config.h´
+set(QPC_CFG_QPCONFIG_H_INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR})
 # import QPC SDK; download from git, if necessary
 include(qpc_sdk_import)
 
