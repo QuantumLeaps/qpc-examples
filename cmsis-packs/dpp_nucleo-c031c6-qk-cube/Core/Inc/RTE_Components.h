@@ -22,7 +22,7 @@
 #define  __RTE_COMPONENTS_H__
 
 /* Defines ------------------------------------------------------------------*/
-/* QuantumLeaps.qpc.7.3.4 */
+/* QuantumLeaps.qpc.8.0.0 */
 #define RTE_RTEF_QPC_QEP /* QP/C QEP */
 #define RTE_RTEF_QPC_QF /* QP/C QF */
 #define RTE_RTEF_QPC_QS /* QP/C QS */

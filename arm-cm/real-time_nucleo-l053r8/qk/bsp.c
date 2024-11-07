@@ -289,6 +289,7 @@ void QF_onStartup(void) {
     SysTick_Config((SystemCoreClock / BSP_TICKS_PER_SEC) + 1U);
 
     // set priorities of ISRs used in the system
+    // NOTE: all interrupts are "kernel aware" in Cortex-M0+
     NVIC_SetPriority(SysTick_IRQn, 0U);
     // ...
 }

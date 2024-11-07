@@ -1031,10 +1031,10 @@
         <package name="STM32C0xx_DFP" schemaVersion="1.7.7" url="https://www.keil.com/pack/" vendor="Keil" version="1.0.0"/>
         <targetInfos/>
       </file>
-      <file attr="config" category="header" condition="CoreM" name="ports\arm-cm\qk\config\qp_config.h" version="7.3.4">
+      <file attr="config" category="header" condition="CoreM" name="ports\arm-cm\qk\config\qp_config.h" version="8.0.0">
         <instance index="0">RTE\RTEF\qp_config.h</instance>
-        <component Cbundle="qpc" Cclass="RTEF" Cgroup="Real-Time Kernel" Cvariant="qk" Cvendor="QuantumLeaps" Cversion="7.3.4" condition="Comp_qf" isDefaultVariant="1"/>
-        <package name="qpc" schemaVersion="1.7.7" url="https://raw.githubusercontent.com/QuantumLeaps/cmsis-packs/main/" vendor="QuantumLeaps" version="7.3.4"/>
+        <component Cbundle="qpc" Cclass="RTEF" Cgroup="Real-Time Kernel" Cvariant="qk" Cvendor="QuantumLeaps" Cversion="8.0.0" condition="Comp_qf" isDefaultVariant="1"/>
+        <package name="qpc" schemaVersion="1.7.7" url="https://raw.githubusercontent.com/QuantumLeaps/cmsis-packs/main/" vendor="QuantumLeaps" version="8.0.0"/>
         <targetInfos>
           <targetInfo name="dbg"/>
           <targetInfo name="rel"/>

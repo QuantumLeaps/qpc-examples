@@ -14,7 +14,7 @@ setlocal
 :: NOTE: Adjust the following symbol to the location of the
 :: STLINK utility on your machine
 ::
-set STLINK="C:\tools\ST\ST-LINK\ST-LINK Utility\ST-LINK_CLI.exe"
+set STLINK="C:\ST\ST-LINK Utility\ST-LINK_CLI.exe"
 
 @echo on
 %STLINK% -P %1 0x08000000

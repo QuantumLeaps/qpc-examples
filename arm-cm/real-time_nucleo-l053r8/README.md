@@ -62,7 +62,7 @@ The example QP application consists of 2 periodic threads (Active Objects) and t
 The NUCLEO-L053R8 needs to be conntected to a logic analyzer as shown in the picture below.
 
 <p align="center">
-<img src="./stm32-nucleo-l053r8_conn.png"/><br>
+<img src="./stm32-nucleo-64_conn.png"/><br>
 <b>Connecting STM32 NUCLEO-L053R8 to a logic analyzer</b>
 </p>
 

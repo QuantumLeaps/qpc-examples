@@ -51,6 +51,12 @@ present on the repository or user disk". Please select the option:
 
 
 # Using the Spy configuration
+> **NOTE** Due to the widespread non-compliance with the GPL, as well as
+infringement on the dual-licensing model of QP frameworks, the QS target-
+resident component has been removed from the open-source GPL distribution.
+To request evaluation of the complete QP/C framework, please contact
+Quantum Leaps at: https://www.state-machine.com/contact.
+
 
 1. Click on the down-arrow on the "hammer" tool and choose "Spy"
 2. Click on "Debug configurations" button and choose "Debug Configurations..."

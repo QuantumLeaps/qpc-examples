@@ -10,7 +10,7 @@
       <TargetName>dbg</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6210000::V6.21::ARMCLANG</pCCUsed>
+      <pCCUsed>6220000::V6.22::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -338,8 +338,8 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-                <Define></Define>
-                <Undefine></Undefine>
+              <Define></Define>
+              <Undefine></Undefine>
               <IncludePath></IncludePath>
             </VariousControls>
           </Cads>
@@ -431,7 +431,7 @@
       <TargetName>spy</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6210000::V6.21::ARMCLANG</pCCUsed>
+      <pCCUsed>6220000::V6.22::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -915,10 +915,10 @@
           <targetInfo name="spy"/>
         </targetInfos>
       </file>
-      <file attr="config" category="header" condition="CoreM" name="ports\arm-cm\qk\config\qp_config.h" version="7.3.4">
+      <file attr="config" category="header" condition="CoreM" name="ports\arm-cm\qk\config\qp_config.h" version="8.0.0">
         <instance index="0">RTE\RTEF\qp_config.h</instance>
-        <component Cbundle="qpc" Cclass="RTEF" Cgroup="Real-Time Kernel" Cvariant="qk" Cvendor="QuantumLeaps" Cversion="7.3.4" condition="Comp_qf" isDefaultVariant="1"/>
-        <package name="qpc" schemaVersion="1.7.7" url="https://raw.githubusercontent.com/QuantumLeaps/cmsis-packs/main/" vendor="QuantumLeaps" version="7.3.4"/>
+        <component Cbundle="qpc" Cclass="RTEF" Cgroup="Real-Time Kernel" Cvariant="qk" Cvendor="QuantumLeaps" Cversion="8.0.0" condition="Comp_qf" isDefaultVariant="1"/>
+        <package name="qpc" schemaVersion="1.7.7" url="https://raw.githubusercontent.com/QuantumLeaps/cmsis-packs/main/" vendor="QuantumLeaps" version="8.0.0"/>
         <targetInfos>
           <targetInfo name="dbg"/>
           <targetInfo name="spy"/>

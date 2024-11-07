@@ -142,7 +142,7 @@ DEFINES   := -DSTM32U545xx \
 #
 ARM_CPU   := -mcpu=cortex-m33
 ARM_FPU   := -mfpu=fpv5-sp-d16
-FLOAT_ABI := -mfloat-abi=hard -mthumb
+FLOAT_ABI := -mfloat-abi=hard
 
 #-----------------------------------------------------------------------------
 # GNU-ARM toolset (NOTE: You need to adjust to your machine)
@@ -164,7 +164,7 @@ LINK  := $(GNU_ARM)/bin/arm-none-eabi-gcc
 BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 
 ##############################################################################
-# Typically you should not need to change anything below this line
+# Typically, you should not need to change anything below this line
 
 # basic utilities (included in QTools for Windows), see:
 #     https://www.state-machine.com/qtools

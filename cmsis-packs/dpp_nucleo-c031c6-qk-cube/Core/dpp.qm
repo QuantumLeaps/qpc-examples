@@ -457,9 +457,9 @@ me-&gt;fork[n] = FREE;</action>
    </statechart>
   </class>
  </package>
- <!--${.}-->
- <directory name=".">
-  <!--${.::dpp.h}-->
+ <!--${Inc}-->
+ <directory name="Inc">
+  <!--${Inc::dpp.h}-->
   <file name="dpp.h">
    <text>#ifndef DPP_H_
 #define DPP_H_
@@ -481,7 +481,10 @@ extern QXMutex TH_mutex;
 
 #endif // DPP_H_</text>
   </file>
-  <!--${.::philo.c}-->
+ </directory>
+ <!--${Src}-->
+ <directory name="Src">
+  <!--${Src::philo.c}-->
   <file name="philo.c">
    <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
 #include &quot;dpp.h&quot;               // DPP Application interface
@@ -511,7 +514,7 @@ $define ${Shared::Philo_ctor}
 $define ${Shared::AO_Philo[N_PHILO]}
 $define ${AOs::Philo}</text>
   </file>
-  <!--${.::table.c}-->
+  <!--${Src::table.c}-->
   <file name="table.c">
    <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
 #include &quot;dpp.h&quot;               // DPP Application interface
