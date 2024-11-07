@@ -518,7 +518,7 @@ void QS_onCommand(uint8_t cmdId,
 //
 // Only ISRs prioritized at or below the QF_AWARE_ISR_CMSIS_PRI level (i.e.,
 // with the numerical values of priorities equal or higher than
-// QF_AWARE_ISR_CMSIS_PRI) are allowed to call the QK_ISR_ENTRY/
+// QF_AWARE_ISR_CMSIS_PRI) are allowed to call the QXK_ISR_ENTRY/
 // QXK_ISR_ENTRY macros or any other QF/QXK services. These ISRs are
 // "QF-aware".
 //

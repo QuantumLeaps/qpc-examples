@@ -351,7 +351,7 @@
                     <state>$PROJ_DIR$\..\..\..\..\..\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\ports\freertos</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM35P_NTZ\non_secure</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\IAR\ARM_CM33_NTZ\non_secure</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\CMSIS\Include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\nucleo-u545re</state>
                 </option>
@@ -1433,7 +1433,7 @@
                     <state>$PROJ_DIR$\..\..\..\..\..\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\ports\freertos</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM35P_NTZ\non_secure</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\IAR\ARM_CM33_NTZ\non_secure</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\CMSIS\Include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\nucleo-u545re</state>
                 </option>
@@ -2515,7 +2515,7 @@
                     <state>$PROJ_DIR$\..\..\..\..\..\include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\ports\freertos</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include</state>
-                    <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\GCC\ARM_CM35P_NTZ\non_secure</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\IAR\ARM_CM33_NTZ\non_secure</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\CMSIS\Include</state>
                     <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\nucleo-u545re</state>
                 </option>
@@ -3271,6 +3271,9 @@
         <name>FreeRTOS</name>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\list.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\IAR\ARM_CM33_NTZ\non_secure\mpu_wrappers_v2_asm.S</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\portable\IAR\ARM_CM33_NTZ\non_secure\port.c</name>
