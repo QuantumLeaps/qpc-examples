@@ -1,33 +1,28 @@
 //============================================================================
 // Product: QUTEST fixture for the DPP example
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// The QP/C software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
@@ -46,8 +41,25 @@ QActive * const AO_Table = &Table_dummy.super;
 extern QAsm * const SM_Philo[N_PHILO];
 
 //............................................................................
-int main() {
-    QF_init();       // initialize the framework and the underlying RT kernel
+#ifdef Q_HOST
+int main(int argc, char *argv[])
+#else
+int main(void)
+#endif
+{
+    QF_init();  // initialize the framework
+
+    // initialize the QS software tracing
+#ifdef Q_HOST
+    if (QS_INIT((argc > 1) ? argv[1] : (void*)0) == 0U) {
+        Q_ERROR();
+    }
+#else
+    if (QS_INIT((void*)0) == 0U) {
+        Q_ERROR();
+    }
+#endif
+
     BSP_init();      // initialize the BSP
 
     // object dictionaries...

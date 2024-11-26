@@ -7,13 +7,24 @@ Q_DEFINE_THIS_FILE
 void Led_DICTIONARY(void); // dictionaries for the Led "spy " test double
 
 //----------------------------------------------------------------------------
-int main() {
+#ifdef Q_HOST
+int main(int argc, char *argv[])
+#else
+int main(void)
+#endif
+{
     QF_init();  // initialize the framework
 
     // initialize the QS software tracing
-    if (!QS_INIT((void *)0)) {
+#ifdef Q_HOST
+    if (QS_INIT((argc > 1) ? argv[1] : (void*)0) == 0U) {
         Q_ERROR();
     }
+#else
+    if (QS_INIT((void*)0) == 0U) {
+        Q_ERROR();
+    }
+#endif
 
     // dictionaries...
     Led_DICTIONARY();

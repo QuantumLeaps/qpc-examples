@@ -13,10 +13,11 @@
 *.obj
 *.elf
 
-# Linker output
+# Linker/Gcov output
 *.ilk
 *.map
 *.exp
+*.gcov
 
 # Precompiled Headers
 *.gch

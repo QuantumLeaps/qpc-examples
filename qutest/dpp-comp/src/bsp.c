@@ -1,33 +1,28 @@
 //============================================================================
 // Product: DPP example, BSP for QUTest
-// Last Updated for Version: 7.3.0
-// Date of the Last Update:  2023-08-23
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// The QP/C software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
@@ -46,21 +41,14 @@ enum {
 
 //............................................................................
 void BSP_init(void) {
-    // initialize the QS software tracing
-    if (!QS_INIT((void *)0)) {
-        Q_ERROR();
-    }
+    BSP_randomSeed(1234U);
 
     QS_FUN_DICTIONARY(&BSP_displayPaused);
     QS_FUN_DICTIONARY(&BSP_displayPhilStat);
     QS_FUN_DICTIONARY(&BSP_random);
     QS_FUN_DICTIONARY(&BSP_randomSeed);
-
     QS_ONLY(produce_sig_dict());
-
     QS_USR_DICTIONARY(BSP_CALL);
-
-    BSP_randomSeed(1234U);
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {

@@ -1,1 +1,1 @@
-gcov -f -o build qep_hsm.o
+gcov -f -o build_host qep_hsm.o

@@ -35,15 +35,32 @@
 
 //#include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 
-//Q_DEFINE_THIS_FILE
+Q_DEFINE_THIS_FILE
 
 //============================================================================
 // instantiate Table AO as a dummy collaborator
 static QActiveDummy Table_dummy;
 QActive * const AO_Table = &Table_dummy.super;
 
-int main() {
-    QF_init();  // initialize the framework and the underlying RT kernel
+#ifdef Q_HOST
+int main(int argc, char *argv[])
+#else
+int main(void)
+#endif
+{
+    QF_init();  // initialize the framework
+
+    // initialize the QS software tracing
+#ifdef Q_HOST
+    if (QS_INIT((argc > 1) ? argv[1] : (void*)0) == 0U) {
+        Q_ERROR();
+    }
+#else
+    if (QS_INIT((void*)0) == 0U) {
+        Q_ERROR();
+    }
+#endif
+
     BSP_init(); // initialize the Board Support Package
 
     QS_OBJ_DICTIONARY(&Table_dummy);
