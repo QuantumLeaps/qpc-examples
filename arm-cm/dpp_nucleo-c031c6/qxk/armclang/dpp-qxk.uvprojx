@@ -338,8 +338,8 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-                <Define></Define>
-                <Undefine></Undefine>
+              <Define></Define>
+              <Undefine></Undefine>
               <IncludePath>..\..;..\..\..\..\..\include;..\..\..\..\..\ports\arm-cm\qxk\armclang;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\nucleo-c031c6</IncludePath>
             </VariousControls>
           </Cads>
