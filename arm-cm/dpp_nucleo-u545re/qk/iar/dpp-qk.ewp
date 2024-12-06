@@ -3261,6 +3261,9 @@
             <name>$PROJ_DIR$\..\..\philo.c</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\..\qp_config.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\..\table.c</name>
         </file>
     </group>

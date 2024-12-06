@@ -1,5 +1,5 @@
 //============================================================================
-// QP configuration file (host with console and just QEP)
+// QP configuration file (host with console)
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
@@ -59,19 +59,19 @@
 // <i>  * Hard-limits for all loops
 // <i>  * Memory Isolation by means of Memory Protection Unit (MPU)
 
-// <c3>Disable QP FuSa in development
+// <c3>Disable QP FuSa in development (NOT recommended)
 // <i>Disable assertions and other self monitoring features
 // <i>in development build configurations (NDEBUG undefined).
-// <i>VIOLATES functional safety standards. NOT recommended !!!
+// <i>NOTE: Disabling safety *violates* functional safety standards.
 //#ifndef NDEBUG
 //#define Q_UNSAFE
 //#endif
 // </c>
 
-// <c3>Disable QP FuSa in production release
-// <i>Disable assertions and other self monitoring features
+// <c3>Disable QP FuSa in production release (NOT recommended)
+// <i>Disable assertions and other safety features
 // <i>in the release build configurations (NDEBUG defined).
-// <i>VIOLATES functional safety standards. NOT recommended !!!
+// <i>NOTE: Disabling safety *violates* functional safety standards.
 //#ifdef NDEBUG
 //#define Q_UNSAFE
 //#endif
@@ -80,7 +80,7 @@
 // </h>
 
 //..........................................................................
-// <h>QEP Event Processor
+// <h>QEP Event Processor (Events)
 // <i>Events and state machines.
 
 // <o>Event signal size (Q_SIGNAL_SIZE)
@@ -94,8 +94,13 @@
 // </h>
 
 //..........................................................................
-// <h>QF Framework
+// <h>QF Framework (Active Objects)
 // <i>Active Object framework
+
+// <o>Maximum # Active Objects (QF_MAX_ACTIVE) <1-64>
+// <i>Maximum # Active Objects in the system <1..64>
+// <i>Default: 32
+#define QF_MAX_ACTIVE  64U
 
 // <o>Maximum # event pools (QF_MAX_EPOOL)
 // <0=>0 no event pools
@@ -104,17 +109,118 @@
 // <12=>12 <13=>13 <14=>14 <15=>15
 // <i>Maximum # Event Pools <1..15>
 // <i>Default: 3
-#define QF_MAX_EPOOL 0U
+#define QF_MAX_EPOOL 3U
 
-#define QF_CRIT_STAT
-#define QF_CRIT_ENTRY() ((void)0)
-#define QF_CRIT_EXIT()  ((void)0)
+// <o>Maximum # clock tick rates (QF_MAX_TICK_RATE)
+// <0=>0 no time events
+// <1=>1 (default) <2=>2 <3=>3 <4=>4 <5=>5
+// <6=>6 <7=>7 <8=>8 <9=>9 <10=>10 <11=>11
+// <12=>12 <13=>13 <14=>14 <15=>15
+// <i>Maximum # clock tick rates for time events <1..15>
+// <i>Default: 1
+#define QF_MAX_TICK_RATE 2U
 
-#define QF_MEM_SYS()    ((void)0)
-#define QF_MEM_APP()    ((void)0)
+// <o>Event size (QF_EVENT_SIZ_SIZE)
+//   <1U=>1
+//   <2U=>2 (default)
+//   <4U=>4
+// <i>Size of the dynamic events for QF [bytes]
+// <i>Default: 2 (64K bytes maximum event size)
+#define QF_EVENT_SIZ_SIZE   2U
+
+// <o>Time event counter size (QF_TIMEEVT_CTR_SIZE)
+//   <1U=>1
+//   <2U=>2
+//   <4U=>4 (default)
+// <i>Size of the QTimeEvt counter [bytes]
+// <i>Default: 4 (2^32 dynamic range)
+#define QF_TIMEEVT_CTR_SIZE 4U
+
+// <o>Event queue counter size (QF_EQUEUE_CTR_SIZE)
+//   <1U=>1 (default)
+//   <2U=>2
+// <i>Size of event queue counter [bytes]
+// <i>Default: 1 (255 events maximum in a queue)
+#define QF_EQUEUE_CTR_SIZE  2U
+
+// <o>Memory pool counter size (QF_MPOOL_CTR_SIZE)
+//   <1U=>1
+//   <2U=>2 (default)
+//   <4U=>4
+// <i>Size of memory pool counter [bytes]
+// <i>Default: 2 (64K blocks maximum in a pool)
+#define QF_MPOOL_CTR_SIZE 2U
+
+// <o>Memory block size (QF_MPOOL_SIZ_SIZE)
+//   <1U=>1
+//   <2U=>2 (default)
+//   <4U=>4
+// <i>Size of memory pool block [bytes]
+// <i>Default: 2 (64K bytes maximum block size)
+#define QF_MPOOL_SIZ_SIZE 2U
+
+// <c2>Enable event parameter initialization (QEVT_PAR_INIT)
+// <i>Initialize parameters of dynamic events at allocation
+// <i>(Resource Acquisition Is Initialization (RAII) for dynamic events)
+#define QEVT_PAR_INIT
+// </c>
+
+// <c1>Enable active object stop API (QACTIVE_CAN_STOP)
+// <i>NOTE: Not recommended
+#define QACTIVE_CAN_STOP
+// </c>
+
+// <c1>Enable context switch callback *without* QS (QF_ON_CONTEXT_SW)
+// <i>Context switch callback QF_onContextSw() when Q_SPY is undefined.
+//#ifndef Q_SPY
+//#define QF_ON_CONTEXT_SW
+//#endif
+// </c>
+
+// <c1>Enable context switch callback *with* QS (QF_ON_CONTEXT_SW)
+// <i>Context switch callback QF_onContextSw() when Q_SPY is defined.
+//#ifdef Q_SPY
+//#define QF_ON_CONTEXT_SW
+//#endif
+// </c>
+
+// <c2>Enable memory isolation (QF_MEM_ISOLATE)
+// <i>Memory isolation (requires MPU)
+// <i>NOTE: implies QF_ON_CONTEXT_SW.
+//#define QF_MEM_ISOLATE
+// </c>
+
+// </h>
+
+//..........................................................................
+// <h>QS Software Tracing (Q_SPY)
+// <i>Target-resident component of QP/Spy software tracing system
+// <i>(tracing instrumentation and command-input).
+// <i>NOTE: The QS software tracing instrumentation is activated only when
+// <i>the macro Q_SPY is defined on the command-line to the compiler.
+// <i>Typically, Q_SPY is defined only in the "spy" build configuration.
+
+// <o>QS timestamp size (QS_TIME_SIZE)
+//   <1U=>1
+//   <2U=>2
+//   <4U=>4 (default)
+// <i>Size of the timestamp in QS [bytes]
+// <i>Default: 4 (2^32 dynamic range)
+#define QS_TIME_SIZE 4U
+
+// <o>QS buffer counter size (QS_CTR_SIZE)
+//   <1U=>1
+//   <2U=>2 (default)
+//   <4U=>4
+// <i>Size of the counter in the internal QS buffer [bytes]
+// <i>Default: 2 (64K bytes in QS buffer)
+#define QS_CTR_SIZE 2U
 
 // </h>
 
 //------------- <<< end of configuration section >>> -----------------------
+
+// Activate the QF console access
+#define QF_CONSOLE
 
 #endif // QP_CONFIG_H_
