@@ -414,6 +414,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
             </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\qp_config.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1035,6 +1040,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
             </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\qp_config.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1655,6 +1665,11 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>qp_config.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\qp_config.h</FilePath>
             </File>
           </Files>
         </Group>

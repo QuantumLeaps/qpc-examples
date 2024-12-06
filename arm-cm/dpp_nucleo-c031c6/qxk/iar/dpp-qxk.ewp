@@ -16,7 +16,7 @@
                 <debug>1</debug>
                 <option>
                     <name>BrowseInfoPath</name>
-                    <state>dbg\BrowseInfo</state>
+                    <state>dbg</state>
                 </option>
                 <option>
                     <name>ExePath</name>
@@ -1095,7 +1095,7 @@
                 <debug>0</debug>
                 <option>
                     <name>BrowseInfoPath</name>
-                    <state>rel\BrowseInfo</state>
+                    <state>rel</state>
                 </option>
                 <option>
                     <name>ExePath</name>
@@ -1484,11 +1484,11 @@
                 </option>
                 <option>
                     <name>IccStaticDestr</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IccCppInlineSemantics</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IccCmsis</name>
@@ -2175,7 +2175,7 @@
                 <debug>1</debug>
                 <option>
                     <name>BrowseInfoPath</name>
-                    <state>spy\BrowseInfo</state>
+                    <state>spy</state>
                 </option>
                 <option>
                     <name>ExePath</name>
@@ -3240,9 +3240,6 @@
             <data />
         </settings>
     </configuration>
-    <mfc>
-        <configuration>Release</configuration>
-    </mfc>
     <group>
         <name>Application</name>
         <file>

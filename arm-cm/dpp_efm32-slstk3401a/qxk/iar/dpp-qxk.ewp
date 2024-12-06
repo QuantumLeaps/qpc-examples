@@ -227,9 +227,6 @@
                 <option>
                     <name>CCDefines</name>
                     <state>EFM32PG1B200F256GM48</state>
-                    <state>QXK_USE_IRQ_HANDLER=FPUEH_IRQHandler</state>
-                    <state>QXK_USE_IRQ_NUM=33</state>
-                    <state>QF_ON_CONTEXT_SW</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -1089,17 +1086,17 @@
         <toolchain>
             <name>ARM</name>
         </toolchain>
-        <debug>0</debug>
+        <debug>1</debug>
         <settings>
             <name>General</name>
             <archiveVersion>3</archiveVersion>
             <data>
                 <version>35</version>
                 <wantNonLocal>1</wantNonLocal>
-                <debug>0</debug>
+                <debug>1</debug>
                 <option>
                     <name>BrowseInfoPath</name>
-                    <state>rel\BrowseInfo</state>
+                    <state>rel</state>
                 </option>
                 <option>
                     <name>ExePath</name>
@@ -1302,14 +1299,13 @@
             <data>
                 <version>37</version>
                 <wantNonLocal>1</wantNonLocal>
-                <debug>0</debug>
+                <debug>1</debug>
                 <option>
                     <name>CCOptimizationNoSizeConstraints</name>
                     <state>0</state>
                 </option>
                 <option>
                     <name>CCDefines</name>
-                    <state>NDEBUG</state>
                     <state>EFM32PG1B200F256GM48</state>
                 </option>
                 <option>
@@ -1371,7 +1367,7 @@
                 <option>
                     <name>CCAllowList</name>
                     <version>1</version>
-                    <state>11111110</state>
+                    <state>00000000</state>
                 </option>
                 <option>
                     <name>CCDebugInfo</name>
@@ -1452,16 +1448,16 @@
                 </option>
                 <option>
                     <name>CCOptLevel</name>
-                    <state>3</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CCOptStrategy</name>
                     <version>0</version>
-                    <state>2</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CCOptLevelSlave</name>
-                    <state>3</state>
+                    <state>1</state>
                 </option>
                 <option>
                     <name>CCPosIndRopi</name>
@@ -1510,7 +1506,7 @@
                 <option>
                     <name>CCOptStrategySlave</name>
                     <version>0</version>
-                    <state>2</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>CCGuardCalls</name>
@@ -1556,7 +1552,7 @@
             <data>
                 <version>11</version>
                 <wantNonLocal>1</wantNonLocal>
-                <debug>0</debug>
+                <debug>1</debug>
                 <option>
                     <name>AObjPrefix</name>
                     <state>1</state>
@@ -1722,7 +1718,7 @@
             <data>
                 <version>1</version>
                 <wantNonLocal>1</wantNonLocal>
-                <debug>0</debug>
+                <debug>1</debug>
                 <option>
                     <name>OOCOutputFormat</name>
                     <version>3</version>
@@ -1770,7 +1766,7 @@
             <data>
                 <version>27</version>
                 <wantNonLocal>1</wantNonLocal>
-                <debug>0</debug>
+                <debug>1</debug>
                 <option>
                     <name>IlinkLibIOConfig</name>
                     <state>1</state>
@@ -1996,7 +1992,7 @@
                 </option>
                 <option>
                     <name>IlinkOptInline</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkOptExceptionsAllow</name>
@@ -2012,7 +2008,7 @@
                 </option>
                 <option>
                     <name>IlinkOptMergeDuplSections</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>IlinkOptUseVfe</name>
@@ -2144,7 +2140,7 @@
             <data>
                 <version>0</version>
                 <wantNonLocal>1</wantNonLocal>
-                <debug>0</debug>
+                <debug>1</debug>
                 <option>
                     <name>IarchiveInputs</name>
                     <state></state>
@@ -2391,9 +2387,6 @@
                 <option>
                     <name>CCDefines</name>
                     <state>Q_SPY</state>
-                    <state>QF_ON_CONTEXT_SW</state>
-                    <state>QXK_USE_IRQ_HANDLER=FPUEH_IRQHandler</state>
-                    <state>QXK_USE_IRQ_NUM=33</state>
                     <state>EFM32PG1B200F256GM48</state>
                 </option>
                 <option>
@@ -3249,9 +3242,6 @@
             <data />
         </settings>
     </configuration>
-    <mfc>
-        <configuration>Release</configuration>
-    </mfc>
     <group>
         <name>Application</name>
         <file>

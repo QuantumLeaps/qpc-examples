@@ -103,7 +103,7 @@ preemptive, is strictly encapsulated inside a dedicated active object
 interrupt latency. Also, the Ethernet interrupt service routine (ISR) runs
 very fast without performing any lengthy copy operations. This means that
 hard-real-time processing can be done at the task level, especially when you
-use a preemptive QK™ kernel for executing your QP™ application.
+use a preemptive QK kernel for executing your QP application.
 
 The QP-lwIP integration has been also carefully designed for portability. All
 hardware-specific code is clearly separated in the Ethernet/lwIP device driver

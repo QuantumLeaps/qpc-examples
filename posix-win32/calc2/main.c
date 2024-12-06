@@ -1,7 +1,7 @@
 //============================================================================
 // Product: calc2 Example
-// Last updated for version 7.3.0
-// Last updated on  2023-07-27
+// Last updated for version 8.0.1
+// Last updated on  2024-12-16
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -37,7 +37,7 @@
 
 #include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 
-Q_DEFINE_THIS_FILE
+//Q_DEFINE_THIS_FILE
 
 //............................................................................
 int main() {

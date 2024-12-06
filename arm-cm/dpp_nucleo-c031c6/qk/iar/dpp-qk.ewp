@@ -3261,6 +3261,9 @@
             <name>$PROJ_DIR$\..\..\philo.c</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\..\..\qp_config.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\..\..\table.c</name>
         </file>
     </group>
@@ -3324,10 +3327,10 @@
     <group>
         <name>QP_port</name>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\..\ports\arm-cm\qk\iar\qp_port.h</name>
+            <name>$PROJ_DIR$\..\..\..\..\..\ports\arm-cm\qk\iar\qk_port.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\..\..\..\ports\arm-cm\qk\iar\qk_port.c</name>
+            <name>$PROJ_DIR$\..\..\..\..\..\ports\arm-cm\qk\iar\qp_port.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\..\..\..\..\ports\arm-cm\qk\iar\qs_port.h</name>

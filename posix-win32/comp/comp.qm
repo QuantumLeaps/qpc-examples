@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="5.3.0" links="1">
+<model version="7.0.0" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>&quot;Orthogonal Component&quot; example</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -78,8 +78,8 @@ BSP_showTime24H(&quot;*** Alarm reset &quot;,  me-&gt;alarm_time, 100U);</action
       </tran_glyph>
      </tran>
      <state_glyph node="2,5,32,15">
-      <entry box="1,2,6,2"/>
-      <exit box="1,4,6,2"/>
+      <entry box="0,3,6,2"/>
+      <exit box="0,5,6,2"/>
      </state_glyph>
     </state>
     <!--${Components::Alarm::SM::on}-->
@@ -116,7 +116,7 @@ QACTIVE_POST(APP_alarmClock, Q_NEW(QEvt, ALARM_SIG), me);</action>
       </tran_glyph>
      </tran>
      <state_glyph node="2,24,32,20">
-      <entry box="1,2,5,2"/>
+      <entry box="0,3,5,2"/>
      </state_glyph>
     </state>
     <state_diagram size="46,48"/>
@@ -213,7 +213,7 @@ QASM_DISPATCH(&amp;me-&gt;alarm.super, &amp;pe.super, me-&gt;super.prio);</actio
        </tran_glyph>
       </tran>
       <state_glyph node="4,36,32,12">
-       <entry box="1,2,27,2"/>
+       <entry box="0,3,27,2"/>
       </state_glyph>
      </state>
      <!--${Components::AlarmClock::SM::timekeeping::mode12h}-->
@@ -240,19 +240,19 @@ QASM_DISPATCH(&amp;me-&gt;alarm.super, &amp;pe.super, me-&gt;super.prio);</actio
        </tran_glyph>
       </tran>
       <state_glyph node="4,50,32,12">
-       <entry box="1,2,17,2"/>
+       <entry box="0,3,17,2"/>
       </state_glyph>
      </state>
      <state_glyph node="2,6,42,58">
-      <entry box="1,2,6,2"/>
-      <exit box="1,4,6,2"/>
+      <entry box="0,3,6,2"/>
+      <exit box="0,5,6,2"/>
      </state_glyph>
     </state>
     <!--${Components::AlarmClock::SM::final}-->
     <state name="final">
      <entry brief="terminate">QF_stop(); // terminate the application</entry>
      <state_glyph node="2,68,31,8">
-      <entry box="1,2,11,2"/>
+      <entry box="0,3,11,2"/>
      </state_glyph>
     </state>
     <state_diagram size="50,80"/>
@@ -333,7 +333,7 @@ $declare${Components::AlarmClock_ctor}
 
 #include &quot;safe_std.h&quot; // portable &quot;safe&quot; &lt;stdio.h&gt;/&lt;string.h&gt; facilities
 
-Q_DEFINE_THIS_FILE
+//Q_DEFINE_THIS_FILE
 
 // Active object class -----------------------------------------------------
 $declare${Components::AlarmClock}

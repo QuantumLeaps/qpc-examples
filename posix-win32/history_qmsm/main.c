@@ -37,7 +37,7 @@
 #include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 #include <stdlib.h>   // for exit()
 
-Q_DEFINE_THIS_FILE
+//Q_DEFINE_THIS_FILE
 
 //............................................................................
 int main() {

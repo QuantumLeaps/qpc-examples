@@ -52,7 +52,7 @@ of the "Fly 'n' Shoot" game on Windows GUI, either single-threaded (win32-qv)
 or multithreaded (win32). This sub-directory contains the  Visual Studio
 solution file (game-gui.sln) for Visual C++.
 
-The Win32-GUI emulation is based on the QWin™ GUI Prototyping Toolkit, see:
+The Win32-GUI emulation is based on the QWin GUI Prototyping Toolkit, see:
 
 - https://www.state-machine.com/products/qtools#QWIN
 
