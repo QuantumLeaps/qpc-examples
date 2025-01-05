@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.0" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>Real-time example</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -201,7 +201,9 @@ BSP_d3off();</action>
     <state name="active">
      <!--${AOs::Sporadic2::SM::active::SPORADIC_A}-->
      <tran trig="SPORADIC_A">
-      <action brief="post-Sporadic3">BSP_d5on();
+      <action brief="post-Sporadic3">Q_UNUSED_PAR(me);
+
+BSP_d5on();
 QACTIVE_POST(AO_Sporadic3, e, me); // Sporadic2 --&gt; Sporadic3
 BSP_d5off();</action>
       <tran_glyph conn="2,12,3,-1,34">
@@ -246,7 +248,9 @@ for (uint16_t i = Q_EVT_CAST(SporadicSpecEvt)-&gt;toggles;
     <state name="active">
      <!--${AOs::Sporadic3::SM::active::SPORADIC_A}-->
      <tran trig="SPORADIC_A">
-      <action brief="post-to-Periodic4,long-RTC">BSP_d4on();
+      <action brief="post-to-Periodic4,long-RTC">Q_UNUSED_PAR(me);
+
+BSP_d4on();
 // Sporadic3 --&gt; Periodic4
 QACTIVE_POST(AO_Periodic4, BSP_getEvtPeriodic4(1U), me);
 BSP_d4off();
@@ -280,7 +284,7 @@ $declare ${Shared}
   </file>
   <!--${.::periodic1.c}-->
   <file name="periodic1.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -294,7 +298,7 @@ $define ${AOs::Periodic1}</text>
   </file>
   <!--${.::periodic4.c}-->
   <file name="periodic4.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -308,13 +312,13 @@ $define ${AOs::Periodic4}</text>
   </file>
   <!--${.::sporadic2.c}-->
   <file name="sporadic2.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
 $declare ${AOs::Sporadic2}
 
-Q_DEFINE_THIS_MODULE(&quot;sporadic2&quot;)
+//Q_DEFINE_THIS_MODULE(&quot;sporadic2&quot;)
 
 $define ${Shared::Sporadic2_ctor}
 $define ${Shared::AO_Sporadic2}
@@ -322,13 +326,13 @@ $define ${AOs::Sporadic2}</text>
   </file>
   <!--${.::sporadic3.c}-->
   <file name="sporadic3.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
 $declare ${AOs::Sporadic3}
 
-Q_DEFINE_THIS_MODULE(&quot;sporadic3&quot;)
+//Q_DEFINE_THIS_MODULE(&quot;sporadic3&quot;)
 
 $define ${Shared::Sporadic3_ctor}
 $define ${Shared::AO_Sporadic3}

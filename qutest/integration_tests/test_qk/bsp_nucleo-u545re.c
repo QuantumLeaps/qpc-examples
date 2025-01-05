@@ -7,20 +7,20 @@
 //                    ------------------------
 //                    Modern Embedded Software
 //
-// SPDX-License-Identifier: LicenseRef-QL-cert
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is part of the QP/C Certification Kit, which is licensed
-// under the terms of the Quantum Leaps Certification Kit licenses. Please
-// contact Quantum Leaps for more information about the available licensing
-// options.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// RESTRICTIONS
-// You may NOT:
-// (a) redistribute, encumber, sell, rent, lease, sublicense, or otherwise
-//     transfer rights in this software,
-// (b) remove or alter any trademark, logo, copyright or other proprietary
-//     notices, legends, symbols or labels present in this software,
-// (c) plagiarize this software to sidestep the licensing obligations.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
+//
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
 //
 // Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
@@ -34,7 +34,7 @@
 
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
-// Local-scope defines -----------------------------------------------------
+// Local-scope defines -------------------------------------------------------
 // LED pins available on the board (just one user LED LD2--Green on PA.5)
 #define LD2_PIN  5U
 
@@ -66,26 +66,28 @@ enum AppRecords { // application-specific trace records
 // ISRs used in this project =================================================
 void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
-    QK_ISR_ENTRY(); // inform QK kernel about entering an ISR
+    QK_ISR_ENTRY();   // inform QK about entering an ISR
 
     // process time events for rate 0
     QTIMEEVT_TICK_X(0U, &l_SysTick_Handler);
 
-    QK_ISR_EXIT();  // inform QK kernel about exiting an ISR
+    QK_ISR_EXIT();  // inform QK about exiting an ISR
 }
 //..........................................................................
 void EXTI0_IRQHandler(void); // prototype
 void EXTI0_IRQHandler(void) { // for testing, NOTE03
-    QK_ISR_ENTRY(); // inform QXK kernel about entering an ISR
+    QK_ISR_ENTRY();   // inform QK about entering an ISR
 
     // for testing...
     static QEvt const t1 = QEVT_INITIALIZER(TEST1_SIG);
     QACTIVE_PUBLISH(&t1, &l_test_ISR);
 
-    QK_ISR_EXIT();  // inform QK kernel about exiting an ISR
+    QK_ISR_EXIT();    // inform QK about exiting an ISR
 }
 
-// BSP functions ===========================================================
+//============================================================================
+// BSP functions...
+
 static void STM32U545RE_MPU_setup(void) {
     // Set Attr 0
     ARM_MPU_SetMemAttr(0UL,
@@ -98,31 +100,33 @@ static void STM32U545RE_MPU_setup(void) {
 
     MPU->RNR = 0U; // region 0 (for ROM: read-only, can-execute)
     MPU->RBAR = ARM_MPU_RBAR(0x08000000U,
-        ARM_MPU_SH_NON,
-        ARM_MPU_AP_RO,
-        ARM_MPU_AP_PO,
-        ARM_MPU_EX);
+        ARM_MPU_SH_NON,        // SH: Normal memory (not-shareable)
+        1U,                    // RO: Normal memory, read-only
+        0U,                    // NP: Normal memory, privileged access only
+        0U);                   // XN: eXecute never (disabled)
     MPU->RLAR = ARM_MPU_RLAR(0x0807FFFFU, 0U);
 
     MPU->RNR = 1U; // region 0 (for RAM1: read-write, execute-never)
     MPU->RBAR = ARM_MPU_RBAR(0x20000000U,
-        ARM_MPU_SH_OUTER,
-        ARM_MPU_AP_RW,
-        ARM_MPU_AP_PO,
-        ARM_MPU_XN);
+        ARM_MPU_SH_OUTER,      // SH: Normal memory (outer shareable)
+        0U,                    // RO: Normal memory, read/write
+        0U,                    // NP: Normal memory, privileged access only
+        1U);                   // XN: eXecute never
     MPU->RLAR = ARM_MPU_RLAR(0x2003FFFFU, 0U);
 
     MPU->RNR = 2U; // region 0 (for RAM2: read-write, execute-never)
     MPU->RBAR = ARM_MPU_RBAR(0x28000000U,
-        ARM_MPU_SH_OUTER,
-        ARM_MPU_AP_RW,
-        ARM_MPU_AP_PO,
-        ARM_MPU_XN);
+        ARM_MPU_SH_OUTER,      // SH: Normal memory (outer shareable)
+        0U,                    // RO: Normal memory, read/write
+        0U,                    // NP: Normal memory, privileged access only
+        1U);                   // XN: eXecute never
     MPU->RLAR = ARM_MPU_RLAR(0x28003FFFU, 0U);
 
     // Enable MPU with all region definitions
     __DMB();
-    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_HFNMIENA_Msk | MPU_CTRL_ENABLE_Msk;
+    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk
+                | MPU_CTRL_HFNMIENA_Msk
+                | MPU_CTRL_ENABLE_Msk;
 
     // Enable MemManage Faults
     SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
@@ -161,7 +165,7 @@ void BSP_init(void) {
     MODIFY_REG(GPIOA->PUPDR,
                GPIO_PUPDR_PUPD0 << (LD2_PIN * GPIO_PUPDR_PUPD1_Pos),
                0U << (LD2_PIN * GPIO_PUPDR_PUPD1_Pos)); // PUSHPULL
-     MODIFY_REG(GPIOA->MODER,
+    MODIFY_REG(GPIOA->MODER,
                GPIO_MODER_MODE0 << (LD2_PIN * GPIO_MODER_MODE1_Pos),
                1U << (LD2_PIN * GPIO_MODER_MODE1_Pos)); // MODE_1
 
@@ -200,7 +204,7 @@ void BSP_ledOn(void) {
 void BSP_ledOff(void) {
     GPIOA->BRR = (1U << LD2_PIN);  // turn LED off
 }
-//..........................................................................
+//............................................................................
 void BSP_trigISR(void) {
     NVIC_SetPendingIRQ(EXTI0_IRQn);
 }

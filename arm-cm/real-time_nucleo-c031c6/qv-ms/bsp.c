@@ -29,7 +29,7 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"     // QP/C real-time embedded framework
+#include "qpc.h"     // QP/C real-time event framework
 #include "bsp.h"     // Board Support Package
 #include "app.h"     // Application interface
 
@@ -130,8 +130,8 @@ void SysTick_Handler(void) {
             QACTIVE_POST(AO_Sporadic2, &sporadicB.super, &l_SysTick_Handler);
         }
         else { // B1 is released
-            QACTIVE_POST(AO_Periodic4, BSP_getEvtPeriodic4(0U), me);
-            QACTIVE_POST(AO_Periodic1, BSP_getEvtPeriodic1(0U), me);
+            QACTIVE_POST(AO_Periodic4, BSP_getEvtPeriodic4(0U), &l_SysTick_Handler);
+            QACTIVE_POST(AO_Periodic1, BSP_getEvtPeriodic1(0U), &l_SysTick_Handler);
         }
     }
 

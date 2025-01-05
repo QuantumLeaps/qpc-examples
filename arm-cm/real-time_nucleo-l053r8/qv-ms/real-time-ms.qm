@@ -386,7 +386,7 @@ $declare ${Shared}
   </file>
   <!--${.::periodic1.c}-->
   <file name="periodic1.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -400,7 +400,7 @@ $define ${AOs::Periodic1}</text>
   </file>
   <!--${.::periodic4.c}-->
   <file name="periodic4.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -414,7 +414,7 @@ $define ${AOs::Periodic4}</text>
   </file>
   <!--${.::sporadic2.c}-->
   <file name="sporadic2.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -428,7 +428,7 @@ $define ${AOs::Sporadic2}</text>
   </file>
   <!--${.::sporadic3.c}-->
   <file name="sporadic3.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 

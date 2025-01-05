@@ -1,44 +1,41 @@
 //============================================================================
-// Product: DPP example, NUCLEO-U545RE-Q board, QV kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-27
+// DPP example, NUCLEO-U545RE-Q board, QV kernel
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
-// <www.state-machine.com>
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
+// <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"                 // QP/C real-time embedded framework
-#include "dpp.h"                 // DPP Application interface
-#include "bsp.h"                 // Board Support Package
+#include "qpc.h"          // QP/C real-time event framework
+#include "dpp.h"          // DPP Application interface
+#include "bsp.h"          // Board Support Package
 
 #include "stm32u545xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
 
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
-// Local-scope defines -----------------------------------------------------
+// Local-scope defines -------------------------------------------------------
 // LED pins available on the board (just one user LED LD2--Green on PA.5)
 #define LD2_PIN  5U
 
@@ -55,17 +52,6 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 #define MODIFY_REG(REG, CLEARMASK, SETMASK) \
     WRITE_REG((REG), ((READ_REG(REG) & (~(CLEARMASK))) | (SETMASK)))
 
-#define CONST_MPU_RBAR(BASE, SH, RO, NP, XN) \
-  ((BASE) + \
-      ((((SH) << MPU_RBAR_SH_Pos) & MPU_RBAR_SH_Msk) | \
-      ((ARM_MPU_AP_(RO, NP) << MPU_RBAR_AP_Pos) & MPU_RBAR_AP_Msk) | \
-      (((XN) << MPU_RBAR_XN_Pos) & MPU_RBAR_XN_Msk)))
-
-#define CONST_MPU_RLAR(LIMIT, IDX) \
-    ((LIMIT) - 32U + \
-       ((((IDX) << MPU_RLAR_AttrIndx_Pos) & MPU_RLAR_AttrIndx_Msk) | \
-        MPU_RLAR_EN_Msk))
-
 // Local-scope objects -----------------------------------------------------
 static uint32_t l_rndSeed;
 
@@ -79,18 +65,19 @@ enum AppRecords { // application-specific trace records
     PAUSED_STAT,
     CONTEXT_SW,
 };
-#endif
+
+#endif // def Q_SPY
 
 //============================================================================
 // Error handler and ISRs...
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    // NOTE: this implementation of the assertion handler is intended only
+    // NOTE: this implementation of the error handler is intended only
     // for debugging and MUST be changed for deployment of the application
     // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, 10000U);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
 
 #ifndef NDEBUG
     // light up the user LED
@@ -99,8 +86,9 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     for (;;) {
     }
 #endif
-
     NVIC_SystemReset();
+    for (;;) { // explicitly "no-return"
+    }
 }
 //............................................................................
 // assertion failure handler for the STM32 library, including the startup code
@@ -109,7 +97,7 @@ void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// ISRs used in the application ============================================
+// ISRs used in the application ==============================================
 
 void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
@@ -144,7 +132,7 @@ void SysTick_Handler(void) {
     QV_ARM_ERRATUM_838869();
 }
 //............................................................................
-// interrupt handler for testing preemptions in QK
+// interrupt handler for testing preemptions in QV
 void EXTI0_IRQHandler(void); // prototype
 void EXTI0_IRQHandler(void) {
 
@@ -187,6 +175,7 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 
 //============================================================================
 // BSP functions...
+
 static void STM32U545RE_MPU_setup(void) {
     // Set Attr 0
     ARM_MPU_SetMemAttr(0UL,
@@ -197,33 +186,35 @@ static void STM32U545RE_MPU_setup(void) {
             ARM_MPU_ATTR_MEMORY_(1UL, 0UL, 1UL, 0UL))
     );
 
-    MPU->RNR = 0U; // region #0 (for ROM: read-only, can-execute)
-    MPU->RBAR = CONST_MPU_RBAR(0x08000000U,
-        ARM_MPU_SH_OUTER,
-        ARM_MPU_AP_RO,
-        ARM_MPU_AP_NP,
-        ARM_MPU_EX);
-    MPU->RLAR = CONST_MPU_RLAR(0x08080000U, 0U);
+    MPU->RNR = 0U; // region 0 (for ROM: read-only, can-execute)
+    MPU->RBAR = ARM_MPU_RBAR(0x08000000U,
+        ARM_MPU_SH_NON,        // SH: Normal memory (not-shareable)
+        1U,                    // RO: Normal memory, read-only
+        0U,                    // NP: Normal memory, privileged access only
+        0U);                   // XN: eXecute never (disabled)
+    MPU->RLAR = ARM_MPU_RLAR(0x0807FFFFU, 0U);
 
-    MPU->RNR = 1U; // region #1 (for RAM1: read-write, execute-never)
-    MPU->RBAR = CONST_MPU_RBAR(0x20000000U,
-        ARM_MPU_SH_OUTER,
-        ARM_MPU_AP_RW,
-        ARM_MPU_AP_NP,
-        ARM_MPU_XN);
-    MPU->RLAR = CONST_MPU_RLAR(0x20040000U, 0U);
+    MPU->RNR = 1U; // region 0 (for RAM1: read-write, execute-never)
+    MPU->RBAR = ARM_MPU_RBAR(0x20000000U,
+        ARM_MPU_SH_OUTER,      // SH: Normal memory (outer shareable)
+        0U,                    // RO: Normal memory, read/write
+        0U,                    // NP: Normal memory, privileged access only
+        1U);                   // XN: eXecute never
+    MPU->RLAR = ARM_MPU_RLAR(0x2003FFFFU, 0U);
 
-    MPU->RNR = 2U; // region #2 (for RAM2: read-write, execute-never)
-    MPU->RBAR = CONST_MPU_RBAR(0x28000000U,
-        ARM_MPU_SH_OUTER,
-        ARM_MPU_AP_RW,
-        ARM_MPU_AP_NP,
-        ARM_MPU_XN);
-    MPU->RLAR = CONST_MPU_RLAR(0x28004000U, 0U);
+    MPU->RNR = 2U; // region 0 (for RAM2: read-write, execute-never)
+    MPU->RBAR = ARM_MPU_RBAR(0x28000000U,
+        ARM_MPU_SH_OUTER,      // SH: Normal memory (outer shareable)
+        0U,                    // RO: Normal memory, read/write
+        0U,                    // NP: Normal memory, privileged access only
+        1U);                   // XN: eXecute never
+    MPU->RLAR = ARM_MPU_RLAR(0x28003FFFU, 0U);
 
     // Enable MPU with all region definitions
     __DMB();
-    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_HFNMIENA_Msk | MPU_CTRL_ENABLE_Msk;
+    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk
+                | MPU_CTRL_HFNMIENA_Msk
+                | MPU_CTRL_ENABLE_Msk;
 
     // Enable MemManage Faults
     SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
@@ -248,6 +239,8 @@ void BSP_init(void) {
     // NOTE: SystemInit() has been already called from the startup code
     // but SystemCoreClock needs to be updated
     SystemCoreClockUpdate();
+
+    // NOTE: The VFP (hardware Floating Point) unit is configured by QV
 
     // enable GPIOA clock port for the LED LD4
     RCC->AHB2ENR1 |= RCC_AHB2ENR1_GPIOAEN;
@@ -286,6 +279,7 @@ void BSP_init(void) {
 
     // dictionaries...
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
+    QS_OBJ_DICTIONARY(&l_EXTI0_1_IRQHandler);
     QS_USR_DICTIONARY(PHILO_STAT);
     QS_USR_DICTIONARY(PAUSED_STAT);
     QS_USR_DICTIONARY(CONTEXT_SW);
@@ -370,6 +364,9 @@ void BSP_randomSeed(uint32_t seed) {
 }
 //............................................................................
 uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
+    // Some floating point code is to exercise the VFP...
+    float volatile x = 3.1415926F;
+    x = x + 2.7182818F;
 
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
@@ -465,7 +462,6 @@ static uint16_t const QS_UARTPrescTable[12] = {
   ((((__PERIPHCLK__)/(USART_PRESCALER_TAB[(__PRESCALER__)]))\
     + ((__BAUDRATE__)/2U))/(__BAUDRATE__))
 
-
 #define QS_UART_DIV_SAMPLING16(__PCLK__, __BAUD__, __CLOCKPRESCALER__) \
   ((((__PCLK__)/QS_UARTPrescTable[(__CLOCKPRESCALER__)]) \
   + ((__BAUD__)/2U)) / (__BAUD__))
@@ -478,7 +474,7 @@ static uint16_t const QS_UARTPrescTable[12] = {
 uint8_t QS_onStartup(void const *arg) {
     Q_UNUSED_PAR(arg);
 
-    static uint8_t qsTxBuf[2*1024]; // buffer for QS-TX channel
+    static uint8_t qsTxBuf[3*1024]; // buffer for QS-TX channel
     QS_initBuf(qsTxBuf, sizeof(qsTxBuf));
 
     static uint8_t qsRxBuf[100];    // buffer for QS-RX channel

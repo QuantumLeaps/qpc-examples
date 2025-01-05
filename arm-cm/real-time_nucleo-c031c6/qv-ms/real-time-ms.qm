@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.0" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>Real-time example, multi-stage threads</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -386,7 +386,7 @@ $declare ${Shared}
   </file>
   <!--${.::periodic1.c}-->
   <file name="periodic1.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -400,7 +400,7 @@ $define ${AOs::Periodic1}</text>
   </file>
   <!--${.::periodic4.c}-->
   <file name="periodic4.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -414,13 +414,13 @@ $define ${AOs::Periodic4}</text>
   </file>
   <!--${.::sporadic2.c}-->
   <file name="sporadic2.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
 $declare ${AOs::Sporadic2}
 
-Q_DEFINE_THIS_MODULE(&quot;sporadic2&quot;)
+//Q_DEFINE_THIS_MODULE(&quot;sporadic2&quot;)
 
 $define ${Shared::Sporadic2_ctor}
 $define ${Shared::AO_Sporadic2}
@@ -428,13 +428,13 @@ $define ${AOs::Sporadic2}</text>
   </file>
   <!--${.::sporadic3.c}-->
   <file name="sporadic3.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
 $declare ${AOs::Sporadic3}
 
-Q_DEFINE_THIS_MODULE(&quot;sporadic3&quot;)
+//Q_DEFINE_THIS_MODULE(&quot;sporadic3&quot;)
 
 $define ${Shared::Sporadic3_ctor}
 $define ${Shared::AO_Sporadic3}

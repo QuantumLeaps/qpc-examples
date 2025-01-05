@@ -30,7 +30,7 @@
 // <info@state-machine.com>
 //============================================================================
 extern "C" {
-#include "qpc.h"          // QP/C real-time embedded framework
+#include "qpc.h"          // QP/C real-time event framework
 #include "dpp.h"          // DPP Application interface
 #include "bsp.h"          // Board Support Package
 } // extern "C"

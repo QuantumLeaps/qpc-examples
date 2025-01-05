@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// The QP/C software is dual-licensed under the terms of the open-source GNU
+// This software is dual-licensed under the terms of the open-source GNU
 // General Public License (GPL) or under the terms of one of the closed-
 // source Quantum Leaps commercial licenses.
 //
@@ -32,7 +32,7 @@
 //Q_DEFINE_THIS_FILE
 
 #ifdef Q_HOST
-#error "This integration test is not designed to run on the HOST"
+    #error This integration test is not designed to run on the HOST
 #endif
 
 //==========================================================================

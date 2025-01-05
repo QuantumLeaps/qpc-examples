@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.2.3" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>&quot;Deferred Event&quot; state pattern example</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -88,7 +88,7 @@ PRINTF_S(&quot;Processing request #%d\n&quot;,
       </tran_glyph>
      </tran>
      <state_glyph node="2,6,30,20">
-      <entry box="1,2,13,2"/>
+      <entry box="0,3,13,2"/>
      </state_glyph>
     </state>
     <!--${Components::TServer::SM::busy}-->
@@ -148,8 +148,8 @@ QTimeEvt_armX(&amp;me-&gt;receivedEvt, BSP_TICKS_PER_SEC, 0U);</entry>
        </tran_glyph>
       </tran>
       <state_glyph node="6,48,40,14">
-       <entry box="1,2,27,2"/>
-       <exit box="1,4,6,2"/>
+       <entry box="0,3,27,2"/>
+       <exit box="0,5,6,2"/>
       </state_glyph>
      </state>
      <!--${Components::TServer::SM::busy::authorizing}-->
@@ -168,8 +168,8 @@ QTimeEvt_armX(&amp;me-&gt;authorizedEvt, 2U*BSP_TICKS_PER_SEC, 0U);</entry>
        </tran_glyph>
       </tran>
       <state_glyph node="6,66,40,14">
-       <entry box="1,2,17,2"/>
-       <exit box="1,4,6,2"/>
+       <entry box="0,3,17,2"/>
+       <exit box="0,5,6,2"/>
       </state_glyph>
      </state>
      <state_glyph node="2,30,54,54">
@@ -181,7 +181,7 @@ QTimeEvt_armX(&amp;me-&gt;authorizedEvt, 2U*BSP_TICKS_PER_SEC, 0U);</entry>
      <entry brief="stop">PRINTF_S(&quot;%s\n&quot;, &quot;final-ENTRY;&quot;);
             QF_stop(); // terminate the application</entry>
      <state_glyph node="2,88,30,10">
-      <entry box="1,2,6,2"/>
+      <entry box="0,3,6,2"/>
      </state_glyph>
     </state>
     <state_diagram size="68,102"/>
