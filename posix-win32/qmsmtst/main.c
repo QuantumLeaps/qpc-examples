@@ -66,19 +66,20 @@ int main(int argc, char *argv[]) {
             char inp[4];
             scanf("%1s", inp); // input the event
 
-            QEvt e = QEVT_INITIALIZER(0U);
+            QSignal sig;
             if ('a' <= inp[0] && inp[0] <= 'i') { // in range?
-                e.sig = (QSignal)(inp[0] - 'a' + A_SIG);
+                sig = (QSignal)(inp[0] - 'a' + A_SIG);
             }
             else if ('A' <= inp[0] && inp[0] <= 'I') { // in range?
-                e.sig = (QSignal)(inp[0] - 'A' + A_SIG);
+                sig = (QSignal)(inp[0] - 'A' + A_SIG);
             }
             else if ((inp[0] == 'x') || (inp[0] == 'X')) { // x or X?
-                e.sig = TERMINATE_SIG; // terminate the interactive test
+                sig = TERMINATE_SIG; // terminate the interactive test
             }
             else {
-                e.sig = IGNORE_SIG;
+                sig = IGNORE_SIG;
             }
+            QEvt e = QEVT_INITIALIZER(sig);
 
             QASM_DISPATCH(the_sm, &e, 0U); // dispatch the event
         }
@@ -138,9 +139,8 @@ void BSP_terminate(int16_t const result) {
 }
 //............................................................................
 static void dispatch(QSignal sig) {
-    QEvt e = QEVT_INITIALIZER(0U);
     Q_REQUIRE((A_SIG <= sig) && (sig <= I_SIG));
-    e.sig = sig;
+    QEvt e = QEVT_INITIALIZER(sig);
     FPRINTF_S(l_outFile, "\n%c:", 'A' + sig - A_SIG);
     QASM_DISPATCH(the_sm, &e, 0U); // dispatch the event
 }

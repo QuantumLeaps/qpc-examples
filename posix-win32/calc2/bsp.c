@@ -40,7 +40,7 @@
 #define DISP_WIDTH      15
 
 #ifdef Q_SPY
-#error "this application does not support Spy build configuration"
+    #error This application does not support Spy build configuration
 #endif
 
 // helper macros to "stringify" values

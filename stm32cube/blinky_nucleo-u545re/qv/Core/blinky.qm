@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+ <documentation>Blinky example</documentation>
+ <!--${qpc}-->
+ <framework name="qpc"/>
+ <!--${APP}-->
+ <package name="APP" stereotype="0x02">
+  <!--${APP::Blinky}-->
+  <class name="Blinky" superclass="qpc::QActive">
+   <!--${APP::Blinky::timeEvt}-->
+   <attribute name="timeEvt" type="QTimeEvt" visibility="0x02" properties="0x00"/>
+   <!--${APP::Blinky::inst}-->
+   <attribute name="inst" type="Blinky" visibility="0x00" properties="0x01"/>
+   <!--${APP::Blinky::SM}-->
+   <statechart properties="0x03">
+    <documentation>Blinky state machine</documentation>
+    <!--${APP::Blinky::SM::initial}-->
+    <initial target="../1">
+     <action>Q_UNUSED_PAR(par);
+
+// QS software tracing (active only in Spy configuration)
+QS_OBJ_DICTIONARY(&amp;Blinky_inst);
+QS_OBJ_DICTIONARY(&amp;Blinky_inst.timeEvt);
+QS_SIG_DICTIONARY(TIMEOUT_SIG, me);
+
+// arm the time event to fire in 1/2 sec and every 1/2 sec
+QTimeEvt_armX(&amp;me-&gt;timeEvt,
+              BSP_TICKS_PER_SEC/2, BSP_TICKS_PER_SEC/2);</action>
+     <initial_glyph conn="2,4,5,1,20,6,-4">
+      <action box="0,-2,6,2"/>
+     </initial_glyph>
+    </initial>
+    <!--${APP::Blinky::SM::off}-->
+    <state name="off">
+     <entry>BSP_ledOff();</entry>
+     <!--${APP::Blinky::SM::off::TIMEOUT}-->
+     <tran trig="TIMEOUT" target="../../2">
+      <tran_glyph conn="2,16,3,1,18,8,-2">
+       <action box="0,-2,8,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph node="2,6,16,12">
+      <entry box="0,3,12,4"/>
+     </state_glyph>
+    </state>
+    <!--${APP::Blinky::SM::on}-->
+    <state name="on">
+     <entry>BSP_ledOn();</entry>
+     <!--${APP::Blinky::SM::on::TIMEOUT}-->
+     <tran trig="TIMEOUT" target="../../1">
+      <tran_glyph conn="2,30,3,1,20,-17,-4">
+       <action box="0,-2,8,2"/>
+      </tran_glyph>
+     </tran>
+     <state_glyph color="2" node="2,20,16,12">
+      <entry box="0,3,12,4"/>
+     </state_glyph>
+    </state>
+    <state_diagram size="24,34"/>
+   </statechart>
+  </class>
+  <!--${APP::AO_Blinky}-->
+  <attribute name="AO_Blinky" type="QActive * const" visibility="0x00" properties="0x00">
+   <code>= &amp;Blinky_inst.super;</code>
+  </attribute>
+  <!--${APP::Blinky_ctor}-->
+  <operation name="Blinky_ctor" type="void" visibility="0x00" properties="0x00">
+   <documentation>// constructor</documentation>
+   <code>Blinky * const me = &amp;Blinky_inst;
+
+QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Blinky_initial));
+QTimeEvt_ctorX(&amp;me-&gt;timeEvt, &amp;me-&gt;super, TIMEOUT_SIG, 0U);</code>
+  </operation>
+ </package>
+ <!--${Inc}-->
+ <directory name="Inc">
+  <!--${Inc::blinky.h}-->
+  <file name="blinky.h">
+   <text>#ifndef BLINKY_H_
+#define BLINKY_H_
+
+enum BlinkySignals {
+    DUMMY_SIG = Q_USER_SIG,
+    //...
+    MAX_PUB_SIG, // the last published signal
+
+    TIMEOUT_SIG,
+    //...
+    MAX_SIG      // the last signal
+};
+
+void Blinky_ctor(void);
+$declare ${APP::AO_Blinky}
+
+// for the QXK kernel only...
+#ifdef QXK_H_
+void XThr_ctor(void);
+extern QXThread * const XT_thr; // global opaque pointer
+#endif
+
+#endif // BLINKY_H_</text>
+  </file>
+ </directory>
+ <!--${Src}-->
+ <directory name="Src">
+  <!--${Src::blinky.c}-->
+  <file name="blinky.c">
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+#include &quot;blinky.h&quot;            // Blinky Application interface
+#include &quot;bsp.h&quot;               // Board Support Package
+
+//Q_DEFINE_THIS_FILE
+
+$declare ${APP::Blinky}
+
+$define ${APP::AO_Blinky}
+$define ${APP::Blinky_ctor}
+$define ${APP::Blinky}</text>
+  </file>
+ </directory>
+</model>
