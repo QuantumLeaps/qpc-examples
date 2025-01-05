@@ -9,9 +9,6 @@ This example implements the "Periodic-Sporadic" application on the STM32 NUCLEO-
 <b>STM32 NUCLEO-C031C6</b>
 </p>
 
-> NOTE<br>
-The CPU is specifically clocked very slowly (only at 2 MHz) to better demonstrate all overheads and delays.
-
 <p align="center">
 <img src="./real-time_trace.png"/><br>
 <b>Logic analyzer trace after pressing the button (QK kernel)</b>

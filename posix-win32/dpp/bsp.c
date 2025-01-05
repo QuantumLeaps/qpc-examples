@@ -31,7 +31,7 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"      // QP/C real-time embedded framework
+#include "qpc.h"      // QP/C real-time event framework
 #include "dpp.h"      // DPP Application interface
 #include "bsp.h"      // Board Support Package
 
@@ -179,7 +179,8 @@ void QF_onStartup(void) {
 }
 //............................................................................
 void QF_onCleanup(void) {
-    PRINTF_S("\n%s\n", "Bye! Bye!");
+    PRINTF_S("\nBye! QTable queue-min=%d\n",
+             QActive_getQueueMin(N_PHILO + 7U));
     QF_consoleCleanup();
 }
 //............................................................................

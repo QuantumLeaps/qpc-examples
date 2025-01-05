@@ -41,7 +41,6 @@
 
 //............................................................................
 int main() {
-
     QF_init();
     QF_onStartup();
 
@@ -62,28 +61,28 @@ int main() {
     QASM_INIT(the_calc, (void *)0, 0U); // trigger initial transition
 
     for (;;) { // event loop
-        CalcEvt e =  { QEVT_INITIALIZER(0U), 0U}; // Calculator event
 
         BSP_show_display(); // show the display
 
         PRINTF_S("%s"," : ");
         fflush(stdout);
-        e.key_code = (uint8_t)QF_consoleWaitForKey();
-        PRINTF_S("%c ", (e.key_code >= ' ') ? e.key_code : 'X');
+        uint8_t key_code = (uint8_t)QF_consoleWaitForKey();
+        PRINTF_S("%c ", (key_code >= ' ') ? key_code : 'X');
 
-        switch (e.key_code) {
+        QSignal sig;
+        switch (key_code) {
             case 'c': // intentionally fall through
             case 'C': {
-                e.super.sig = C_SIG;
+                sig = C_SIG;
                 break;
             }
             case 'e': // intentionally fall through
             case 'E': {
-                e.super.sig = CE_SIG;
+                sig = CE_SIG;
                 break;
             }
             case '0': {
-                e.super.sig = DIGIT_0_SIG;
+                sig = DIGIT_0_SIG;
                 break;
             }
             case '1': // intentionally fall through
@@ -95,36 +94,37 @@ int main() {
             case '7': // intentionally fall through
             case '8': // intentionally fall through
             case '9': {
-                e.super.sig = DIGIT_1_9_SIG;
+                sig = DIGIT_1_9_SIG;
                 break;
             }
             case '.': {
-                e.super.sig = POINT_SIG;
+                sig = POINT_SIG;
                 break;
             }
             case '+': // intentionally fall through
             case '-': // intentionally fall through
             case '*': // intentionally fall through
             case '/': {
-                e.super.sig = OPER_SIG;
+                sig = OPER_SIG;
                 break;
             }
             case '=': // intentionally fall through
             case '\r': { // Enter key
-                e.super.sig = EQUALS_SIG;
+                sig = EQUALS_SIG;
                 break;
             }
             case '\33': { // ESC key
-                e.super.sig = OFF_SIG;
+                sig = OFF_SIG;
                 break;
             }
             default: {
-                e.super.sig = 0; // invalid event
+                sig = 0; // invalid event
                 break;
             }
         }
 
-        if (e.super.sig != 0) {  // valid event generated?
+        if (sig != 0) {  // valid event generated?
+            CalcEvt e = { QEVT_INITIALIZER(sig), key_code}; // Calculator event
             QASM_DISPATCH(the_calc, &e.super, 0U); // dispatch event
         }
     }

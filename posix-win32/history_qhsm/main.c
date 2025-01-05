@@ -1,7 +1,7 @@
 //============================================================================
 // Product: History Example, Win32
-// Last updated for version 8.0.1
-// Last updated on  2024-12-16
+// Last updated for version 8.0.2
+// Last updated on  2024-12-27
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -58,23 +58,23 @@ int main() {
     QASM_INIT(the_oven, (void *)0, 0U);
 
     for (;;) {
-        QEvt e = QEVT_INITIALIZER(0U);
-        uint8_t c;
-
         PRINTF_S("\n", "");
-        c = (uint8_t)QF_consoleWaitForKey();
+        uint8_t c = (uint8_t)QF_consoleWaitForKey();
         PRINTF_S("%c: ", (c >= ' ') ? c : 'X');
 
+        QSignal sig = 0U;
         switch (c) {
-            case 'o':  e.sig = OPEN_SIG;        break;
-            case 'c':  e.sig = CLOSE_SIG;       break;
-            case 't':  e.sig = TOAST_SIG;       break;
-            case 'b':  e.sig = BAKE_SIG;        break;
-            case 'f':  e.sig = OFF_SIG;         break;
-            case 0x1B: e.sig = TERMINATE_SIG;   break;
+            case 'o':  sig = OPEN_SIG;        break;
+            case 'c':  sig = CLOSE_SIG;       break;
+            case 't':  sig = TOAST_SIG;       break;
+            case 'b':  sig = BAKE_SIG;        break;
+            case 'f':  sig = OFF_SIG;         break;
+            case 0x1B: sig = TERMINATE_SIG;   break;
+            default: PRINTF_S("unrecognized", ""); break;
         }
 
         // dispatch the event into the state machine
+        QEvt e = QEVT_INITIALIZER(sig);
         QASM_DISPATCH(the_oven,  &e, 0U);
     }
 

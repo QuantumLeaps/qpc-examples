@@ -37,7 +37,7 @@
 
                // protection against including lwIP in unauthorized modules
 #ifndef LWIP_ALLOWED
-#error "The lwIP code is not reentrant and is not allowed in this module."
+    #error The lwIP code is not reentrant and is not allowed in this module.
 #endif
 
 #include "lwip/opt.h"                            // lwIP options come first

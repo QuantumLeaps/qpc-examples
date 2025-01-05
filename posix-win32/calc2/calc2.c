@@ -80,10 +80,10 @@ static QState Calc_ready(Calc * const me, QEvt const * const e);
 static QState Calc_result(Calc * const me, QEvt const * const e);
 static QState Calc_begin(Calc * const me, QEvt const * const e);
 static QState Calc_operand(Calc * const me, QEvt const * const e);
-static QState Calc_zero1(Calc * const me, QEvt const * const e);
-static QState Calc_int1(Calc * const me, QEvt const * const e);
-static QState Calc_frac1(Calc * const me, QEvt const * const e);
-static QState Calc_negated1(Calc * const me, QEvt const * const e);
+static QState Calc_zero(Calc * const me, QEvt const * const e);
+static QState Calc_intg(Calc * const me, QEvt const * const e);
+static QState Calc_frac(Calc * const me, QEvt const * const e);
+static QState Calc_neg(Calc * const me, QEvt const * const e);
 static QState Calc_opEntered(Calc * const me, QEvt const * const e);
 static QState Calc_final(Calc * const me, QEvt const * const e);
 //$enddecl${SMs::Calc} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -307,14 +307,14 @@ static QState Calc_ready(Calc * const me, QEvt const * const e) {
         //${SMs::Calc::SM::on::ready::DIGIT_0}
         case DIGIT_0_SIG: {
             BSP_clear();
-            status_ = Q_TRAN(&Calc_zero1);
+            status_ = Q_TRAN(&Calc_zero);
             break;
         }
         //${SMs::Calc::SM::on::ready::DIGIT_1_9}
         case DIGIT_1_9_SIG: {
             BSP_clear();
             BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
-            status_ = Q_TRAN(&Calc_int1);
+            status_ = Q_TRAN(&Calc_intg);
             break;
         }
         //${SMs::Calc::SM::on::ready::POINT}
@@ -322,7 +322,7 @@ static QState Calc_ready(Calc * const me, QEvt const * const e) {
             BSP_clear();
             BSP_insert((int)'0');
             BSP_insert((int)'.');
-            status_ = Q_TRAN(&Calc_frac1);
+            status_ = Q_TRAN(&Calc_frac);
             break;
         }
         //${SMs::Calc::SM::on::ready::OPER}
@@ -384,7 +384,7 @@ static QState Calc_begin(Calc * const me, QEvt const * const e) {
         case OPER_SIG: {
             //${SMs::Calc::SM::on::ready::begin::OPER::[e->key=='-']}
             if (Q_EVT_CAST(CalcEvt)->key_code == KEY_MINUS) {
-                status_ = Q_TRAN(&Calc_negated1);
+                status_ = Q_TRAN(&Calc_neg);
             }
             //${SMs::Calc::SM::on::ready::begin::OPER::[else]}
             else {
@@ -424,7 +424,7 @@ static QState Calc_operand(Calc * const me, QEvt const * const e) {
         }
         //${SMs::Calc::SM::on::operand::EQUALS}
         case EQUALS_SIG: {
-            //${SMs::Calc::SM::on::operand::EQUALS::[Calc_eval(me,BSP_get_value(),KE~}
+            //${SMs::Calc::SM::on::operand::EQUALS::[Calc_eval()]}
             if (Calc_eval(me, BSP_get_value(), KEY_NULL)) {
                 status_ = Q_TRAN(&Calc_result);
             }
@@ -436,7 +436,7 @@ static QState Calc_operand(Calc * const me, QEvt const * const e) {
         }
         //${SMs::Calc::SM::on::operand::OPER}
         case OPER_SIG: {
-            //${SMs::Calc::SM::on::operand::OPER::[Calc_eval(me,BSP_get_value(),Q_~}
+            //${SMs::Calc::SM::on::operand::OPER::[Calc_eval()]}
             if (Calc_eval(me, BSP_get_value(), Q_EVT_CAST(CalcEvt)->key_code)) {
                 status_ = Q_TRAN(&Calc_opEntered);
             }
@@ -444,6 +444,24 @@ static QState Calc_operand(Calc * const me, QEvt const * const e) {
             else {
                 status_ = Q_TRAN(&Calc_error);
             }
+            break;
+        }
+        //${SMs::Calc::SM::on::operand::POINT}
+        case POINT_SIG: {
+            BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
+            status_ = Q_TRAN(&Calc_frac);
+            break;
+        }
+        //${SMs::Calc::SM::on::operand::DIGIT_0}
+        case DIGIT_0_SIG: {
+            BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
+            status_ = Q_TRAN(&Calc_zero);
+            break;
+        }
+        //${SMs::Calc::SM::on::operand::DIGIT_1_9}
+        case DIGIT_1_9_SIG: {
+            BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
+            status_ = Q_TRAN(&Calc_intg);
             break;
         }
         default: {
@@ -454,39 +472,32 @@ static QState Calc_operand(Calc * const me, QEvt const * const e) {
     return status_;
 }
 
-//${SMs::Calc::SM::on::operand::zero1} .......................................
-static QState Calc_zero1(Calc * const me, QEvt const * const e) {
+//${SMs::Calc::SM::on::operand::zero} ........................................
+static QState Calc_zero(Calc * const me, QEvt const * const e) {
     QState status_;
     switch (e->sig) {
-        //${SMs::Calc::SM::on::operand::zero1}
+        //${SMs::Calc::SM::on::operand::zero}
         case Q_ENTRY_SIG: {
-            BSP_message("zero1-ENTRY;");
+            BSP_message("zero-ENTRY;");
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::zero1}
+        //${SMs::Calc::SM::on::operand::zero}
         case Q_EXIT_SIG: {
-            BSP_message("zero1-EXIT;");
+            BSP_message("zero-EXIT;");
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::zero1::DIGIT_0}
+        //${SMs::Calc::SM::on::operand::zero::DIGIT_0}
         case DIGIT_0_SIG: {
             ;
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::zero1::DIGIT_1_9}
+        //${SMs::Calc::SM::on::operand::zero::DIGIT_1_9}
         case DIGIT_1_9_SIG: {
             BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
-            status_ = Q_TRAN(&Calc_int1);
-            break;
-        }
-        //${SMs::Calc::SM::on::operand::zero1::POINT}
-        case POINT_SIG: {
-            BSP_insert((int)'0');
-            BSP_insert((int)'.');
-            status_ = Q_TRAN(&Calc_frac1);
+            status_ = Q_TRAN(&Calc_intg);
             break;
         }
         default: {
@@ -497,29 +508,29 @@ static QState Calc_zero1(Calc * const me, QEvt const * const e) {
     return status_;
 }
 
-//${SMs::Calc::SM::on::operand::int1} ........................................
-static QState Calc_int1(Calc * const me, QEvt const * const e) {
+//${SMs::Calc::SM::on::operand::intg} ........................................
+static QState Calc_intg(Calc * const me, QEvt const * const e) {
     QState status_;
     switch (e->sig) {
-        //${SMs::Calc::SM::on::operand::int1}
+        //${SMs::Calc::SM::on::operand::intg}
         case Q_ENTRY_SIG: {
-            BSP_message("int1-ENTRY;");
+            BSP_message("intg-ENTRY;");
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::int1}
+        //${SMs::Calc::SM::on::operand::intg}
         case Q_EXIT_SIG: {
-            BSP_message("int1-EXIT;");
+            BSP_message("intg-EXIT;");
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::int1::POINT}
+        //${SMs::Calc::SM::on::operand::intg::POINT}
         case POINT_SIG: {
             BSP_insert((int)'.');
-            status_ = Q_TRAN(&Calc_frac1);
+            status_ = Q_TRAN(&Calc_frac);
             break;
         }
-        //${SMs::Calc::SM::on::operand::int1::DIGIT_0, DIGIT_1_9}
+        //${SMs::Calc::SM::on::operand::intg::DIGIT_0, DIGIT_1_9}
         case DIGIT_0_SIG: // intentionally fall through
         case DIGIT_1_9_SIG: {
             BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
@@ -534,29 +545,29 @@ static QState Calc_int1(Calc * const me, QEvt const * const e) {
     return status_;
 }
 
-//${SMs::Calc::SM::on::operand::frac1} .......................................
-static QState Calc_frac1(Calc * const me, QEvt const * const e) {
+//${SMs::Calc::SM::on::operand::frac} ........................................
+static QState Calc_frac(Calc * const me, QEvt const * const e) {
     QState status_;
     switch (e->sig) {
-        //${SMs::Calc::SM::on::operand::frac1}
+        //${SMs::Calc::SM::on::operand::frac}
         case Q_ENTRY_SIG: {
-            BSP_message("frac1-ENTRY;");
+            BSP_message("frac-ENTRY;");
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::frac1}
+        //${SMs::Calc::SM::on::operand::frac}
         case Q_EXIT_SIG: {
-            BSP_message("frac1-EXIT;");
+            BSP_message("frac-EXIT;");
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::frac1::POINT}
+        //${SMs::Calc::SM::on::operand::frac::POINT}
         case POINT_SIG: {
             ;
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::frac1::DIGIT_0, DIGIT_1_9}
+        //${SMs::Calc::SM::on::operand::frac::DIGIT_0, DIGIT_1_9}
         case DIGIT_0_SIG: // intentionally fall through
         case DIGIT_1_9_SIG: {
             BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
@@ -571,49 +582,31 @@ static QState Calc_frac1(Calc * const me, QEvt const * const e) {
     return status_;
 }
 
-//${SMs::Calc::SM::on::operand::negated1} ....................................
-static QState Calc_negated1(Calc * const me, QEvt const * const e) {
+//${SMs::Calc::SM::on::operand::neg} .........................................
+static QState Calc_neg(Calc * const me, QEvt const * const e) {
     QState status_;
     switch (e->sig) {
-        //${SMs::Calc::SM::on::operand::negated1}
+        //${SMs::Calc::SM::on::operand::neg}
         case Q_ENTRY_SIG: {
-            BSP_message("negated1-ENTRY;");
+            BSP_message("neg-ENTRY;");
             BSP_negate();
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::negated1}
+        //${SMs::Calc::SM::on::operand::neg}
         case Q_EXIT_SIG: {
-            BSP_message("negated1-EXIT;");
+            BSP_message("neg-EXIT;");
             status_ = Q_HANDLED();
             break;
         }
-        //${SMs::Calc::SM::on::operand::negated1::DIGIT_0}
-        case DIGIT_0_SIG: {
-            BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
-            status_ = Q_TRAN(&Calc_zero1);
-            break;
-        }
-        //${SMs::Calc::SM::on::operand::negated1::DIGIT_1_9}
-        case DIGIT_1_9_SIG: {
-            BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
-            status_ = Q_TRAN(&Calc_int1);
-            break;
-        }
-        //${SMs::Calc::SM::on::operand::negated1::POINT}
-        case POINT_SIG: {
-            BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
-            status_ = Q_TRAN(&Calc_frac1);
-            break;
-        }
-        //${SMs::Calc::SM::on::operand::negated1::OPER}
+        //${SMs::Calc::SM::on::operand::neg::OPER}
         case OPER_SIG: {
-            //${SMs::Calc::SM::on::operand::negated1::OPER::[e->key=='-']}
+            //${SMs::Calc::SM::on::operand::neg::OPER::[e->key=='-']}
             if (Q_EVT_CAST(CalcEvt)->key_code == KEY_MINUS) {
                 ;
                 status_ = Q_HANDLED();
             }
-            //${SMs::Calc::SM::on::operand::negated1::OPER::[else]}
+            //${SMs::Calc::SM::on::operand::neg::OPER::[else]}
             else {
                 status_ = Q_HANDLED();
             }
@@ -646,14 +639,14 @@ static QState Calc_opEntered(Calc * const me, QEvt const * const e) {
         //${SMs::Calc::SM::on::opEntered::DIGIT_0}
         case DIGIT_0_SIG: {
             BSP_clear();
-            status_ = Q_TRAN(&Calc_zero1);
+            status_ = Q_TRAN(&Calc_zero);
             break;
         }
         //${SMs::Calc::SM::on::opEntered::DIGIT_1_9}
         case DIGIT_1_9_SIG: {
             BSP_clear();
             BSP_insert(Q_EVT_CAST(CalcEvt)->key_code);
-            status_ = Q_TRAN(&Calc_int1);
+            status_ = Q_TRAN(&Calc_intg);
             break;
         }
         //${SMs::Calc::SM::on::opEntered::POINT}
@@ -661,14 +654,14 @@ static QState Calc_opEntered(Calc * const me, QEvt const * const e) {
             BSP_clear();
             BSP_insert((int)'0');
             BSP_insert((int)'.');
-            status_ = Q_TRAN(&Calc_frac1);
+            status_ = Q_TRAN(&Calc_frac);
             break;
         }
         //${SMs::Calc::SM::on::opEntered::OPER}
         case OPER_SIG: {
             //${SMs::Calc::SM::on::opEntered::OPER::[e->key=='-']}
             if (Q_EVT_CAST(CalcEvt)->key_code == KEY_MINUS) {
-                status_ = Q_TRAN(&Calc_negated1);
+                status_ = Q_TRAN(&Calc_neg);
             }
             //${SMs::Calc::SM::on::opEntered::OPER::[else]}
             else {
