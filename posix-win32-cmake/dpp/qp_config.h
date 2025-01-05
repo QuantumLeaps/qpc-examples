@@ -9,7 +9,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// The QP/C software is dual-licensed under the terms of the open-source GNU
+// This software is dual-licensed under the terms of the open-source GNU
 // General Public License (GPL) or under the terms of one of the closed-
 // source Quantum Leaps commercial licenses.
 //
@@ -37,7 +37,7 @@
 //   <691=>691 (QP 6.9.1 or newer)
 //   <734=>7.3.4 (QP 7.3.4 or newer)
 //   <9999=>9999 (Latest only)
-// <i>QP API backwards compatibility with the QP/C API version.
+// <i>QP API backwards compatibility with the QP API version.
 // <i>Lower QP_API_VERSION values enable backwards compatibility
 // <i>with lower (older) QP API versions.
 // <i>For example, QP_API_VERSION==691 will enable the compatibility

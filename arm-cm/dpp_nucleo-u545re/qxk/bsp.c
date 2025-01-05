@@ -1,35 +1,32 @@
 //============================================================================
-// Product: DPP example, NUCLEO-U545RE-Q board, QXK kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
+// DPP example, NUCLEO-U545RE-Q board, QXK kernel
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
-// <www.state-machine.com>
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
+// <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"          // QP/C real-time embedded framework
+#include "qpc.h"          // QP/C real-time event framework
 #include "dpp.h"          // DPP Application interface
 #include "bsp.h"          // Board Support Package
 
@@ -80,7 +77,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, 10000U);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
 
 #ifndef NDEBUG
     // light up the user LED
@@ -100,7 +97,7 @@ void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// ISRs used in the application ============================================
+// ISRs used in the application ==============================================
 
 void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
@@ -196,39 +193,40 @@ static void STM32U545RE_MPU_setup(void) {
 
     MPU->RNR = 0U; // region 0 (for ROM: read-only, can-execute)
     MPU->RBAR = ARM_MPU_RBAR(0x08000000U,
-        ARM_MPU_SH_NON,
-        ARM_MPU_AP_RO,
-        ARM_MPU_AP_PO,
-        ARM_MPU_EX);
+        ARM_MPU_SH_NON,        // SH: Normal memory (not-shareable)
+        1U,                    // RO: Normal memory, read-only
+        0U,                    // NP: Normal memory, privileged access only
+        0U);                   // XN: eXecute never (disabled)
     MPU->RLAR = ARM_MPU_RLAR(0x0807FFFFU, 0U);
 
     MPU->RNR = 1U; // region 0 (for RAM1: read-write, execute-never)
     MPU->RBAR = ARM_MPU_RBAR(0x20000000U,
-        ARM_MPU_SH_OUTER,
-        ARM_MPU_AP_RW,
-        ARM_MPU_AP_PO,
-        ARM_MPU_XN);
+        ARM_MPU_SH_OUTER,      // SH: Normal memory (outer shareable)
+        0U,                    // RO: Normal memory, read/write
+        0U,                    // NP: Normal memory, privileged access only
+        1U);                   // XN: eXecute never
     MPU->RLAR = ARM_MPU_RLAR(0x2003FFFFU, 0U);
 
     MPU->RNR = 2U; // region 0 (for RAM2: read-write, execute-never)
     MPU->RBAR = ARM_MPU_RBAR(0x28000000U,
-        ARM_MPU_SH_OUTER,
-        ARM_MPU_AP_RW,
-        ARM_MPU_AP_PO,
-        ARM_MPU_XN);
+        ARM_MPU_SH_OUTER,      // SH: Normal memory (outer shareable)
+        0U,                    // RO: Normal memory, read/write
+        0U,                    // NP: Normal memory, privileged access only
+        1U);                   // XN: eXecute never
     MPU->RLAR = ARM_MPU_RLAR(0x28003FFFU, 0U);
 
     // Enable MPU with all region definitions
     __DMB();
-    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk | MPU_CTRL_ENABLE_Msk;
+    MPU->CTRL = MPU_CTRL_PRIVDEFENA_Msk
+                | MPU_CTRL_HFNMIENA_Msk
+                | MPU_CTRL_ENABLE_Msk;
 
     // Enable MemManage Faults
     SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
     __DSB();
     __ISB();
 }
-
-// BSP functions ===========================================================
+//..........................................................................
 void BSP_init(void) {
     // setup the MPU...
     STM32U545RE_MPU_setup();
@@ -662,15 +660,15 @@ void QS_onCommand(uint8_t cmdId,
 //
 // Only ISRs prioritized at or below the QF_AWARE_ISR_CMSIS_PRI level (i.e.,
 // with the numerical values of priorities equal or higher than
-// QF_AWARE_ISR_CMSIS_PRI) are allowed to call the QK_ISR_ENTRY/
-// QK_ISR_ENTRY macros or any other QF/QK services. These ISRs are
+// QF_AWARE_ISR_CMSIS_PRI) are allowed to call the QXK_ISR_ENTRY/
+// QXK_ISR_ENTRY macros or any other QF/QXK services. These ISRs are
 // "QF-aware".
 //
 // Conversely, any ISRs prioritized above the QF_AWARE_ISR_CMSIS_PRI priority
 // level (i.e., with the numerical values of priorities less than
 // QF_AWARE_ISR_CMSIS_PRI) are never disabled and are not aware of the kernel.
-// Such "QF-unaware" ISRs cannot call ANY QF/QK services. In particular they
-// can NOT call the macros QK_ISR_ENTRY/QK_ISR_ENTRY. The only mechanism
+// Such "QF-unaware" ISRs cannot call ANY QF/QXK services. In particular they
+// can NOT call the macros QXK_ISR_ENTRY/QXK_ISR_ENTRY. The only mechanism
 // by which a "QF-unaware" ISR can communicate with the QF framework is by
 // triggering a "QF-aware" ISR, which can post/publish events.
 //

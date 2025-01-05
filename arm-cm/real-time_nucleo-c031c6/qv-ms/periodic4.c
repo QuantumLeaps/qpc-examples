@@ -35,7 +35,7 @@
 // <info@state-machine.com>
 //
 //$endhead${.::periodic4.c} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-#include "qpc.h"               // QP/C real-time embedded framework
+#include "qpc.h"               // QP/C real-time event framework
 #include "bsp.h"               // Board Support Package
 #include "app.h"               // Application interface
 
