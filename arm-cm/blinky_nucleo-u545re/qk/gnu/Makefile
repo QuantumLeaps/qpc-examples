@@ -1,7 +1,5 @@
 ##############################################################################
 # Product: Makefile for QP/C on NUCLEO-U545RE-Q, QK kernel, GNU-ARM
-# Last Updated for Version: 7.4.0
-# Date of the Last Update:  2024-06-23
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------

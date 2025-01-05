@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.2.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>Real-time example with &quot;Time-Triggered&quot; scheduling.</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -417,7 +417,7 @@ BSP_d5off();</action>
        </tran_glyph>
       </tran>
       <state_glyph node="4,24,36,12">
-       <entry box="1,2,6,2"/>
+       <entry box="0,3,6,2"/>
       </state_glyph>
      </state>
      <state_glyph node="2,6,42,34"/>
@@ -502,7 +502,7 @@ BSP_d4off();</action>
        </tran_glyph>
       </tran>
       <state_glyph node="4,24,36,12">
-       <entry box="1,2,6,2"/>
+       <entry box="0,3,6,2"/>
       </state_glyph>
      </state>
      <state_glyph node="2,6,42,34"/>
@@ -524,7 +524,7 @@ $declare ${Shared}
   </file>
   <!--${.::ttsched.c}-->
   <file name="ttsched.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -541,7 +541,7 @@ $define ${Components::TTSched}</text>
   </file>
   <!--${.::periodic1.c}-->
   <file name="periodic1.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -555,7 +555,7 @@ $define ${Components::Periodic1}</text>
   </file>
   <!--${.::periodic4.c}-->
   <file name="periodic4.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -569,7 +569,7 @@ $define ${Components::Periodic4}</text>
   </file>
   <!--${.::sporadic2.c}-->
   <file name="sporadic2.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 
@@ -583,7 +583,7 @@ $define ${Components::Sporadic2}</text>
   </file>
   <!--${.::sporadic3.c}-->
   <file name="sporadic3.c">
-   <text>#include &quot;qpc.h&quot;               // QP/C real-time embedded framework
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
 #include &quot;bsp.h&quot;               // Board Support Package
 #include &quot;app.h&quot;               // Application interface
 

@@ -614,6 +614,7 @@
                 <option>
                     <name>AUserIncludes</name>
                     <state>$PROJ_DIR$\..</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include</state>
                 </option>
                 <option>
                     <name>AExtraOptionsCheckV2</name>
@@ -1696,6 +1697,7 @@
                 <option>
                     <name>AUserIncludes</name>
                     <state>$PROJ_DIR$\..</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include</state>
                 </option>
                 <option>
                     <name>AExtraOptionsCheckV2</name>
@@ -2778,6 +2780,7 @@
                 <option>
                     <name>AUserIncludes</name>
                     <state>$PROJ_DIR$\..</state>
+                    <state>$PROJ_DIR$\..\..\..\..\..\3rd_party\FreeRTOS-Kernel\include</state>
                 </option>
                 <option>
                     <name>AExtraOptionsCheckV2</name>
