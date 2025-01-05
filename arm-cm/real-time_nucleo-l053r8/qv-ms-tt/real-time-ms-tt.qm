@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="6.2.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm.xsd">
+<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>Real-time example with &quot;Time-Triggered&quot; scheduling.</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -417,7 +417,7 @@ BSP_d5off();</action>
        </tran_glyph>
       </tran>
       <state_glyph node="4,24,36,12">
-       <entry box="1,2,6,2"/>
+       <entry box="0,3,6,2"/>
       </state_glyph>
      </state>
      <state_glyph node="2,6,42,34"/>
@@ -502,7 +502,7 @@ BSP_d4off();</action>
        </tran_glyph>
       </tran>
       <state_glyph node="4,24,36,12">
-       <entry box="1,2,6,2"/>
+       <entry box="0,3,6,2"/>
       </state_glyph>
      </state>
      <state_glyph node="2,6,42,34"/>
