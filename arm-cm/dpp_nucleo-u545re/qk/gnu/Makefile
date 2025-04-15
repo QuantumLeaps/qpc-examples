@@ -1,36 +1,32 @@
 ##############################################################################
-# Product: Makefile for QP/C on NUCLEO-U545RE-Q, QK kernel, GNU-ARM
-# Last Updated for Version: 7.4.0
-# Date of the Last Update:  2024-06-23
+# Makefile for QP/C on NUCLEO-U545RE, QK kernel, GNU-ARM
+#
+# Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+# SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 #
-# This program is open source software: you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as published
-# by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# This software is dual-licensed under the terms of the open-source GNU
+# General Public License (GPL) or under the terms of one of the closed-
+# source Quantum Leaps commercial licenses.
 #
-# Alternatively, this program may be distributed and modified under the
-# terms of Quantum Leaps commercial licenses, which expressly supersede
-# the GNU General Public License and are specifically designed for
-# licensees interested in retaining the proprietary status of their code.
+# Redistributions in source code must retain this top-level comment block.
+# Plagiarizing this software to sidestep the license obligations is illegal.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# NOTE:
+# The GPL does NOT permit the incorporation of this code into proprietary
+# programs. Please contact Quantum Leaps for commercial licensing options,
+# which expressly supersede the GPL and are designed explicitly for
+# closed-source distribution.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses>.
-#
-# Contact information:
+# Quantum Leaps contact information:
 # <www.state-machine.com/licensing>
 # <info@state-machine.com>
 ##############################################################################
+
 # examples of invoking this Makefile:
 # building configurations: Debug (default), Release, and Spy
 # make
@@ -48,63 +44,83 @@
 #    https://github.com/QuantumLeaps/qtools
 
 #-----------------------------------------------------------------------------
-# project name
+# project:
 #
-PROJECT     := dpp-qk
+PROJECT := dpp-qk
 
-#-----------------------------------------------------------------------------
-# project directories
-#
+VPATH := .. \
+	../..
 
-# location of the QP/C framework (if not provided in an environment var.)
-ifeq ($(QPC),)
-QPC := ../../../../..
-endif
+INCLUDES := -I.. \
+	-I../..
 
-# QP port used in this project
-QP_PORT_DIR := $(QPC)/ports/arm-cm/qk/gnu
-
-# list of all source directories used by this project
-VPATH = \
-	.. \
-	../.. \
-	$(QPC)/src/qf \
-	$(QPC)/src/qk \
-	$(QPC)/src/qs \
-	$(QP_PORT_DIR) \
-	$(QPC)/3rd_party/nucleo-u545re \
-	$(QPC)/3rd_party/nucleo-u545re/gnu
-
-# list of all include directories needed by this project
-INCLUDES  = \
-	-I../.. \
-	-I$(QPC)/include \
-	-I$(QP_PORT_DIR) \
-	-I$(QPC)/3rd_party/CMSIS/Include \
-	-I$(QPC)/3rd_party/nucleo-u545re
-
-#-----------------------------------------------------------------------------
-# files
-#
-
-# assembler source files
-ASM_SRCS :=
-
-# C source files
 C_SRCS := \
 	bsp.c \
 	main.c \
 	philo.c \
 	table.c \
+
+CPP_SRCS :=
+
+DEFINES  :=
+
+LIB_DIRS :=
+LIBS     :=
+OUTPUT   := $(PROJECT)
+
+#-----------------------------------------------------------------------------
+# target
+#
+TARGET     := nucleo-u545re
+3RD_PARTY  := ../../../../../3rd_party
+
+VPATH += \
+	$(3RD_PARTY)/$(TARGET) \
+	$(3RD_PARTY)/$(TARGET)/gnu
+
+INCLUDES += \
+	-I$(3RD_PARTY)/CMSIS/Include \
+	-I$(3RD_PARTY)/$(TARGET)
+
+C_SRCS += \
 	system_stm32u5xx.c \
 	startup_stm32u545retxq.c
 
-# C++ source files
-CPP_SRCS :=
+DEFINES += -DSTM32U545xx \
+	$(DEF)
 
-OUTPUT    := $(PROJECT)
+ARM_CPU   := -mcpu=cortex-m33
+ARM_FPU   := -mfpu=fpv5-sp-d16
+FLOAT_ABI := -mfloat-abi=hard
+
 LD_SCRIPT := $(PROJECT).ld
 
+BIN_DIR := build_$(TARGET)
+
+#-----------------------------------------------------------------------------
+# QP framework
+#
+
+# location of the QP/C framework (if not provided in an env. variable)
+ifeq ($(QP),)
+QP := ../../../../..
+endif
+
+# QP port used in this project
+QP_PORT_DIR := $(QP)/ports/arm-cm/qk/gnu
+
+VPATH += \
+	$(QP)/src/qk \
+	$(QP)/src/qs \
+	$(QP_PORT_DIR)
+
+INCLUDES += \
+	-I$(QP)/include \
+	-I$(QP_PORT_DIR)
+
+#-----------------------------------------------------------------------------
+# QP/C++ framework sources
+#
 QP_SRCS := \
 	qep_hsm.c \
 	qep_msm.c \
@@ -121,30 +137,23 @@ QP_SRCS := \
 	qk.c \
 	qk_port.c
 
-QP_ASMS :=
-
 QS_SRCS := \
 	qs.c \
+	qs_64bit.c \
 	qs_rx.c \
 	qs_fp.c
 
-LIB_DIRS  :=
-LIBS      :=
+VPATH += \
+	$(QP)/src/qf \
+	$(QP)/src/qs \
+	$(QP_PORT_DIR)
 
-# defines
-DEFINES   := -DSTM32U545xx \
-	$(DEF)
-
-# ARM CPU, ARCH, FPU, and Float-ABI types...
-# ARM_CPU:   [cortex-m0 | cortex-m0plus | cortex-m1 | cortex-m3 | cortex-m4]
-# ARM_FPU:   [ | vfp]
-# FLOAT_ABI: [ | soft | softfp | hard]
-#
-ARM_CPU   := -mcpu=cortex-m33
-ARM_FPU   := -mfpu=fpv5-sp-d16
-FLOAT_ABI := -mfloat-abi=hard
+# add the QP sources to the build
+C_SRCS += $(QP_SRCS)
+C_SRCS += syscalls.c
 
 #-----------------------------------------------------------------------------
+# GNU toolset:
 # GNU-ARM toolset (NOTE: You need to adjust to your machine)
 # see https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads
 #
@@ -163,22 +172,33 @@ AS    := $(GNU_ARM)/bin/arm-none-eabi-as
 LINK  := $(GNU_ARM)/bin/arm-none-eabi-gcc
 BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 
-##############################################################################
-# Typically, you should not need to change anything below this line
-
+#-----------------------------------------------------------------------------
 # basic utilities (included in QTools for Windows), see:
 #     https://www.state-machine.com/qtools
+#
+ifeq ($(OS),Windows_NT)
+	MKDIR      := mkdir
+	RM         := rm
+	TARGET_EXT := .exe
+else ifeq ($(OSTYPE),cygwin)
+	MKDIR      := mkdir -p
+	RM         := rm -f
+	TARGET_EXT := .exe
+else
+	MKDIR      := mkdir -p
+	RM         := rm -f
+	TARGET_EXT :=
+endif
+CP         := cp
+SLEEP      := sleep
 
-MKDIR := mkdir
-RM    := rm
+
+##############################################################################
+# Typically you should not need to change anything below this line
 
 #-----------------------------------------------------------------------------
 # build options for various configurations for ARM Cortex-M
 #
-
-# combine all the sources...
-C_SRCS += $(QP_SRCS)
-ASM_SRCS += $(QP_ASMS)
 
 ifeq (rel, $(CONF)) # Release configuration ..................................
 
@@ -186,11 +206,11 @@ BIN_DIR := rel
 
 ASFLAGS = $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c11 -Wall \
 	-ffunction-sections -fdata-sections \
 	-O2 $(INCLUDES) $(DEFINES) -DNDEBUG
 
-CPPFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CPPFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c++17 -Wall \
 	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
 	-O2 $(INCLUDES) $(DEFINES) -DNDEBUG
 
@@ -202,11 +222,11 @@ C_SRCS += $(QS_SRCS)
 
 ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c11 -Wall \
 	-ffunction-sections -fdata-sections \
 	-O $(INCLUDES) $(DEFINES) -DQ_SPY
 
-CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c++17 -Wall \
 	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES) -DQ_SPY
 
@@ -216,11 +236,11 @@ BIN_DIR := dbg
 
 ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c11 -Wall \
 	-ffunction-sections -fdata-sections \
 	-O $(INCLUDES) $(DEFINES)
 
-CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c++17 -Wall \
 	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES)
 
@@ -231,13 +251,11 @@ LINKFLAGS = -T$(LD_SCRIPT) $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb \
 	-specs=nosys.specs -specs=nano.specs \
 	-Wl,-Map,$(BIN_DIR)/$(OUTPUT).map,--cref,--gc-sections $(LIB_DIRS)
 
-ASM_OBJS     := $(patsubst %.s,%.o,  $(notdir $(ASM_SRCS)))
 C_OBJS       := $(patsubst %.c,%.o,  $(notdir $(C_SRCS)))
 CPP_OBJS     := $(patsubst %.cpp,%.o,$(notdir $(CPP_SRCS)))
 
 TARGET_BIN   := $(BIN_DIR)/$(OUTPUT).bin
 TARGET_ELF   := $(BIN_DIR)/$(OUTPUT).elf
-ASM_OBJS_EXT := $(addprefix $(BIN_DIR)/, $(ASM_OBJS))
 C_OBJS_EXT   := $(addprefix $(BIN_DIR)/, $(C_OBJS))
 C_DEPS_EXT   := $(patsubst %.o, %.d, $(C_OBJS_EXT))
 CPP_OBJS_EXT := $(addprefix $(BIN_DIR)/, $(CPP_OBJS))
@@ -261,11 +279,11 @@ else
 all : $(TARGET_BIN) run
 endif
 
-$(TARGET_BIN): $(TARGET_ELF)
+$(TARGET_BIN) : $(TARGET_ELF)
 	$(BIN) -O binary $< $@
 
-$(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+$(TARGET_ELF) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c
@@ -293,23 +311,26 @@ ifneq ($(MAKECMDGOALS),clean)
 endif
 
 
-clean:
+clean :
 	-$(RM) $(BIN_DIR)/*.o \
 	$(BIN_DIR)/*.d \
 	$(BIN_DIR)/*.bin \
 	$(BIN_DIR)/*.elf \
 	$(BIN_DIR)/*.map
-	
-show:
-	@echo PROJECT = $(PROJECT)
+
+show :
+	@echo PROJECT      = $(PROJECT)
 	@echo CONF = $(CONF)
-	@echo DEFINES = $(DEFINES)
-	@echo ASM_FPU = $(ASM_FPU)
-	@echo ASM_SRCS = $(ASM_SRCS)
-	@echo C_SRCS = $(C_SRCS)
-	@echo CPP_SRCS = $(CPP_SRCS)
-	@echo ASM_OBJS_EXT = $(ASM_OBJS_EXT)
-	@echo C_OBJS_EXT = $(C_OBJS_EXT)
-	@echo C_DEPS_EXT = $(C_DEPS_EXT)
+	@echo BIN_DIR      = $(BIN_DIR)
+	@echo TARGET_ELF   = $(TARGET_ELF)
+	@echo MAKECMDGOALS = $(MAKECMDGOALS)
+	@echo VPATH        = $(VPATH)
+	@echo C_SRCS       = $(C_SRCS)
+	@echo CPP_SRCS     = $(CPP_SRCS)
+	@echo C_DEPS_EXT   = $(C_DEPS_EXT)
+	@echo C_OBJS_EXT   = $(C_OBJS_EXT)
 	@echo CPP_DEPS_EXT = $(CPP_DEPS_EXT)
-	@echo TARGET_ELF = $(TARGET_ELF)
+	@echo CPP_OBJS_EXT = $(CPP_OBJS_EXT)
+	@echo LIB_DIRS     = $(LIB_DIRS)
+	@echo LIBS         = $(LIBS)
+	@echo DEFINES      = $(DEFINES)

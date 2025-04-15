@@ -1,13 +1,11 @@
 ##############################################################################
 # Product: Makefile for Qube for Windows and POSIX *HOSTS*
-# Last updated for version 7.2.0
-# Last updated on  2023-01-08
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+# Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
 #
 # This program is open source software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as published
@@ -25,7 +23,7 @@
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with this program. If not, see <www.gnu.org/licenses/>.
+# along with this program. If not, see <http://www.gnu.org/licenses>.
 #
 # Contact information:
 # <www.state-machine.com/licensing>
@@ -59,11 +57,11 @@ VPATH := ..
 INCLUDES := -I..
 
 # location of the QP/C framework (if not provided in an env. variable)
-ifeq ($(QPC),)
-QPC := ../../../..
+ifeq ($(QP),)
+QP := ../../../..
 endif
 
-QP_PORT_DIR := $(QPC)/ports/qube
+QP_PORT_DIR := $(QP)/ports/qube
 
 # make sure that QTOOLS env. variable is defined...
 ifeq ("$(wildcard $(QTOOLS))","")
@@ -157,8 +155,8 @@ endif
 BIN_DIR := $(PROJECT)
 
 C_SRCS   += $(QS_SRCS)
-INCLUDES += -I$(QPC)/include -I$(QP_PORT_DIR) -I$(QTOOLS)/qspy/include
-VPATH    += $(QPC)/src/qf $(QPC)/src/qs $(QP_PORT_DIR) $(QTOOLS)/qspy/source
+INCLUDES += -I$(QP)/include -I$(QP_PORT_DIR) -I$(QTOOLS)/qspy/include
+VPATH    += $(QP)/src/qf $(QP)/src/qs $(QP_PORT_DIR) $(QTOOLS)/qspy/source
 
 # gcc options:
 CFLAGS  = -c -g -O -fno-pie -std=c11 -pedantic -Wall -Wextra -W \
@@ -195,7 +193,7 @@ all: $(TARGET_EXE)
 	$(TARGET_EXE)
 
 $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

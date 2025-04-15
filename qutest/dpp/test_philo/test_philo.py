@@ -1,5 +1,5 @@
 # test-script for QUTest unit testing harness
-# see https://www.state-machine.com/qtools/qutest.html/qutest.html
+# see https://www.state-machine.com/qtools/qutest.html
 
 # preamble...
 def on_reset():
@@ -38,8 +38,10 @@ publish("EAT_SIG", pack("<B", 2))
 expect("@timestamp MP-Get   Obj=EvtPool1,*")
 expect("@timestamp QF-New   Sig=EAT_SIG,*")
 expect("@timestamp QF-Pub   Sdr=QS_RX,Evt<Sig=EAT_SIG,*")
+expect("@timestamp Sch-Lock Ceil=0->3")
 expect("@timestamp AO-Post  Sdr=QS_RX,Obj=Philo_inst[2],Evt<Sig=EAT_SIG,*")
 expect("@timestamp QUTEST_ON_POST EAT_SIG,Obj=Philo_inst[2] 2")
+expect("@timestamp Sch-Unlk Ceil=3->0")
 expect("@timestamp QF-gc?   Evt<Sig=EAT_SIG,*")
 expect("@timestamp AO-GetL  Obj=Philo_inst[2],Evt<Sig=EAT_SIG,*")
 expect("@timestamp Disp===> Obj=Philo_inst[2],Sig=EAT_SIG,State=Philo_hungry")

@@ -77,25 +77,25 @@ BIN_DIR := build_$(TARGET)
 #
 
 # location of the QP/C framework (if not provided in an env. variable)
-ifeq ($(QPC),)
-QPC := ../../..
+ifeq ($(QP),)
+QP := ../../..
 endif
 
 ifeq ($(OS),Windows_NT)
 
 ifdef QV
-QP_PORT_DIR := $(QPC)/ports/win32-qv
+QP_PORT_DIR := $(QP)/ports/win32-qv
 else
-QP_PORT_DIR := $(QPC)/ports/win32
+QP_PORT_DIR := $(QP)/ports/win32
 endif
 LIBS += -lws2_32
 
 else
 
 ifdef QV
-QP_PORT_DIR := $(QPC)/ports/posix-qv
+QP_PORT_DIR := $(QP)/ports/posix-qv
 else
-QP_PORT_DIR := $(QPC)/ports/posix
+QP_PORT_DIR := $(QP)/ports/posix
 endif
 LIBS += -lpthread
 
@@ -105,7 +105,7 @@ VPATH += \
 	$(QP_PORT_DIR)
 
 INCLUDES += \
-	-I$(QPC)/include \
+	-I$(QP)/include \
 	-I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
@@ -134,18 +134,18 @@ QS_SRCS := \
 	qs_port.c
 
 VPATH += \
-	$(QPC)/src/qf \
-	$(QPC)/src/qs $(QP_PORT_DIR)
+	$(QP)/src/qf \
+	$(QP)/src/qs $(QP_PORT_DIR)
 
 INCLUDES += \
-	-I$(QPC)/include \
+	-I$(QP)/include \
 	-I$(QP_PORT_DIR)
 
 # add the QP sources to the build
 C_SRCS += $(QP_SRCS)
 
 ifeq (spy, $(CONF))  # Spy configuration
-VPATH  += $(QPC)/src/qs
+VPATH  += $(QP)/src/qs
 C_SRCS += $(QS_SRCS)
 endif
 
@@ -259,7 +259,7 @@ all: $(TARGET_EXE)
 ifeq (spy, $(CONF))
 
 $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 else

@@ -84,8 +84,8 @@ $(error QTOOLS not found. Please install QTools and define QTOOLS env. variable)
 endif
 
 # location of the QP/C framework (if not provided in an env. variable)
-ifeq ($(QPC),)
-QPC := ../../../..
+ifeq ($(QP),)
+QP := ../../../..
 endif
 
 # location of the QTOOLS directory (if not provided in an environment var.)
@@ -100,7 +100,7 @@ endif
 
 # add QP/C, Unity/CMock to the build...
 VPATH    += $(UNITY)/src $(UNITY)/extras/cmock/src
-INCLUDES += -I$(QPC)/include -I$(UNITY)/src -I$(UNITY)/extras/cmock/src
+INCLUDES += -I$(QP)/include -I$(UNITY)/src -I$(UNITY)/extras/cmock/src
 #C_SRCS   += unity.c cmock.c
 
 #============================================================================
@@ -175,7 +175,7 @@ all: $(TARGET_EXE)
 	$(TARGET_EXE)
 
 $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

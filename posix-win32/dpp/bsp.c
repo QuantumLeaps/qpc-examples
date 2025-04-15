@@ -179,8 +179,8 @@ void QF_onStartup(void) {
 }
 //............................................................................
 void QF_onCleanup(void) {
-    PRINTF_S("\nBye! QTable queue-min=%d\n",
-             QActive_getQueueMin(N_PHILO + 7U));
+    PRINTF_S("\nBye! QTable queue-min=%u\n",
+             (unsigned)QActive_getQueueMin(N_PHILO + 7U));
     QF_consoleCleanup();
 }
 //............................................................................

@@ -116,20 +116,24 @@
 // See http://www.FreeRTOS.org/RTOS-Cortex-M3-M4.html.
 #define configMAX_SYSCALL_INTERRUPT_PRIORITY     ( configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY << (8 - configPRIO_BITS) )
 
-// Definitions that map the FreeRTOS port interrupt handlers to their CMSIS
-// standard names.
-#define xPortPendSVHandler PendSV_Handler
+// Map the FreeRTOS port interrupt handlers to their CMSIS standard names.
 #define vPortSVCHandler SVC_Handler
+#define xPortPendSVHandler PendSV_Handler
 #define xPortSysTickHandler SysTick_Handler
 
 // Prevent the inclusion of items the assembler will not understand in assembly files.
 #ifndef __IAR_SYSTEMS_ASM__
-
-    extern uint32_t SystemCoreClock;
-
-    // Normal assert() semantics without relying on the provision of an assert.h header file.
-    void assert_failed(char const * const module, int const id);
     #define configASSERT( x ) if( ( x ) == 0 ) assert_failed( __FILE__, __LINE__ );
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    void assert_failed(char const * const module, int const id);
+    extern uint32_t SystemCoreClock;
+#ifdef __cplusplus
+}
+#endif
+
 #endif // __IAR_SYSTEMS_ASM__
 
 #endif // FREERTOS_CONFIG_H
