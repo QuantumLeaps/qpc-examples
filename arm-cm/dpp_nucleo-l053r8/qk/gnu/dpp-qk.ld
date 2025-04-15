@@ -1,35 +1,30 @@
 /*****************************************************************************
-* Product: Linker script for for STM32L053R8, GNU-ARM linker
-* Last Updated for Version: 5.9.8
-* Date of the Last Update:  2017-09-13
+* Linker script for for STM32L053R8, GNU-ARM linker
 *
-*                    Q u a n t u m     L e a P s
-*                    ---------------------------
-*                    innovating embedded systems
+* Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 *
-* Copyright (C) Quantum Leaps, LLC. All rights reserved.
+*                    Q u a n t u m  L e a P s
+*                    ------------------------
+*                    Modern Embedded Software
 *
-* This program is open source software: you can redistribute it and/or
-* modify it under the terms of the GNU General Public License as published
-* by the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
+* SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 *
-* Alternatively, this program may be distributed and modified under the
-* terms of Quantum Leaps commercial licenses, which expressly supersede
-* the GNU General Public License and are specifically designed for
-* licensees interested in retaining the proprietary status of their code.
+* This software is dual-licensed under the terms of the open-source GNU
+* General Public License (GPL) or under the terms of one of the closed-
+* source Quantum Leaps commercial licenses.
 *
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
+* Redistributions in source code must retain this top-level comment block.
+* Plagiarizing this software to sidestep the license obligations is illegal.
 *
-* You should have received a copy of the GNU General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
+* NOTE:
+* The GPL does NOT permit the incorporation of this code into proprietary
+* programs. Please contact Quantum Leaps for commercial licensing options,
+* which expressly supersede the GPL and are designed explicitly for
+* closed-source distribution.
 *
-* Contact information:
-* https://state-machine.com
-* mailto:info@state-machine.com
+* Quantum Leaps contact information:
+* <www.state-machine.com/licensing>
+* <info@state-machine.com>
 *****************************************************************************/
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
@@ -47,87 +42,131 @@ STACK_SIZE = 2048;
 HEAP_SIZE = 0;
 
 SECTIONS {
-
-    .isr_vector : {        /* the vector table goes FIRST into ROM */
-        KEEP(*(.isr_vector)) /* vector table */
+    /* Startup code into ROM type memory */
+    .isr_vector : {
+        . = ALIGN(4);
+        KEEP(*(.isr_vector)) /* Startup code */
         . = ALIGN(4);
     } >ROM
 
-    .text : {              /* code and constants */
+    /* The program code and other data into ROM type memory */
+    .text : {
         . = ALIGN(4);
         *(.text)           /* .text sections (code) */
         *(.text*)          /* .text* sections (code) */
-        *(.rodata)         /* .rodata sections (constants, strings, etc.) */
-        *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+        *(.glue_7)         /* glue arm to thumb code */
+        *(.glue_7t)        /* glue thumb to arm code */
+        *(.eh_frame)
 
         KEEP (*(.init))
         KEEP (*(.fini))
 
         . = ALIGN(4);
+        _etext = .;        /* define a global symbols at end of code */
     } >ROM
 
-    .preinit_array : {
+    /* Constant data into ROM type memory */
+    .rodata : {
+        . = ALIGN(4);
+        *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+        *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+        . = ALIGN(4);
+    } >ROM
+
+    /* NOTE:
+    * The "READONLY" keyword is only supported in GCC11 and later,
+    * remove it if using GCC10 or earlier.
+    */
+    .ARM.extab (READONLY) : {
+        . = ALIGN(4);
+        *(.ARM.extab* .gnu.linkonce.armextab.*)
+        . = ALIGN(4);
+    } >ROM
+
+    .ARM (READONLY) : {
+        . = ALIGN(4);
+        __exidx_start = .;
+        *(.ARM.exidx*)
+        __exidx_end = .;
+        . = ALIGN(4);
+    } >ROM
+
+    .preinit_array (READONLY) : {
+        . = ALIGN(4);
         PROVIDE_HIDDEN (__preinit_array_start = .);
         KEEP (*(.preinit_array*))
         PROVIDE_HIDDEN (__preinit_array_end = .);
+        . = ALIGN(4);
     } >ROM
 
-    .init_array : {
+    .init_array (READONLY) : {
+        . = ALIGN(4);
         PROVIDE_HIDDEN (__init_array_start = .);
         KEEP (*(SORT(.init_array.*)))
         KEEP (*(.init_array*))
         PROVIDE_HIDDEN (__init_array_end = .);
+        . = ALIGN(4);
     } >ROM
 
-    .fini_array : {
+    .fini_array (READONLY) : {
+        . = ALIGN(4);
         PROVIDE_HIDDEN (__fini_array_start = .);
-        KEEP (*(.fini_array*))
         KEEP (*(SORT(.fini_array.*)))
+        KEEP (*(.fini_array*))
         PROVIDE_HIDDEN (__fini_array_end = .);
+        . = ALIGN(4);
     } >ROM
 
-    _etext = .;            /* global symbols at end of code */
-
+    /* RAM ------------------------------------------------------------*/
     .stack : {
+        . = ALIGN(8);
         __stack_start__ = .;
         . = . + STACK_SIZE;
         . = ALIGN(4);
         __stack_end__ = .;
+        . = ALIGN(8);
     } >RAM
 
-    .data :  AT (_etext) {
-        __data_load = LOADADDR (.data);
-        __data_start = .;
+    /* Used by the startup to initialize data */
+    __data_load = LOADADDR(.data);
+
+    /* Initialized data sections into "RAM" Ram type memory */
+    .data : {
+        . = ALIGN(4);
+        __data_start = .;  /* create a global symbol at data start */
         *(.data)           /* .data sections */
         *(.data*)          /* .data* sections */
+        *(.RamFunc)        /* .RamFunc sections */
+        *(.RamFunc*)       /* .RamFunc* sections */
         . = ALIGN(4);
-        __data_end__ = .;
+        __data_end__ = .;  /* define a global symbol at data end */
         _edata = __data_end__;
-    } >RAM
+    } >RAM AT> ROM
 
+    /* Uninitialized data section into "RAM" Ram type memory */
+    . = ALIGN(4);
     .bss : {
-        __bss_start__ = .;
+        /* This is used by the startup in order to initialize the .bss section */
+        __bss_start__ = .; /* define a global symbol at bss start */
+        _sbss = __bss_start__;
         *(.bss)
         *(.bss*)
         *(COMMON)
-        . = ALIGN(4);
-        _ebss = .;         /* define a global symbol at bss end */
-        __bss_end__ = .;
+
+       . = ALIGN(4);
+       __bss_end__ = .;    /* define a global symbol at bss end */
+       _ebss = __bss_end__;
     } >RAM
 
-    __exidx_start = .;
-    .ARM.exidx   : { *(.ARM.exidx* .gnu.linkonce.armexidx.*) } >RAM
-    __exidx_end = .;
-
-    PROVIDE ( end = _ebss );
-    PROVIDE ( _end = _ebss );
-    PROVIDE ( __end__ = _ebss );
-
     .heap : {
+        . = ALIGN(8);
+        PROVIDE ( end = . );
+        PROVIDE ( _end = . );
         __heap_start__ = .;
         . = . + HEAP_SIZE;
         . = ALIGN(4);
         __heap_end__ = .;
+        . = ALIGN(8);
     } >RAM
 
     /* Remove information from the standard libraries */
