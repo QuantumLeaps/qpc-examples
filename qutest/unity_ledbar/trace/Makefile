@@ -64,8 +64,8 @@ INCLUDES := -I. \
 	-I../src
 
 # location of the QP/C framework (if not provided in an env. variable)
-ifeq ($(QPC),)
-QPC := ../../../..
+ifeq ($(QP),)
+QP := ../../../..
 endif
 
 # make sure that QTOOLS env. variable is defined...
@@ -129,8 +129,8 @@ ifeq ($(OS),Windows_NT)
 # - the single-threaded QP/C port (win32-qv) or
 # - the multithreaded QP/C port (win32).
 #
-QP_PORT_DIR := $(QPC)/ports/win32-qv
-#QP_PORT_DIR := $(QPC)/ports/win32
+QP_PORT_DIR := $(QP)/ports/win32-qv
+#QP_PORT_DIR := $(QP)/ports/win32
 LIBS += -lws2_32
 
 else
@@ -140,8 +140,8 @@ else
 # - the single-threaded QP/C port (win32-qv) or
 # - the multithreaded QP/C port (win32).
 #
-QP_PORT_DIR := $(QPC)/ports/posix-qv
-#QP_PORT_DIR := $(QPC)/ports/posix
+QP_PORT_DIR := $(QP)/ports/posix-qv
+#QP_PORT_DIR := $(QP)/ports/posix
 LIBS += -lpthread
 
 endif
@@ -149,8 +149,8 @@ endif
 #============================================================================
 # Typically you should not need to change anything below this line
 
-VPATH    += $(QPC)/src/qf $(QP_PORT_DIR)
-INCLUDES += -I$(QPC)/include -I$(QP_PORT_DIR)
+VPATH    += $(QP)/src/qf $(QP_PORT_DIR)
+INCLUDES += -I$(QP)/include -I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
 # GNU toolset:
@@ -201,7 +201,7 @@ else ifeq (spy, $(CONF))  # Spy configuration ................................
 BIN_DIR := build_spy
 
 C_SRCS   += $(QS_SRCS)
-VPATH    += $(QPC)/src/qs
+VPATH    += $(QP)/src/qs
 
 # gcc options:
 CFLAGS  = -c -g -O -fno-pie -std=c11 -pedantic -Wall -Wextra -W \
@@ -252,7 +252,7 @@ all: $(TARGET_EXE)
 	$(TARGET_EXE)
 
 $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

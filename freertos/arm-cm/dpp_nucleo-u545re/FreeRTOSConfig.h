@@ -43,8 +43,16 @@
  * https://www.FreeRTOS.org/a00110.html
  *----------------------------------------------------------*/
 #ifndef __IASMARM__
-extern uint32_t SystemCoreClock;
+#ifdef __cplusplus
+extern "C" {
 #endif
+    void assert_failed(char const * const module, int const id);
+    extern uint32_t SystemCoreClock;
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __IAR_SYSTEMS_ASM__
 
 /* Cortex M33 port configuration. */
 #define configENABLE_MPU                                0

@@ -54,40 +54,40 @@ PROJECT     := dpp
 #
 
 # location of the QP/C framework (if not provided in an environment var.)
-ifeq ($(QPC),)
-QPC := ../../../../..
+ifeq ($(QP),)
+QP := ../../../../..
 endif
 
 # location of the FREERTOS (if not provided in an environment var.)
 ifeq ($(FREERTOS),)
-FREERTOS := $(QPC)/3rd_party/FreeRTOS-Kernel
+FREERTOS := $(QP)/3rd_party/FreeRTOS-Kernel
 endif
 
 # QP port used in this project
-QP_PORT_DIR := $(QPC)/ports/freertos
+QP_PORT_DIR := $(QP)/ports/freertos
 
 # list of all source directories used by this project
 VPATH = \
 	.. \
-	$(QPC)/src/qf \
-	$(QPC)/src/qs \
+	$(QP)/src/qf \
+	$(QP)/src/qs \
 	$(QP_PORT_DIR) \
 	$(FREERTOS) \
 	$(FREERTOS)/portable/GCC/ARM_CM4F \
-	$(QPC)/3rd_party/stm32f4-discovery \
-	$(QPC)/3rd_party/stm32f4-discovery/src \
-	$(QPC)/3rd_party/stm32f4-discovery/gnu
+	$(QP)/3rd_party/stm32f4-discovery \
+	$(QP)/3rd_party/stm32f4-discovery/src \
+	$(QP)/3rd_party/stm32f4-discovery/gnu
 
 # list of all include directories needed by this project
 INCLUDES  = \
 	-I.. \
-	-I$(QPC)/include \
+	-I$(QP)/include \
 	-I$(QP_PORT_DIR) \
 	-I$(FREERTOS)/include \
 	-I$(FREERTOS)/portable/GCC/ARM_CM4F \
-	-I$(QPC)/3rd_party/CMSIS/Include \
-	-I$(QPC)/3rd_party/stm32f4-discovery \
-	-I$(QPC)/3rd_party/stm32f4-discovery/inc
+	-I$(QP)/3rd_party/CMSIS/Include \
+	-I$(QP)/3rd_party/stm32f4-discovery \
+	-I$(QP)/3rd_party/stm32f4-discovery/inc
 
 #-----------------------------------------------------------------------------
 # files
@@ -271,7 +271,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 	$(BIN) -O binary $< $@
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

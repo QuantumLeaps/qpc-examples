@@ -9,9 +9,9 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 #
-# The QP/C software is dual-licensed under the terms of the open-source GNU
-# General Public License (GPL) or under the terms of one of the closed-
-# source Quantum Leaps commercial licenses.
+# The QP/C software is dual-licensed under the terms of the open-source
+# GNU General Public License (GPL) or under the terms of one of the
+# closed-source Quantum Leaps commercial licenses.
 #
 # Redistributions in source code must retain this top-level comment block.
 # Plagiarizing this software to sidestep the license obligations is illegal.
@@ -40,8 +40,8 @@
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
-# is included in the Qtools collection for Windows, see:
-#    https://sourceforge.net/projects/qpc/files/QTools/
+# is included in the QTools collection for Windows, see:
+#    https://github.com/QuantumLeaps/qtools
 #
 
 #-----------------------------------------------------------------------------
@@ -54,34 +54,34 @@ PROJECT     := dpp
 #
 
 # location of the QP/C framework (if not provided in an environment var.)
-ifeq ($(QPC),)
-QPC := ../../../../..
+ifeq ($(QP),)
+QP := ../../../../..
 endif
 
 # QP port used in this project
-QP_PORT_DIR := $(QPC)/ports/uc-os2
+QP_PORT_DIR := $(QP)/ports/uc-os2
 
 # list of all source directories used by this project
 VPATH = \
 	.. \
-	$(QPC)/src/qf \
-	$(QPC)/src/qs \
+	$(QP)/src/qf \
+	$(QP)/src/qs \
 	$(QP_PORT_DIR) \
-	$(QPC)/3rd_party/uC-OS2/Source \
-	$(QPC)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M \
-	$(QPC)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M/GNU \
-	$(QPC)/3rd_party/ek-tm4c123gxl \
-	$(QPC)/3rd_party/ek-tm4c123gxl/gnu
+	$(QP)/3rd_party/uC-OS2/Source \
+	$(QP)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M \
+	$(QP)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M/GNU \
+	$(QP)/3rd_party/ek-tm4c123gxl \
+	$(QP)/3rd_party/ek-tm4c123gxl/gnu
 
 # list of all include directories needed by this project
 INCLUDES  = \
 	-I.. \
-	-I$(QPC)/include \
+	-I$(QP)/include \
 	-I$(QP_PORT_DIR) \
-	-I$(QPC)/3rd_party/uC-OS2/Source \
-	-I$(QPC)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M/GNU \
-	-I$(QPC)/3rd_party/CMSIS/Include \
-	-I$(QPC)/3rd_party/ek-tm4c123gxl
+	-I$(QP)/3rd_party/uC-OS2/Source \
+	-I$(QP)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M/GNU \
+	-I$(QP)/3rd_party/CMSIS/Include \
+	-I$(QP)/3rd_party/ek-tm4c123gxl
 
 #-----------------------------------------------------------------------------
 # files
@@ -177,19 +177,20 @@ BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 ##############################################################################
 # Typically, you should not need to change anything below this line
 
-# basic utilities (included in Qtools for Windows), see:
-#    http://sourceforge.net/projects/qpc/files/Qtools
+# basic utilities (included in QTools for Windows), see:
+#     https://www.state-machine.com/qtools
 
 MKDIR := mkdir
 RM    := rm
 
 #-----------------------------------------------------------------------------
-# build options for various configurations for ARM Cortex-M4F
+# build options for various configurations
 #
 
 # combine all the sources...
 C_SRCS += $(QP_SRCS)
 C_SRCS += $(RTOS_SRCS)
+C_SRCS += syscalls.c
 
 ifeq (rel, $(CONF)) # Release configuration ..................................
 
@@ -271,7 +272,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 	$(BIN) -O binary $< $@
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

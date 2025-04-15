@@ -160,7 +160,7 @@ static QState TServer_idle(TServer * const me, QEvt const * const e) {
             Q_NEW_REF(me->activeRequest, RequestEvt);
 
             PRINTF_S("Processing request #%d\n",
-                   (int)me->activeRequest->ref_num);
+                   (int)Q_EVT_CAST(RequestEvt)->ref_num);
             status_ = Q_TRAN(&TServer_receiving);
             break;
         }
@@ -186,7 +186,7 @@ static QState TServer_busy(TServer * const me, QEvt const * const e) {
             PRINTF_S("busy-EXIT; done processing request #%d\n",
                    (int)me->activeRequest->ref_num);
 
-            // delete the reference to the active request because
+            // delete the reference to the active request, because
             // it is now processed.
             Q_DELETE_REF(me->activeRequest);
             status_ = Q_HANDLED();

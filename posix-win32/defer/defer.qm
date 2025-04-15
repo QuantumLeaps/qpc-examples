@@ -76,14 +76,14 @@ else {
 Q_NEW_REF(me-&gt;activeRequest, RequestEvt);
 
 PRINTF_S(&quot;Processing request #%d\n&quot;,
-       (int)me-&gt;activeRequest-&gt;ref_num);</action>
+       (int)Q_EVT_CAST(RequestEvt)-&gt;ref_num);</action>
       <tran_glyph conn="2,18,3,1,56,32,-12">
        <action box="0,-2,24,2"/>
       </tran_glyph>
      </tran>
      <!--${Components::TServer::SM::idle::TERMINATE}-->
      <tran trig="TERMINATE" target="../../3">
-      <tran_glyph conn="2,22,3,1,62,68,-32">
+      <tran_glyph conn="2,22,3,1,62,72,-32">
        <action box="0,-2,10,2"/>
       </tran_glyph>
      </tran>
@@ -96,7 +96,7 @@ PRINTF_S(&quot;Processing request #%d\n&quot;,
      <exit>PRINTF_S(&quot;busy-EXIT; done processing request #%d\n&quot;,
        (int)me-&gt;activeRequest-&gt;ref_num);
 
-// delete the reference to the active request because
+// delete the reference to the active request, because
 // it is now processed.
 Q_DELETE_REF(me-&gt;activeRequest);</exit>
      <!--${Components::TServer::SM::busy::NEW_REQUEST}-->
@@ -172,7 +172,7 @@ QTimeEvt_armX(&amp;me-&gt;authorizedEvt, 2U*BSP_TICKS_PER_SEC, 0U);</entry>
        <exit box="0,5,6,2"/>
       </state_glyph>
      </state>
-     <state_glyph node="2,30,54,54">
+     <state_glyph color="2" node="2,30,52,54">
       <exit box="0,3,29,2"/>
      </state_glyph>
     </state>
@@ -180,7 +180,7 @@ QTimeEvt_armX(&amp;me-&gt;authorizedEvt, 2U*BSP_TICKS_PER_SEC, 0U);</entry>
     <state name="final">
      <entry brief="stop">PRINTF_S(&quot;%s\n&quot;, &quot;final-ENTRY;&quot;);
             QF_stop(); // terminate the application</entry>
-     <state_glyph node="2,88,30,10">
+     <state_glyph color="3" node="2,88,30,10">
       <entry box="0,3,6,2"/>
      </state_glyph>
     </state>

@@ -1,32 +1,29 @@
 //============================================================================
-// Test fixture for DPP example
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
+// Purpose: Fixture for QUTEST
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC <state-machine.com>.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
-// <www.state-machine.com>
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
+// <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"
@@ -63,6 +60,7 @@ int main(void)
 
     BSP_init(); // initialize the Board Support Package
 
+    // object dictionaries...
     QS_OBJ_DICTIONARY(&Table_dummy);
 
     // pause execution of the test and wait for the test script to continue
@@ -80,19 +78,19 @@ int main(void)
     static QEvtPtr philoQueueSto[N_PHILO][10];
     uint8_t n = 2U;
     Philo_ctor(n); // instantiate all Philosopher active objects
-    QActive_start(AO_Philo[n],          // AO to start
-                  n + 1U,                // QP priority of the AO
-                  philoQueueSto[n],      // event queue storage
-                  Q_DIM(philoQueueSto[n]), // queue length [events]
-                  (void *)0,             // stack storage (not used)
-                  0U,                    // size of the stack [bytes]
-                  (void *)0);            // initialization param
+    QActive_start(AO_Philo[n], // AO to start
+        n + 1U,                // QP priority of the AO
+        philoQueueSto[n],      // event queue storage
+        Q_DIM(philoQueueSto[n]), // queue length [events]
+        (void *)0,             // stack storage (not used)
+        0U,                    // size of the stack [bytes]
+        (void *)0);            // initialization param
 
     // instantiate Table AO as a dummy collaborator
     QActiveDummy_ctor(&Table_dummy);
     QActive_start(&Table_dummy.super,
-                  N_PHILO + 1U, // QP priority of the dummy
-                  (QEvtPtr *)0, 0U, (void *)0, 0U, (void *)0);
+        N_PHILO + 1U, // QP priority of the dummy
+        (QEvtPtr *)0, 0U, (void *)0, 0U, (void *)0);
 
     return QF_run(); // run the QF application
 }
@@ -117,7 +115,7 @@ void QS_onCommand(uint8_t cmdId,
 }
 
 //============================================================================
-//! Host callback function to "massage" the event, if necessary
+// Host callback function to "massage" the event, if necessary
 void QS_onTestEvt(QEvt *e) {
     (void)e;
 #ifdef Q_HOST  // is this test compiled for a desktop Host computer?
@@ -125,7 +123,7 @@ void QS_onTestEvt(QEvt *e) {
 #endif // embedded Target
 }
 //............................................................................
-//! callback function to output the posted QP events...
+// callback function to output the posted QP events...
 void QS_onTestPost(void const *sender, QActive *recipient,
                    QEvt const *e, bool status)
 {

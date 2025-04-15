@@ -1,13 +1,11 @@
 ##############################################################################
 # Product: Makefile for QP/C on EK-TM4C123GXL, QV kernel, GNU-ARM
-# Last Updated for Version: 7.0.1
-# Date of the Last Update:  2022-05-23
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005-2021 Quantum Leaps, LLC. All rights reserved.
+# Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
 #
 # This program is open source software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as published
@@ -44,9 +42,8 @@
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
-# is included in the Qtools collection for Windows, see:
-#    https://sourceforge.net/projects/qpc/files/QTools/
-#
+# is included in the QTools collection for Windows, see:
+#    https://github.com/QuantumLeaps/qtools
 
 #-----------------------------------------------------------------------------
 # project name
@@ -58,31 +55,31 @@ PROJECT     := blinky-qv
 #
 
 # location of the QP/C framework (if not provided in an environment var.)
-ifeq ($(QPC),)
-QPC := ../../../../..
+ifeq ($(QP),)
+QP := ../../../../..
 endif
 
 # QP port used in this project
-QP_PORT_DIR := $(QPC)/ports/arm-cm/qv/gnu
+QP_PORT_DIR := $(QP)/ports/arm-cm/qv/gnu
 
 # list of all source directories used by this project
 VPATH = \
 	.. \
 	../.. \
-	$(QPC)/src/qf \
-	$(QPC)/src/qv \
-	$(QPC)/src/qs \
+	$(QP)/src/qf \
+	$(QP)/src/qv \
+	$(QP)/src/qs \
 	$(QP_PORT_DIR) \
-	$(QPC)/3rd_party/ek-tm4c123gxl \
-	$(QPC)/3rd_party/ek-tm4c123gxl/gnu
+	$(QP)/3rd_party/ek-tm4c123gxl \
+	$(QP)/3rd_party/ek-tm4c123gxl/gnu
 
 # list of all include directories needed by this project
 INCLUDES  = \
 	-I../.. \
-	-I$(QPC)/include \
+	-I$(QP)/include \
 	-I$(QP_PORT_DIR) \
-	-I$(QPC)/3rd_party/CMSIS/Include \
-	-I$(QPC)/3rd_party/ek-tm4c123gxl
+	-I$(QP)/3rd_party/CMSIS/Include \
+	-I$(QP)/3rd_party/ek-tm4c123gxl
 
 #-----------------------------------------------------------------------------
 # files
@@ -93,9 +90,9 @@ ASM_SRCS :=
 
 # C source files
 C_SRCS := \
+	main.c \
 	blinky.c \
 	bsp.c \
-	main.c \
 	system_TM4C123GH6PM.c \
 	startup_TM4C123GH6PM.c
 
@@ -132,7 +129,8 @@ LIB_DIRS  :=
 LIBS      :=
 
 # defines
-DEFINES   := -DTARGET_IS_TM4C123_RB1
+DEFINES   := -DTARGET_IS_TM4C123_RB1 \
+	$(DEF)
 
 # ARM CPU, ARCH, FPU, and Float-ABI types...
 # ARM_CPU:   [cortex-m0 | cortex-m0plus | cortex-m1 | cortex-m3 | cortex-m4]
@@ -177,7 +175,8 @@ RM    := rm
 #
 
 # combine all the sources...
-C_SRCS += $(QP_SRCS)
+C_SRCS   += $(QP_SRCS)
+C_SRCS   += syscalls.c
 ASM_SRCS += $(QP_ASMS)
 
 ifeq (rel, $(CONF)) # Release configuration ..................................
@@ -260,7 +259,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 	$(BIN) -O binary $< $@
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

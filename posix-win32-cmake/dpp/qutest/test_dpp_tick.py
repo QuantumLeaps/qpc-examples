@@ -1,5 +1,5 @@
 # test script for QUTest unit testing harness
-# see https://www.state-machine.com/qtools/qutest.html/qutest.html
+# see https://www.state-machine.com/qtools/qutest.html
 
 # preamble...
 def on_reset():
@@ -72,4 +72,3 @@ expect("@timestamp =>Intern Obj=Philo_inst[0],Sig=EAT_SIG,State=Philo_thinking")
 expect("@timestamp QF-gc    Evt<Sig=EAT_SIG,Pool=1,*")
 expect("@timestamp MP-Put   Obj=EvtPool1,*")
 expect("@timestamp Trg-Done QS_RX_TICK")
-
