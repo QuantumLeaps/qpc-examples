@@ -1,5 +1,5 @@
 # test-script for QUTest unit testing harness
-# see https://www.state-machine.com/qtools/qutest.html/qutest.html
+# see https://www.state-machine.com/qtools/qutest.html
 
 note('''
 This test group verifies the preemption tests

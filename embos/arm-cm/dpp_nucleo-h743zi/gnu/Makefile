@@ -1,33 +1,29 @@
 ##############################################################################
 # Product: Makefile for QP/C on NUCLEO-H743ZI, embOS RTOS, GNU-ARM
-# Last Updated for Version: 7.2.0
-# Date of the Last Update:  2022-12-13
+#
+# Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 #
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+# SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 #
-# This program is open source software: you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as published
-# by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# The QP/C software is dual-licensed under the terms of the open-source
+# GNU General Public License (GPL) or under the terms of one of the
+# closed-source Quantum Leaps commercial licenses.
 #
-# Alternatively, this program may be distributed and modified under the
-# terms of Quantum Leaps commercial licenses, which expressly supersede
-# the GNU General Public License and are specifically designed for
-# licensees interested in retaining the proprietary status of their code.
+# Redistributions in source code must retain this top-level comment block.
+# Plagiarizing this software to sidestep the license obligations is illegal.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# NOTE:
+# The GPL (see <www.gnu.org/licenses/gpl-3.0>) does NOT permit the
+# incorporation of the QP/C software into proprietary programs. Please
+# contact Quantum Leaps for commercial licensing options, which expressly
+# supersede the GPL and are designed explicitly for licensees interested
+# in using QP/C in closed-source proprietary applications.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses>.
-#
-# Contact information:
+# Quantum Leaps contact information:
 # <www.state-machine.com/licensing>
 # <info@state-machine.com>
 ##############################################################################
@@ -44,8 +40,8 @@
 #
 # NOTE:
 # To use this Makefile on Windows, you will need the GNU make utility, which
-# is included in the Qtools collection for Windows, see:
-#    https://sourceforge.net/projects/qpc/files/QTools/
+# is included in the QTools collection for Windows, see:
+#    https://github.com/QuantumLeaps/qtools
 #
 
 #-----------------------------------------------------------------------------
@@ -58,12 +54,12 @@ PROJECT     := dpp
 #
 
 # location of the QP/C framework (if not provided in an environment var.)
-ifeq ($(QPC),)
-QPC := ../../../../..
+ifeq ($(QP),)
+QP := ../../../../..
 endif
 
 # QP port used in this project
-QP_PORT_DIR := $(QPC)/ports/embos
+QP_PORT_DIR := $(QP)/ports/embos
 
 # list of all source directories used by this project
 VPATH = \
@@ -71,26 +67,26 @@ VPATH = \
 	Setup \
 	.. \
 	../.. \
-	$(QPC)/src/qf \
-	$(QPC)/src/qs \
+	$(QP)/src/qf \
+	$(QP)/src/qs \
 	$(QP_PORT_DIR) \
-	$(QPC)/3rd_party/STM32CubeH7/nucleo-h743zi/gnu \
-	$(QPC)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
-	$(QPC)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src \
-	$(QPC)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates
+	$(QP)/3rd_party/STM32CubeH7/nucleo-h743zi/gnu \
+	$(QP)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
+	$(QP)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src \
+	$(QP)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates
 
 # list of all include directories needed by this project
 INCLUDES  = \
 	-I.. \
 	-I../.. \
 	-ISEGGER \
-	-I$(QPC)/include \
+	-I$(QP)/include \
 	-I$(QP_PORT_DIR) \
-	-I$(QPC)/3rd_party/embOS-gnu/Start/Inc \
-	-I$(QPC)/3rd_party/CMSIS/Include \
-	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
-	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
-	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Inc
+	-I$(QP)/3rd_party/embOS-gnu/Start/Inc \
+	-I$(QP)/3rd_party/CMSIS/Include \
+	-I$(QP)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
+	-I$(QP)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
+	-I$(QP)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Inc
 
 #-----------------------------------------------------------------------------
 # files
@@ -147,7 +143,7 @@ QS_SRCS := \
 	qs_rx.c \
 	qs_fp.c
 
-LIB_DIRS  := -L$(QPC)/3rd_party/embOS-gnu/Start/Lib
+LIB_DIRS  := -L$(QP)/3rd_party/embOS-gnu/Start/Lib
 LIBS      := -losT7VLR
 
 # defines
@@ -188,18 +184,19 @@ BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 ##############################################################################
 # Typically, you should not need to change anything below this line
 
-# basic utilities (included in Qtools for Windows), see:
-#    http://sourceforge.net/projects/qpc/files/Qtools
+# basic utilities (included in QTools for Windows), see:
+#     https://www.state-machine.com/qtools
 
 MKDIR := mkdir
 RM    := rm
 
 #-----------------------------------------------------------------------------
-# build options for various configurations for ARM Cortex-M
+# build options for various configurations
 #
 
 # combine all the sources...
 C_SRCS += $(QP_SRCS)
+C_SRCS += syscalls.c
 ASM_SRCS += $(QP_ASMS)
 
 ifeq (rel, $(CONF)) # Release configuration ..................................
@@ -282,7 +279,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 	$(BIN) -O binary $< $@
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

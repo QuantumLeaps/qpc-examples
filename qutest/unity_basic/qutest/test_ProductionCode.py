@@ -1,6 +1,6 @@
 # QUTEST script corresponding to the test_ProductionCode.c test fixture.
 # This test fixture corresponds to ../test_unity/TestProductionCode.c fixture.
-# see https://www.state-machine.com/qtools/qutest.html/qutest.html
+# see https://www.state-machine.com/qtools/qutest.html
 
 # preamble...
 def on_setup():
@@ -69,4 +69,3 @@ to setup the initial condition.''')
 command(1)  # FunctionWhichReturnsLocalVariable()
 expect("@timestamp USER+001 FunctionWhichReturnsLocalVariable 0x00001234")
 expect("@timestamp Trg-Done QS_RX_COMMAND")
-

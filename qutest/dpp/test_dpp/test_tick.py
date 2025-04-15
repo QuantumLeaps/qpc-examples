@@ -1,5 +1,5 @@
 # test script for QUTest unit testing harness
-# see https://www.state-machine.com/qtools/qutest.html/qutest.html
+# see https://www.state-machine.com/qtools/qutest.html
 
 # preamble...
 def on_reset():
@@ -32,6 +32,7 @@ expect("@timestamp BSP_CALL BSP_displayPhilStat 2 hungry  ")
 expect("@timestamp MP-Get   Obj=EvtPool1,*")
 expect("@timestamp QF-New   Sig=EAT_SIG,*")
 expect("@timestamp QF-Pub   Sdr=Table_inst,Evt<Sig=EAT_SIG,Pool=1,Ref=0>")
+expect("@timestamp Sch-Lock Ceil=0->5")
 expect("@timestamp AO-Post  Sdr=Table_inst,Obj=Philo_inst[4],Evt<Sig=EAT_SIG,Pool=1,Ref=2>,*")
 expect("@timestamp QUTEST_ON_POST EAT_SIG,Obj=Philo_inst[4] 2")
 expect("@timestamp AO-Post  Sdr=Table_inst,Obj=Philo_inst[3],Evt<Sig=EAT_SIG,Pool=1,Ref=3>,*")
@@ -42,6 +43,7 @@ expect("@timestamp AO-Post  Sdr=Table_inst,Obj=Philo_inst[1],Evt<Sig=EAT_SIG,Poo
 expect("@timestamp QUTEST_ON_POST EAT_SIG,Obj=Philo_inst[1] 2")
 expect("@timestamp AO-Post  Sdr=Table_inst,Obj=Philo_inst[0],Evt<Sig=EAT_SIG,Pool=1,Ref=6>,*")
 expect("@timestamp QUTEST_ON_POST EAT_SIG,Obj=Philo_inst[0] 2")
+expect("@timestamp Sch-Unlk Ceil=5->0")
 expect("@timestamp QF-gcA   Evt<Sig=EAT_SIG,Pool=1,*")
 expect("@timestamp BSP_CALL BSP_displayPhilStat 2 eating  ")
 expect("@timestamp =>Intern Obj=Table_inst,Sig=HUNGRY_SIG,State=Table_serving")
@@ -72,4 +74,3 @@ expect("@timestamp =>Intern Obj=Philo_inst[0],Sig=EAT_SIG,State=Philo_thinking")
 expect("@timestamp QF-gc    Evt<Sig=EAT_SIG,Pool=1,*")
 expect("@timestamp MP-Put   Obj=EvtPool1,*")
 expect("@timestamp Trg-Done QS_RX_TICK")
-

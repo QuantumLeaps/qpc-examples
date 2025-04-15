@@ -100,17 +100,24 @@
 // version.
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 1
 
-// Prevent the inclusion of items the assembler will not understand in assembly files.
-#ifndef __IAR_SYSTEMS_ASM__
-    #define configASSERT( x ) if( ( x ) == 0 ) assert_failed( __FILE__, __LINE__ );
-
-    void assert_failed(char const * const module, int const id);
-    extern uint32_t SystemCoreClock;
-#endif
-
 // Map the FreeRTOS port interrupt handlers to their CMSIS standard names.
 #define vPortSVCHandler SVC_Handler
 #define xPortPendSVHandler PendSV_Handler
 #define xPortSysTickHandler SysTick_Handler
+
+// Prevent the inclusion of items the assembler will not understand in assembly files.
+#ifndef __IAR_SYSTEMS_ASM__
+    #define configASSERT( x ) if( ( x ) == 0 ) assert_failed( __FILE__, __LINE__ );
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    void assert_failed(char const * const module, int const id);
+    extern uint32_t SystemCoreClock;
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __IAR_SYSTEMS_ASM__
 
 #endif // FREERTOS_CONFIG_H

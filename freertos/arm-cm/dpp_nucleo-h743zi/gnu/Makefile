@@ -54,42 +54,42 @@ PROJECT     := dpp
 #
 
 # location of the QP/C framework (if not provided in an environment var.)
-ifeq ($(QPC),)
-QPC := ../../../../..
+ifeq ($(QP),)
+QP := ../../../../..
 endif
 
 # location of the FREERTOS (if not provided in an environment var.)
 ifeq ($(FREERTOS),)
-FREERTOS := $(QPC)/3rd_party/FreeRTOS-Kernel
+FREERTOS := $(QP)/3rd_party/FreeRTOS-Kernel
 endif
 
 # QP port used in this project
-QP_PORT_DIR := $(QPC)/ports/freertos
+QP_PORT_DIR := $(QP)/ports/freertos
 
 # list of all source directories used by this project
 VPATH = \
 	.. \
-	$(QPC)/src/qf \
-	$(QPC)/src/qs \
+	$(QP)/src/qf \
+	$(QP)/src/qs \
 	$(QP_PORT_DIR) \
 	$(FREERTOS) \
 	$(FREERTOS)/portable/GCC/ARM_CM7/r0p1 \
-	$(QPC)/3rd_party/STM32CubeH7/nucleo-h743zi/gnu \
-	$(QPC)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
-	$(QPC)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src \
-	$(QPC)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates
+	$(QP)/3rd_party/STM32CubeH7/nucleo-h743zi/gnu \
+	$(QP)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
+	$(QP)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Src \
+	$(QP)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Source/Templates
 
 # list of all include directories needed by this project
 INCLUDES  = \
 	-I.. \
-	-I$(QPC)/include \
+	-I$(QP)/include \
 	-I$(QP_PORT_DIR) \
 	-I$(FREERTOS)/include \
 	-I$(FREERTOS)/portable/GCC/ARM_CM4F \
-	-I$(QPC)/3rd_party/CMSIS/Include \
-	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
-	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
-	-I$(QPC)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Inc
+	-I$(QP)/3rd_party/CMSIS/Include \
+	-I$(QP)/3rd_party/STM32CubeH7/Drivers/CMSIS/Device/ST/STM32H7xx/Include \
+	-I$(QP)/3rd_party/STM32CubeH7/Drivers/BSP/STM32H7xx_Nucleo_144 \
+	-I$(QP)/3rd_party/STM32CubeH7/Drivers/STM32H7xx_HAL_Driver/Inc
 
 #-----------------------------------------------------------------------------
 # files
@@ -186,7 +186,7 @@ BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 
 
 ##############################################################################
-# Typically, you should not need to change anything below this line
+# Typically you should not need to change anything below this line
 
 # basic utilities (included in Qtools for Windows), see:
 #    http://sourceforge.net/projects/qpc/files/Qtools
@@ -200,6 +200,7 @@ RM    := rm
 
 # combine all the sources...
 C_SRCS += $(QP_SRCS) $(RTOS_SRCS)
+C_SRCS += syscalls.c
 ASM_SRCS += $(QP_ASMS)
 
 ifeq (rel, $(CONF)) # Release configuration ..................................
@@ -282,7 +283,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 	$(BIN) -O binary $< $@
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

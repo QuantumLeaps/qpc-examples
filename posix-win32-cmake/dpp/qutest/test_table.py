@@ -1,5 +1,5 @@
 # test-script for QUTest unit testing harness
-# see https://www.state-machine.com/qtools/qutest.html/qutest.html
+# see https://www.state-machine.com/qtools/qutest.html
 
 # preamble...
 def on_reset():
@@ -83,4 +83,3 @@ expect("@timestamp =>Intern Obj=Table_inst,Sig=DONE_SIG,State=Table_serving")
 expect("@timestamp QF-gc    Evt<Sig=DONE_SIG,*")
 expect("@timestamp MP-Put   Obj=EvtPool1,*")
 expect("@timestamp Trg-Done QS_RX_EVENT")
-

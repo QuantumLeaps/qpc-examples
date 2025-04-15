@@ -57,35 +57,35 @@ PROJECT     := dpp
 #
 
 # location of the QP/C framework (if not provided in an environment var.)
-ifeq ($(QPC),)
-QPC := ../../../../..
+ifeq ($(QP),)
+QP := ../../../../..
 endif
 
 # QP port used in this project
-QP_PORT_DIR := $(QPC)/ports/uc-os2
+QP_PORT_DIR := $(QP)/ports/uc-os2
 
 # list of all source directories used by this project
 VPATH = \
 	.. \
-	$(QPC)/src/qf \
-	$(QPC)/src/qk \
-	$(QPC)/src/qs \
+	$(QP)/src/qf \
+	$(QP)/src/qk \
+	$(QP)/src/qs \
 	$(QP_PORT_DIR) \
-	$(QPC)/3rd_party/uC-OS2/Source \
-	$(QPC)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M \
-	$(QPC)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M/GNU \
-	$(QPC)/3rd_party/nucleo-u545re \
-	$(QPC)/3rd_party/nucleo-u545re/gnu
+	$(QP)/3rd_party/uC-OS2/Source \
+	$(QP)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M \
+	$(QP)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M/GNU \
+	$(QP)/3rd_party/nucleo-u545re \
+	$(QP)/3rd_party/nucleo-u545re/gnu
 
 # list of all include directories needed by this project
 INCLUDES  = \
 	-I.. \
-	-I$(QPC)/include \
+	-I$(QP)/include \
 	-I$(QP_PORT_DIR) \
-	-I$(QPC)/3rd_party/uC-OS2/Source \
-	-I$(QPC)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M/GNU \
-	-I$(QPC)/3rd_party/CMSIS/Include \
-	-I$(QPC)/3rd_party/nucleo-u545re
+	-I$(QP)/3rd_party/uC-OS2/Source \
+	-I$(QP)/3rd_party/uC-OS2/Ports/ARM-Cortex-M/ARMv7-M/GNU \
+	-I$(QP)/3rd_party/CMSIS/Include \
+	-I$(QP)/3rd_party/nucleo-u545re
 
 #-----------------------------------------------------------------------------
 # files
@@ -135,7 +135,8 @@ RTOS_SRCS := \
 	os_time.c \
 	os_tmr.c \
 	os_dbg.c \
-	os_cpu_c.c
+	os_cpu_c.c \
+	syscalls.c
 
 RTOS_ASMS := \
 	os_cpu_a.s
@@ -284,7 +285,7 @@ $(TARGET_BIN): $(TARGET_ELF)
 	$(BIN) -O binary $< $@
 
 $(TARGET_ELF) : $(ASM_OBJS_EXT) $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 $(BIN_DIR)/%.d : %.c

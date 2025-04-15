@@ -50,12 +50,12 @@ cd %HOMEDIR%\..\%DIR%
 make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
 
-set DIR=qhsm\test
+set DIR=qep_hsm\test
 cd %HOMEDIR%\..\%DIR%
 make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
 
-set DIR=qmsm\test
+set DIR=qep_msm\test
 cd %HOMEDIR%\..\%DIR%
 make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err

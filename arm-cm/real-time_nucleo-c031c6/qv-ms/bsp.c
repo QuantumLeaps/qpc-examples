@@ -1,42 +1,39 @@
 //============================================================================
 // BSP for "real-time" Example
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
+//
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"     // QP/C real-time event framework
-#include "bsp.h"     // Board Support Package
-#include "app.h"     // Application interface
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application interface
 
-#include "stm32l0xx.h"  // CMSIS-compliant header file for the MCU used
+#include "stm32c0xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
 
-Q_DEFINE_THIS_MODULE("bsp") // for functional-safety assertions
+Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 // Local-scope defines -----------------------------------------------------
 
@@ -49,14 +46,9 @@ Q_DEFINE_THIS_MODULE("bsp") // for functional-safety assertions
 #define TST6_PIN  9U
 #define TST7_PIN  5U // LED LD2-Green
 
+// Button pins available on the board (just one user Button B1 on PC.13)
 // button on GPIO PC (input)
 #define B1_PIN    13U
-
-#ifdef Q_SPY
-    // QSpy source IDs
-    static QSpyId const l_SysTick_Handler = { 100U };
-
-#endif
 
 //============================================================================
 // Error handler and ISRs...
@@ -71,22 +63,30 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 
 #ifndef NDEBUG
     // light up the user LED
-    GPIOA->BSRR = (1U << TST6_PIN);
-    for (;;) { // for debugging, hang on in an endless loop...
-    }
-#else
-    NVIC_SystemReset();
-    for (;;) { // explicitly "no-return"
+    GPIOA->BSRR = (1U << TST7_PIN);  // turn LED on
+    // for debugging, hang on in an endless loop...
+    for (;;) {
     }
 #endif
+
+    NVIC_SystemReset();
 }
 //............................................................................
+// assertion failure handler for the STM32 library, including the startup code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// ISRs used in the application ==============================================
+//............................................................................
+#ifdef __UVISION_VERSION
+// dummy initialization of the ctors (not used in C)
+void _init(void);
+void _init(void) {
+}
+#endif // __UVISION_VERSION
+
+// ISRs used in the application ============================================
 
 void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
@@ -97,20 +97,21 @@ void SysTick_Handler(void) {
     QV_schedEnable(); // <== enable the scheduler to process next clock tick
 #endif
 
-    // Perform the debouncing of sporadics. The algorithm for debouncing
+    // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
     // and Michael Barr, page 71.
     static struct {
         uint32_t depressed;
         uint32_t previous;
-    } sporadics = { 0U, 0U };
-    uint32_t current = ~GPIOC->IDR; // read Port C with state of Sporadic B1
-    uint32_t tmp = sporadics.depressed; // save the depressed sporadics
-    sporadics.depressed |= (sporadics.previous & current); // set depressed
-    sporadics.depressed &= (sporadics.previous | current); // clear released
-    sporadics.previous   = current; // update the history
-    tmp ^= sporadics.depressed;     // changed debounced depressed
-    current = sporadics.depressed;
+    } buttons = { 0U, 0U };
+
+    uint32_t current = ~GPIOC->IDR; // read Port C with state of Button B1
+    uint32_t tmp = buttons.depressed; // save the depressed buttons
+    buttons.depressed |= (buttons.previous & current); // set depressed
+    buttons.depressed &= (buttons.previous | current); // clear released
+    buttons.previous   = current; // update the history
+    tmp ^= buttons.depressed;     // changed debounced depressed
+    current = buttons.depressed;
 
     if ((tmp & (1U << B1_PIN)) != 0U) { // debounced B1 state changed?
         if ((current & (1U << B1_PIN)) != 0U) { // is B1 depressed?
@@ -140,7 +141,7 @@ void SysTick_Handler(void) {
     BSP_d1off();
 }
 
-// BSP functions ===========================================================
+// BSP functions =============================================================
 void BSP_init(void) {
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
@@ -175,10 +176,10 @@ void BSP_init(void) {
           (3U << 2U*TST4_PIN) | (3U << 2U*TST5_PIN) | (3U << 2U*TST6_PIN) |
           (3U << 2U*TST7_PIN));
 
-    // enable GPIOC clock port for the Sporadic B1
+    // enable GPIOC clock port for the Button B1
     RCC->IOPENR |=  (1U << 2U);
 
-    // configure Sporadic B1 pin on GPIOC as input, no pull-up, pull-down
+    // configure Button B1 pin on GPIOC as input, no pull-up, pull-down
     GPIOC->MODER &= ~(3U << 2U*B1_PIN);
     GPIOC->PUPDR &= ~(3U << 2U*B1_PIN);
 }
@@ -292,6 +293,7 @@ void QF_onStartup(void) {
     SysTick_Config((SystemCoreClock / BSP_TICKS_PER_SEC) + 1U);
 
     // set priorities of ISRs used in the system
+    // NOTE: all interrupts are "kernel aware" in Cortex-M0+
     NVIC_SetPriority(SysTick_IRQn, 0U);
     // ...
 }
@@ -299,20 +301,24 @@ void QF_onStartup(void) {
 void QF_onCleanup(void) {
 }
 //............................................................................
-void QV_onIdle(void) { // CATION: called with interrupts DISABLED, see NOTE0
+#ifdef QF_ON_CONTEXT_SW
+// NOTE: the context-switch callback is called with interrupts DISABLED
+void QF_onContextSw(QActive *prev, QActive *next) {
+}
+#endif // QF_ON_CONTEXT_SW
+//............................................................................
+void QV_onIdle(void) { // CAUTION: called with interrupts DISABLED, see NOTE0
     BSP_d7on(); // LED LD2
 #ifdef NDEBUG
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-M MCU.
     //
-    BSP_d7off();
     QV_CPU_SLEEP(); // atomically go to sleep and enable interrupts
-    BSP_d7on();
 #else
     QF_INT_ENABLE(); // just enable interrupts
-    BSP_d7off();
 #endif
+    BSP_d7off();
 }
 
 //============================================================================
@@ -322,4 +328,3 @@ void QV_onIdle(void) { // CATION: called with interrupts DISABLED, see NOTE0
 // an event. QV_onIdle() must internally enable interrupts, ideally
 // atomically with putting the CPU to the power-saving mode.
 //
-

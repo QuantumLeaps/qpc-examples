@@ -1,5 +1,5 @@
 # test-script for QUTest unit testing harness
-# see https://www.state-machine.com/qtools/qutest.html/qutest.html
+# see https://www.state-machine.com/qtools/qutest.html
 
 required(VERSION >= 740, "QUTest VERSION >= 740 required")
 
