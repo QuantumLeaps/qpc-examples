@@ -1,7 +1,5 @@
 //============================================================================
 // Product: "Fly 'n' Shoot" game example on EFM32-SLSTK3401A board
-// Last updated for version 7.3.0
-// Last updated on  2023-06-29
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -60,6 +58,6 @@ void BSP_displayOff(void);
 void BSP_randomSeed(uint32_t seed); // random seed
 uint32_t BSP_random(void);          // pseudo-random generator
 
-extern QActive *const the_Ticker0;  // "Ticker" AO for tick rate 0
+extern QTicker *const AO_Ticker0;   // "Ticker" AO for tick rate 0
 
 #endif // BSP_H_

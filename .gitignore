@@ -50,6 +50,10 @@
 *.idb
 *.pdb
 
+# GCOV files
+*.gcda
+*.gcno
+
 # Kernel Module Compile Results
 *.mod*
 *.cmd

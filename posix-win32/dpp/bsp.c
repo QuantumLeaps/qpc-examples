@@ -38,25 +38,29 @@
 #include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 #include <stdlib.h>   // for exit()
 
-Q_DEFINE_THIS_FILE
+Q_DEFINE_THIS_MODULE("bsp")
 
 // Local objects -------------------------------------------------------------
+static QTicker l_Ticker0_inst; // "ticker" AO for tick rate 0
+QTicker * const the_Ticker0 = &l_Ticker0_inst;
+
 static uint32_t l_rnd; // random seed
 
 #ifdef Q_SPY
-    enum {
+    enum AppRecords { // application-specific trace records
         PHILO_STAT = QS_USER,
         PAUSED_STAT,
     };
 
     // QSpy source IDs
     static QSpyId const l_clock_tick = { QS_AP_ID };
+
 #endif
 
 //============================================================================
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
-    FPRINTF_S(stderr, "ERROR in %s:%d", module, id);
+    FPRINTF_S(stderr, ">>>> ERROR in %s:%d <<<<", module, id);
     QF_onCleanup();
     QS_EXIT();
     exit(-1);
@@ -87,6 +91,7 @@ void BSP_init(int argc, char *argv[]) {
     }
 
     QS_OBJ_DICTIONARY(&l_clock_tick);
+    QS_OBJ_DICTIONARY(the_Ticker0);
 
     QS_USR_DICTIONARY(PHILO_STAT);
     QS_USR_DICTIONARY(PAUSED_STAT);
@@ -95,7 +100,8 @@ void BSP_init(int argc, char *argv[]) {
 
     // setup the QS filters...
     QS_GLB_FILTER(QS_ALL_RECORDS);
-    QS_GLB_FILTER(-QS_QF_TICK);    // exclude the tick record
+    QS_GLB_FILTER(-QS_QF_TICK);     // exclude the tick record
+    QS_LOC_FILTER(-(N_PHILO + 4));  // exclude the "ticker" prio
 }
 //............................................................................
 void BSP_start(void) {
@@ -120,14 +126,21 @@ void BSP_start(void) {
             (void *)0);              // no initialization param
     }
 
+    QTicker_ctor(the_Ticker0, 0U);   // "ticker" AO for tick rate 0
+    QActive_start(&the_Ticker0->super,
+        N_PHILO + 4U,   // QP priority
+        (void *)0, 0U,  // no queue
+        (void *)0, 0U,  // no stack storage
+        (void *)0);     // no init. event
+
     static QEvtPtr tableQueueSto[N_PHILO];
     Table_ctor();
     QActive_start(AO_Table,
-        N_PHILO + 7U,            // QP prio. of the AO
-        tableQueueSto,           // event queue storage
-        Q_DIM(tableQueueSto),    // queue length [events]
-        (void *)0, 0U,           // no stack storage
-        (void *)0);              // no initialization param
+        N_PHILO + 7U,    // QP prio. of the AO
+        tableQueueSto,   // event queue storage
+        Q_DIM(tableQueueSto), // queue length [events]
+        (void *)0, 0U,   // no stack storage
+        (void *)0);      // no initialization param
 }
 //............................................................................
 void BSP_terminate(int16_t result) {
@@ -179,8 +192,7 @@ void QF_onStartup(void) {
 }
 //............................................................................
 void QF_onCleanup(void) {
-    PRINTF_S("\nBye! QTable queue-min=%u\n",
-             (unsigned)QActive_getQueueMin(N_PHILO + 7U));
+    PRINTF_S("\n%s\n", "Bye!");
     QF_consoleCleanup();
 }
 //............................................................................
@@ -200,7 +212,8 @@ void QF_onClockTick(void) {
     select(0, NULL, NULL, NULL, &tv); // block for the timevalue
 #endif
 
-    QTIMEEVT_TICK_X(0U, &l_clock_tick); // process time events at rate 0
+    //QTIMEEVT_TICK_X(0U, &l_clock_tick); // process time events at rate 0
+    QTICKER_TRIG(the_Ticker0, &l_clock_tick); // trigger ticker AO
 
     QS_RX_INPUT(); // handle the QS-RX input
     QS_OUTPUT();   // handle the QS output

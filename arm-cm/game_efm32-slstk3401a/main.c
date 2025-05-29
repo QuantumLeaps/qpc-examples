@@ -1,7 +1,5 @@
 //============================================================================
 // Product: "Fly 'n' Shoot" game example
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -37,8 +35,8 @@
 
 //Q_DEFINE_THIS_FILE
 
-static QTicker l_ticker0; // ticker active object for tick rate 0
-QActive * const the_Ticker0 = &l_ticker0.super;
+static QTicker l_Ticker0_inst; // ticker active object for tick rate 0
+QTicker * const AO_Ticker0 = &l_Ticker0_inst;
 
 //............................................................................
 int main() {
@@ -66,6 +64,7 @@ int main() {
     QS_OBJ_DICTIONARY(AO_Missile);
     QS_OBJ_DICTIONARY(AO_Ship);
     QS_OBJ_DICTIONARY(AO_Tunnel);
+    QS_OBJ_DICTIONARY(AO_Ticker0);
 
     // signal dictionaries for globally published events...
     QS_SIG_DICTIONARY(TIME_TICK_SIG,      (void *)0);
@@ -74,8 +73,8 @@ int main() {
     QS_SIG_DICTIONARY(GAME_OVER_SIG,      (void *)0);
 
     // start the active objects...
-    QTicker_ctor(&l_ticker0, 0U); // active object for tick rate 0
-    QActive_start(the_Ticker0,
+    QTicker_ctor(AO_Ticker0, 0U);    // "ticker" AO for tick rate 0
+    QActive_start(&AO_Ticker0->super,
                   1U,                // QP priority
                   0, 0, 0, 0, 0);    // no queue, no stack , no init. event
 

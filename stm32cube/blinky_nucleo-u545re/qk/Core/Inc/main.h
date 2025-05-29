@@ -28,6 +28,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32u5xx_hal.h"
+
 #include "stm32u5xx_nucleo.h"
 
 #include "stm32u5xx_ll_icache.h"
