@@ -23,7 +23,7 @@ int main() {
     QS_OBJ_DICTIONARY(AO_QHsmTst);
 
     // QS filters...
-    QS_GLB_FILTER(QS_ALL_RECORDS);
+    QS_GLB_FILTER(QS_GRP_ALL);
 
     // publish-subscribe not used, no call to QActive_psInit()
     // dynamic event allocation not used, no call to QF_poolInit()

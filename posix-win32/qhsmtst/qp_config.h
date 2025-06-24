@@ -80,20 +80,6 @@
 // </h>
 
 //..........................................................................
-// <h>QEP Event Processor (Events)
-// <i>Events and state machines.
-
-// <o>Event signal size (Q_SIGNAL_SIZE)
-//   <1U=>1
-//   <2U=>2 (default)
-//   <4U=>4
-// <i>Size of the QEvt signal for QEP/QF [bytes]
-// <i>Default: 2
-#define Q_SIGNAL_SIZE  2U
-
-// </h>
-
-//..........................................................................
 // <h>QF Framework (Active Objects)
 // <i>Active Object framework
 
@@ -109,7 +95,7 @@
 // <12=>12 <13=>13 <14=>14 <15=>15
 // <i>Maximum # Event Pools <1..15>
 // <i>Default: 3
-#define QF_MAX_EPOOL 3U
+#define QF_MAX_EPOOL 0U
 
 // <o>Maximum # clock tick rates (QF_MAX_TICK_RATE)
 // <0=>0 no time events

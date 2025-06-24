@@ -93,6 +93,7 @@ INCLUDES += \
 #
 QP_SRCS := \
 	qep_hsm.c \
+	qf_act.c
 
 QS_SRCS := \
 	qs.c \

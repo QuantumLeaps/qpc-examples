@@ -1,102 +1,119 @@
 @setlocal
-
 @set HOMEDIR=%CD%
-set LOG=%HOMEDIR%
 
-::goto skip
+::@echo off
 
-set DIR=self_test\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
-if %ERRORLEVEL% neq 2 goto err
+@if "%1"=="" (
+@echo usage  : run_nucleo-u545re.bat USB-NUCLEO-BOARD
+@echo example: run_nucleo-u545re.bat f:
+exit /b
+)
 
-set DIR=blinky\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+@set TESTDIR=%HOMEDIR%\..
+@set LOGDIR=%HOMEDIR%
+@set MAKEFILE=nucleo-u545re.mak
+@set LOGEXT=trg
+@set LOGSEP=%HOMEDIR%\log_sect_sep.txt
+
+:: unit tests ================================================================
+set TEST=blinky
+cd %TESTDIR%\%TEST%\test
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=dpp\test_philo
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=dpp
+cd %TESTDIR%\%TEST%\test_dpp
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%_dpp.%LOGEXT%
 
-set DIR=dpp\test_table
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=dpp
+cd %TESTDIR%\%TEST%\test_philo
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%_philo.%LOGEXT%
 
-set DIR=dpp\test_dpp
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=dpp
+cd %TESTDIR%\%TEST%\test_table
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%_table.%LOGEXT%
 
-set DIR=dpp-comp\test_philo
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=dpp-comp
+cd %TESTDIR%\%TEST%\test_dpp
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%_dpp.%LOGEXT%
 
-set DIR=dpp-comp\test_table
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=dpp-comp
+cd %TESTDIR%\%TEST%\test_philo
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%_philo.%LOGEXT%
 
-set DIR=dpp-comp\test_dpp
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=dpp-comp
+cd %TESTDIR%\%TEST%\test_table
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%_table.%LOGEXT%
 
-set DIR=evt_par\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=evt-par
+cd %TESTDIR%\%TEST%\test
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=qep_hsm\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=start_seq
+cd %TESTDIR%\%TEST%\test
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=qep_msm\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=unity_basic
+cd %TESTDIR%\%TEST%\qtest
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=start_seq\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=unity_mock
+cd %TESTDIR%\%TEST%\qtest
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=unity_basic\qutest
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
-if %ERRORLEVEL% neq 2 goto err
-
-set DIR=unity_mock\qutest
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=unity_strlen
+cd %TESTDIR%\%TEST%\qtest
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=unity_strlen\qutest
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=unity_ledbar
+cd %TESTDIR%\%TEST%\qtest
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=integration_tests\test_qk
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+:: integration tests =========================================================
+set TEST=integration_tests
+cd %TESTDIR%\%TEST%\test_qk
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%_qk.%LOGEXT%
 
-set DIR=integration_tests\test_qxk
-cd %HOMEDIR%\..\%DIR%
-make -j8 -f nucleo-u545re.mak LOG=%LOG% OPT=c USB=%1 flash
+set TEST=integration_tests
+cd %TESTDIR%\%TEST%\test_qxk
+make -j8 -f %MAKEFILE% LOG=. OPT=c USB=%1 flash
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.log %LOGDIR%\TST_%TEST%_qxk.%LOGEXT%
 
 :cleanup
-@echo Cleanup...
-cd %HOMEDIR%\..
-for /d /r %%i in (build_nucleo-u545re) do @rmdir /s/q "%%i"
+@echo Final cleanup...
+cd %TESTDIR%
+@for /d /r . %%d in (build_nucleo-u545re) do @if exist "%%d" rd /s /q "%%d"
 @echo OK
 
-@chdir /d %HOMEDIR%
+@cd /d %HOMEDIR%
 exit /b
 
 :err
