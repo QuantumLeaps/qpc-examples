@@ -80,15 +80,15 @@ void test_LedBar_99_percent_four_on(void) {
 }
 
 // error handler...
-Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    Q_UNUSED_PAR(module);
-    Q_UNUSED_PAR(id);
+void Q_onError(char const * const module, int const id) {
+    (void)module;
+    (void)id;
 
-    UNITY_TEST_FAIL(loc, "ERROR");
+    UNITY_TEST_FAIL(id, "ERROR");
 }
 //............................................................................
-void assert_failed(char const * const module, int_t const id); // prototype
-void assert_failed(char const * const module, int_t const id) {
+void assert_failed(char const * const module, int const id); // prototype
+void assert_failed(char const * const module, int const id) {
     Q_onError(module, id);
 }
 

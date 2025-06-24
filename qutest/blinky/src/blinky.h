@@ -51,7 +51,6 @@ enum BlinkySignals {
 //${AOs::Blinky_ctor} ........................................................
 void Blinky_ctor(void);
 //$enddecl${AOs::Blinky_ctor} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 //$declare${AOs::AO_Blinky} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 //${AOs::AO_Blinky} ..........................................................
@@ -60,4 +59,3 @@ extern QActive * const AO_Blinky;
 //$enddecl${AOs::AO_Blinky} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 #endif // BLINKY_H
-

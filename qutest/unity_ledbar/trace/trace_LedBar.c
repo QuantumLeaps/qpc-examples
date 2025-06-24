@@ -31,7 +31,7 @@ int main() {
     QS_FUN_DICTIONARY(&LedBar_setPercent);
 
     // filter setup...
-    QS_GLB_FILTER(QS_ALL_RECORDS);
+    QS_GLB_FILTER(QS_GRP_ALL);
 
     trace_LedBar_percent(100U);
     trace_LedBar_percent(19U);

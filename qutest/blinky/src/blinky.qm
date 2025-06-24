@@ -9,14 +9,18 @@
   <class name="Blinky" superclass="qpc::QActive">
    <!--${AOs::Blinky::timeEvt}-->
    <attribute name="timeEvt" type="QTimeEvt" visibility="0x02" properties="0x00"/>
+   <!--${AOs::Blinky::inst}-->
+   <attribute name="inst" type="Blinky" visibility="0x00" properties="0x01">
+    <documentation>// the only Blinky instance (Singleton)</documentation>
+   </attribute>
    <!--${AOs::Blinky::SM}-->
    <statechart properties="0x03">
     <!--${AOs::Blinky::SM::initial}-->
     <initial target="../1">
      <action>(void)par; // unused parameter
 
-QS_OBJ_DICTIONARY(&amp;l_blinky);
-QS_OBJ_DICTIONARY(&amp;l_blinky.timeEvt);
+QS_OBJ_DICTIONARY(&amp;Blinky_inst);
+QS_OBJ_DICTIONARY(&amp;Blinky_inst.timeEvt);
 
 QTimeEvt_armX(&amp;me-&gt;timeEvt,
     BSP_TICKS_PER_SEC/2, BSP_TICKS_PER_SEC/2);</action>
@@ -56,11 +60,11 @@ QTimeEvt_armX(&amp;me-&gt;timeEvt,
   <!--${AOs::AO_Blinky}-->
   <attribute name="AO_Blinky" type="QActive * const" visibility="0x00" properties="0x00">
    <documentation>// opaque pointer to the Blinky AO</documentation>
-   <code>= &amp;l_blinky.super;</code>
+   <code>= &amp;Blinky_inst.super;</code>
   </attribute>
   <!--${AOs::Blinky_ctor}-->
   <operation name="Blinky_ctor" type="void" visibility="0x00" properties="0x00">
-   <code>Blinky *me = &amp;l_blinky;
+   <code>Blinky *me = &amp;Blinky_inst;
 QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Blinky_initial));
 QTimeEvt_ctorX(&amp;me-&gt;timeEvt, &amp;me-&gt;super, TIMEOUT_SIG, 0U);</code>
   </operation>
@@ -81,11 +85,9 @@ enum BlinkySignals {
 };
 
 $declare${AOs::Blinky_ctor}
-
 $declare${AOs::AO_Blinky}
 
-#endif // BLINKY_H
-</text>
+#endif // BLINKY_H</text>
   </file>
   <!--${.::blinky.c}-->
   <file name="blinky.c">
@@ -95,14 +97,13 @@ $declare${AOs::AO_Blinky}
 
 //Q_DEFINE_THIS_MODULE(&quot;blinky&quot;)
 
-// ask QM to declare the Blinky class...
-$declare ${AOs::Blinky}
+// ask QM to declare the Blinky class ----------------------------------------
+$declare${AOs::Blinky}
 
-static Blinky l_blinky;
+// define the global opaque pointer to Blinky AO -----------------------------
+$define${AOs::AO_Blinky}
 
-$define ${AOs::AO_Blinky}
-
-// ask QM to define the Blinky class...
+// ask QM to define the Blinky class (including the state machine) -----------
 $define ${AOs::Blinky_ctor}
 $define ${AOs::Blinky}</text>
   </file>

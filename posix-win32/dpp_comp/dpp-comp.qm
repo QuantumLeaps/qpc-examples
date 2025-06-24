@@ -103,7 +103,7 @@ for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
     me-&gt;fork[n] = FREE;
     me-&gt;isHungry[n] = 0U;
 
-    QASM_INIT(SM_Philo[n], (void *)0, QS_AP_ID + n);
+    QASM_INIT(SM_Philo[n], (void *)0, QS_ID_AP + n);
     BSP_displayPhilStat(n, &quot;thinking&quot;);
 }</action>
      <initial_glyph conn="3,3,5,1,43,25,-8">
@@ -115,7 +115,7 @@ for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
      <!--${Cont::Table::SM::active::TIMEOUT}-->
      <tran trig="TIMEOUT">
       <action>uint16_t n = Q_EVT_CAST(CompTimeEvt)-&gt;compNum;
-QASM_DISPATCH(SM_Philo[n], e, QS_AP_ID + n);</action>
+QASM_DISPATCH(SM_Philo[n], e, QS_ID_AP + n);</action>
       <tran_glyph conn="2,11,3,-1,14">
        <action box="0,-2,26,4"/>
       </tran_glyph>
@@ -148,7 +148,7 @@ QASM_DISPATCH(SM_Philo[n], e, QS_AP_ID + n);</action>
             QEVT_INITIALIZER(EAT_SIG),
             .philoId = n
         };
-        QASM_DISPATCH(SM_Philo[n], &amp;evt.super, QS_AP_ID + n);
+        QASM_DISPATCH(SM_Philo[n], &amp;evt.super, QS_ID_AP + n);
 
         me-&gt;isHungry[n] = 0U;
         BSP_displayPhilStat(n, &quot;eating  &quot;);
@@ -174,7 +174,7 @@ TableEvt const evt = {
     QEVT_INITIALIZER(EAT_SIG),
     .philoId = n
 };
-QASM_DISPATCH(SM_Philo[n], &amp;evt.super, QS_AP_ID + n);
+QASM_DISPATCH(SM_Philo[n], &amp;evt.super, QS_ID_AP + n);
 BSP_displayPhilStat(n, &quot;eating  &quot;);</action>
         <choice_glyph conn="20,33,5,-1,10">
          <action box="1,0,10,2"/>
@@ -218,7 +218,7 @@ if ((me-&gt;isHungry[m] != 0U) &amp;&amp; (me-&gt;fork[m] == FREE)) {
         QEVT_INITIALIZER(EAT_SIG),
         .philoId = m
     };
-    QASM_DISPATCH(SM_Philo[m], &amp;evt.super, QS_AP_ID + m);
+    QASM_DISPATCH(SM_Philo[m], &amp;evt.super, QS_ID_AP + m);
     BSP_displayPhilStat(m, &quot;eating  &quot;);
 }
 m = left(n); // check the left neighbor
@@ -233,7 +233,7 @@ if ((me-&gt;isHungry[m] != 0U) &amp;&amp; (me-&gt;fork[n] == FREE)) {
         QEVT_INITIALIZER(EAT_SIG),
         .philoId = m
     };
-    QASM_DISPATCH(SM_Philo[m], &amp;evt.super, QS_AP_ID + m);
+    QASM_DISPATCH(SM_Philo[m], &amp;evt.super, QS_ID_AP + m);
     BSP_displayPhilStat(m, &quot;eating  &quot;);
 }</action>
        <tran_glyph conn="4,41,3,-1,16">

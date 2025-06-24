@@ -155,9 +155,9 @@ void BSP_init(void) {
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_SM_RECORDS); // state machine records
-    QS_GLB_FILTER(QS_AO_RECORDS); // active object records
-    QS_GLB_FILTER(QS_UA_RECORDS); // all user records
+    QS_GLB_FILTER(QS_GRP_SM); // state machine records
+    QS_GLB_FILTER(QS_GRP_AO); // active object records
+    QS_GLB_FILTER(QS_GRP_UA); // all user records
 }
 //............................................................................
 void QF_onStartup(void) {

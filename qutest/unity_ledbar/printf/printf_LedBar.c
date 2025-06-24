@@ -23,12 +23,12 @@ int main() {
 //............................................................................
 #include <stdlib.h> // for exit()
 
-Q_NORETURN Q_onError(char const * const module, int_t const id) {
+void Q_onError(char const * const module, int const id) {
     printf("ERROR in %s:%d\n", module, id);
     exit(-1);
 }
 //............................................................................
-void assert_failed(char const * const module, int_t const id); // prototype
-void assert_failed(char const * const module, int_t const id) {
+void assert_failed(char const * const module, int const id); // prototype
+void assert_failed(char const * const module, int const id) {
     Q_onError(module, id);
 }

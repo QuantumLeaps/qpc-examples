@@ -43,12 +43,18 @@ Q_DEFINE_THIS_FILE
 extern int Counter;
 
 //----------------------------------------------------------------------------
-int main() {
-    QF_init();  // initialize the framework
+#ifdef Q_HOST
+int main(int argc, char *argv[]) { // host takes command-line arguments
+    void * const qs_arg = ((argc > 1) ? argv[1] : (void*)0);
+#else // embedded target
+int main(void) { // embedded target takes no command-line arguments
+    void * const qs_arg = (void*)0;
+#endif
 
-    // initialize the QS software tracing
-    if (!QS_INIT((void*)0)) {
-        Q_ERROR();
+    QF_init(); // initialize the framework
+
+    if (!QS_INIT(qs_arg)) { // initialize the QS software tracing
+        Q_ERROR(); // QS initialization must succeed
     }
 
     // dictionaries...
@@ -57,7 +63,7 @@ int main() {
     QS_OBJ_DICTIONARY(&Counter);
 
     // filter setup...
-    QS_GLB_FILTER(QS_ALL_RECORDS);
+    QS_GLB_FILTER(QS_GRP_ALL);
 
     return QF_run(); // run the tests
 }

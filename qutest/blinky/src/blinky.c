@@ -41,17 +41,22 @@
 
 //Q_DEFINE_THIS_MODULE("blinky")
 
-// ask QM to declare the Blinky class...
+// ask QM to declare the Blinky class ----------------------------------------
 //$declare${AOs::Blinky} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 //${AOs::Blinky} .............................................................
-typedef struct {
+typedef struct Blinky {
 // protected:
     QActive super;
 
 // private:
     QTimeEvt timeEvt;
+
+// public:
 } Blinky;
+
+// the only Blinky instance (Singleton)
+extern Blinky Blinky_inst;
 
 // protected:
 static QState Blinky_initial(Blinky * const me, void const * const par);
@@ -59,8 +64,7 @@ static QState Blinky_off(Blinky * const me, QEvt const * const e);
 static QState Blinky_on(Blinky * const me, QEvt const * const e);
 //$enddecl${AOs::Blinky} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-static Blinky l_blinky;
-
+// define the global opaque pointer to Blinky AO -----------------------------
 //$skip${QP_VERSION} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 // Check for the minimum required QP version
 #if (QP_VERSION < 730U) || (QP_VERSION != ((QP_RELEASE^4294967295U)%0x2710U))
@@ -70,15 +74,15 @@ static Blinky l_blinky;
 //$define${AOs::AO_Blinky} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 //${AOs::AO_Blinky} ..........................................................
-QActive * const AO_Blinky = &l_blinky.super;
+QActive * const AO_Blinky = &Blinky_inst.super;
 //$enddef${AOs::AO_Blinky} ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-// ask QM to define the Blinky class...
+// ask QM to define the Blinky class (including the state machine) -----------
 //$define${AOs::Blinky_ctor} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 //${AOs::Blinky_ctor} ........................................................
 void Blinky_ctor(void) {
-    Blinky *me = &l_blinky;
+    Blinky *me = &Blinky_inst;
     QActive_ctor(&me->super, Q_STATE_CAST(&Blinky_initial));
     QTimeEvt_ctorX(&me->timeEvt, &me->super, TIMEOUT_SIG, 0U);
 }
@@ -86,14 +90,15 @@ void Blinky_ctor(void) {
 //$define${AOs::Blinky} vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 
 //${AOs::Blinky} .............................................................
+Blinky Blinky_inst;
 
 //${AOs::Blinky::SM} .........................................................
 static QState Blinky_initial(Blinky * const me, void const * const par) {
     //${AOs::Blinky::SM::initial}
     (void)par; // unused parameter
 
-    QS_OBJ_DICTIONARY(&l_blinky);
-    QS_OBJ_DICTIONARY(&l_blinky.timeEvt);
+    QS_OBJ_DICTIONARY(&Blinky_inst);
+    QS_OBJ_DICTIONARY(&Blinky_inst.timeEvt);
 
     QTimeEvt_armX(&me->timeEvt,
         BSP_TICKS_PER_SEC/2, BSP_TICKS_PER_SEC/2);

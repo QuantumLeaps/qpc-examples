@@ -185,6 +185,7 @@ RM    := rm
 # combine all the sources...
 C_SRCS   += $(QP_SRCS)
 C_SRCS   += $(RTOS_SRCS)
+C_SRCS   += syscalls.c
 
 ifeq (rel, $(CONF)) # Release configuration ..................................
 
@@ -194,11 +195,11 @@ ASFLAGS = $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
 CFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
 	-ffunction-sections -fdata-sections \
-	-O1 $(INCLUDES) $(DEFINES) -DNDEBUG
+	-O2 $(INCLUDES) $(DEFINES) -DNDEBUG
 
 CPPFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
 	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
-	-O1 $(INCLUDES) $(DEFINES) -DNDEBUG
+	-O2 $(INCLUDES) $(DEFINES) -DNDEBUG
 
 else ifeq (spy, $(CONF))  # Spy configuration ................................
 
@@ -298,7 +299,7 @@ clean:
 	$(BIN_DIR)/*.bin \
 	$(BIN_DIR)/*.elf \
 	$(BIN_DIR)/*.map
-	
+
 show:
 	@echo PROJECT = $(PROJECT)
 	@echo CONF = $(CONF)

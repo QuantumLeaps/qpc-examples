@@ -1,107 +1,172 @@
 @setlocal
-
 @set HOMEDIR=%CD%
-set LOG=%HOMEDIR%
 
-::goto skip
+::@echo off
 
-set DIR=self_test\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
-if %ERRORLEVEL% neq 2 goto err
+@set TESTDIR=%HOMEDIR%\..
+@set LOGDIR=%HOMEDIR%
+@set MAKEFILE=Makefile
+@set LOGEXT=host
+@set LOGSEP=%LOGDIR%\log_sect_sep.txt
 
-set DIR=blinky\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+:: goto start
+
+:: unit tests ================================================================
+set TEST=blinky
+cd %TESTDIR%\%TEST%\test
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=dpp\test_philo
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=dpp
+cd %TESTDIR%\%TEST%\test_dpp
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_dpp.%LOGEXT%
 
-set DIR=dpp\test_table
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=dpp
+cd %TESTDIR%\%TEST%\test_philo
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_philo.%LOGEXT%
 
-set DIR=dpp\test_dpp
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=dpp
+cd %TESTDIR%\%TEST%\test_table
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_table.%LOGEXT%
 
-set DIR=dpp-comp\test_philo
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=dpp-comp
+cd %TESTDIR%\%TEST%\test_dpp
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_dpp.%LOGEXT%
 
-set DIR=dpp-comp\test_table
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=dpp-comp
+cd %TESTDIR%\%TEST%\test_philo
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_philo.%LOGEXT%
 
-set DIR=dpp-comp\test_dpp
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=dpp-comp
+cd %TESTDIR%\%TEST%\test_table
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_table.%LOGEXT%
 
-set DIR=evt_par\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=evt_par
+cd %TESTDIR%\%TEST%\test
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=qep_hsm\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=start_seq
+cd %TESTDIR%\%TEST%\test
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=qep_msm\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=unity_basic
+cd %TESTDIR%\%TEST%\test
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
+@echo NOTE: 2 errors expected!
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
+
+set TEST=unity_basic
+cd %TESTDIR%\%TEST%\qutest
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
+@echo 2 errors expected!
+:: if %ERRORLEVEL% neq 2 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
+
+set TEST=unity_basic
+cd %TESTDIR%\%TEST%\qutest
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
+@echo NOTE: 2 errors expected!
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
+
+set TEST=unity_ledbar
+cd %TESTDIR%\%TEST%\test
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
+@echo NOTE: 1 error expected!
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_unity.%LOGEXT%
+
+set TEST=unity_ledbar
+cd %TESTDIR%\%TEST%\qutest
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
+@echo NOTE: 1 error expected!
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
+
+set TEST=unity_ledbar
+cd %TESTDIR%\%TEST%\printf
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_printf.%LOGEXT%
 
-set DIR=start_seq\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=unity_ledbar2
+cd %TESTDIR%\%TEST%\test
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
+@echo NOTE: 1 error expected!
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_unity.%LOGEXT%
+
+set TEST=unity_ledbar2
+cd %TESTDIR%\%TEST%\qutest
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
+@echo NOTE: 3 errors expected!
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
+
+set TEST=unity_mock
+cd %TESTDIR%\%TEST%\test
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_unity.%LOGEXT%
 
-set DIR=unity_basic\qutest
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
-if %ERRORLEVEL% neq 2 goto err
-
-set DIR=unity_mock\qutest
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=unity_mock
+cd %TESTDIR%\%TEST%\qutest
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
 
-set DIR=unity_strlen\qutest
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=unity_strlen
+cd %TESTDIR%\%TEST%\test
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%_unity.%LOGEXT%
 
-set DIR=unity_basic\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
-if %ERRORLEVEL% neq 2 goto err
-
-set DIR=unity_mock\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
+set TEST=unity_strlen
+cd %TESTDIR%\%TEST%\qutest
+del *.log *.cov
+make -j8 -f %MAKEFILE% LOG=. OPT=c
 if %ERRORLEVEL% neq 0 goto err
-
-set DIR=unity_strlen\test
-cd %HOMEDIR%\..\%DIR%
-make -j8 LOG=%LOG% OPT=c
-if %ERRORLEVEL% neq 0 goto err
+copy /b/y *.cov + %LOGSEP% + *.log + %LOGSEP% + *.c.gcov %LOGDIR%\TST_%TEST%.%LOGEXT%
 
 :cleanup
-@echo Cleanup...
-cd %HOMEDIR%\..
-for /d /r %%i in (build_host) do @rmdir /s/q "%%i"
+@echo Final cleanup...
+cd %TESTDIR%
+@for /d /r . %%d in (build_host) do @if exist "%%d" rd /s /q "%%d"
 @echo OK
 
-@chdir /d %HOMEDIR%
+@cd /d %HOMEDIR%
 exit /b
 
 :err
