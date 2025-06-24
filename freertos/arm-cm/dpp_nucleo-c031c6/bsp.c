@@ -1,31 +1,28 @@
 //============================================================================
-// Product: DPP example, EK-TM4C123GXL board, FreeRTOS kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
+// BSP for "real-time" Example, NUCLEO-C031C6 board, FreeRTOS kernel
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
@@ -33,38 +30,32 @@
 #include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
 
-#include "TM4C123GH6PM.h"        // the device specific header (TI)
-#include "sysctl.h"              // system control driver (TI)
-#include "gpio.h"                // GPIO driver (TI)
+#include "stm32c0xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
 
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
-// LEDs and Switches of the EK-TM4C123GXL board ............................
-#define LED_RED     (1U << 1U)
-#define LED_GREEN   (1U << 3U)
-#define LED_BLUE    (1U << 2U)
-
-#define BTN_SW1     (1U << 4U)
-#define BTN_SW2     (1U << 0U)
-
+// Local-scope defines -----------------------------------------------------
 // "RTOS-aware" interrupt priorities for FreeRTOS on ARM Cortex-M, NOTE1
 #define RTOS_AWARE_ISR_CMSIS_PRI \
     (configMAX_SYSCALL_INTERRUPT_PRIORITY >> (8-__NVIC_PRIO_BITS))
+
+// LED pins available on the board (just one user LED LD4--Green on PA.5)
+#define LD4_PIN  5U
+
+// Button pins available on the board (just one user Button B1 on PC.13)
+#define B1_PIN   13U
 
 // Local-scope objects -----------------------------------------------------
 static uint32_t l_rndSeed;
 
 #ifdef Q_SPY
 
-    // QS identifiers for non-QP sources of events
-    static uint8_t const l_TickHook = 0U;
-    static uint8_t const l_GPIOPortA_IRQHandler = 0U;
+    QSTimeCtr QS_tickTime_;
+    QSTimeCtr QS_tickPeriod_;
 
-    #define UART_BAUD_RATE      115200U
-    #define UART_FR_TXFE        (1U << 7)
-    #define UART_FR_RXFE        (1U << 4)
-    #define UART_TXFIFO_DEPTH   16U
+    // QSpy source IDs
+    static QSpyId const l_TickHook = { 0U };
 
     enum AppRecords { // application-specific trace records
         PHILO_STAT = QS_USER,
@@ -85,76 +76,33 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
 
 #ifndef NDEBUG
-    // light up all LEDs
-    GPIOF_AHB->DATA_Bits[LED_GREEN | LED_RED | LED_BLUE] = 0xFFU;
+    // light up the user LED
+    GPIOA->BSRR = (1U << LD4_PIN);  // turn LED on
     // for debugging, hang on in an endless loop...
     for (;;) {
     }
-#else
+#endif
+
     NVIC_SystemReset();
     for (;;) { // explicitly "no-return"
     }
-#endif
 }
 //............................................................................
+// assertion failure handler for the STM32 library, including the startup code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// ISRs used in the application ==============================================
-
-// NOTE: this ISR is for testing of the various preemption scenarios
-// by triggering the GPIOPortA interrupt from the debugger. You achieve
-// this by writing 0 to the  SWTRIG register at 0xE000,EF00.
-//
-// Code Composer Studio: From the CCS debugger you need open the register
-// window and select NVIC registers from the drop-down list. You scroll to
-// the NVIC_SW_TRIG register, which denotes the Software Trigger Interrupt
-// Register in the NVIC. To trigger the GPIOA interrupt you need to write
-// 0x00 to the NVIC_SW_TRIG by clicking on this field, entering the value,
-// and pressing the Enter key.
-//
-// IAR EWARM: From the C-Spy debugger you need to open Registers view and
-// select the "Other Systems Register" group. From there, you need to write
-// 0 to the STIR write-only register and press enter.
-//
-// NOTE: only the "FromISR" FreeRTOS API variants are allowed in the ISRs!
-void GPIOPortA_IRQHandler(void); // prototype
-void GPIOPortA_IRQHandler(void) {
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-    // for testing...
-    QACTIVE_POST_FROM_ISR(AO_Table,
-        Q_NEW_FROM_ISR(QEvt, MAX_PUB_SIG),
-        &xHigherPriorityTaskWoken,
-        &l_GPIOPortA_IRQHandler);
-
-    // the usual end of FreeRTOS ISR...
-    portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
-}
 //............................................................................
-#ifdef Q_SPY
-
-// ISR for receiving bytes from the QSPY Back-End
-// NOTE: This ISR is "kernel-unaware" meaning that it does not interact with
-// the FreeRTOS or QP and is not disabled. Such ISRs don't need to call
-// portEND_SWITCHING_ISR(() at the end, but they also cannot call any
-// FreeRTOS or QP APIs.
-void UART0_IRQHandler(void); // prototype
-void UART0_IRQHandler(void) {
-    uint32_t status = UART0->RIS; // get the raw interrupt status
-    UART0->ICR = status;          // clear the asserted interrupts
-
-    while ((UART0->FR & UART_FR_RXFE) == 0) { // while RX FIFO NOT empty
-        uint32_t b = UART0->DR;
-        QS_RX_PUT(b);
-    }
+#ifdef __UVISION_VERSION
+// dummy initialization of the ctors (not used in C)
+void _init(void);
+void _init(void) {
 }
-#endif
+#endif // __UVISION_VERSION
 
-// Application hooks used in this project ====================================
-// NOTE: only the "FromISR" API variants are allowed in vApplicationTickHook
+// ISRs "hooks" used in the application ======================================
 
 void vApplicationTickHook(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -170,16 +118,16 @@ void vApplicationTickHook(void) {
         uint32_t previous;
     } buttons = { 0U, 0U };
 
-    uint32_t current = ~GPIOF_AHB->DATA_Bits[BTN_SW1 | BTN_SW2]; // SW1&SW2
-    uint32_t tmp = buttons.depressed; // save debounced depressed buttons
+    uint32_t current = ~GPIOC->IDR; // read Port C with state of Button B1
+    uint32_t tmp = buttons.depressed; // save the depressed buttons
     buttons.depressed |= (buttons.previous & current); // set depressed
     buttons.depressed &= (buttons.previous | current); // clear released
     buttons.previous   = current; // update the history
     tmp ^= buttons.depressed;     // changed debounced depressed
     current = buttons.depressed;
 
-    if ((tmp & BTN_SW1) != 0U) {  // debounced SW1 state changed?
-        if ((current & BTN_SW1) != 0U) { // is SW1 depressed?
+    if ((tmp & (1U << B1_PIN)) != 0U) { // debounced B1 state changed?
+        if ((current & (1U << B1_PIN)) != 0U) { // is B1 depressed?
             static QEvt const pauseEvt = QEVT_INITIALIZER(PAUSE_SIG);
             QACTIVE_PUBLISH_FROM_ISR(&pauseEvt,
                                 &xHigherPriorityTaskWoken,
@@ -193,48 +141,28 @@ void vApplicationTickHook(void) {
         }
     }
 
+#ifdef Q_SPY
+    tmp = SysTick->CTRL; // clear CTRL_COUNTFLAG
+    QS_tickTime_ += QS_tickPeriod_; // account for the clock rollover
+#endif
+
     // notify FreeRTOS to perform context switch from ISR, if needed
     portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 }
+
 //............................................................................
 void vApplicationIdleHook(void) {
-    // toggle the User LED on and then off, see NOTE01
-    QF_INT_DISABLE();
-    GPIOF_AHB->DATA_Bits[LED_BLUE] = 0xFFU;  // turn the Blue LED on
-    GPIOF_AHB->DATA_Bits[LED_BLUE] = 0U;     // turn the Blue LED off
-    QF_INT_ENABLE();
-
-    // Some floating point code is to exercise the VFP...
-    float volatile x = 1.73205F;
-    x = x * 1.73205F;
-
-#ifdef Q_SPY
-    QS_rxParse();  // parse all the received bytes
-
-    if ((UART0->FR & UART_FR_TXFE) != 0U) {  // TX done?
-        uint16_t fifo = UART_TXFIFO_DEPTH;   // max bytes we can accept
-        uint8_t const *block;
-
-        QF_INT_DISABLE();
-        block = QS_getBlock(&fifo); // try to get next block to transmit
-        QF_INT_ENABLE();
-
-        while (fifo-- != 0U) {  // any bytes in the block?
-            UART0->DR = *block++;  // put into the FIFO
-        }
-    }
-#elif defined NDEBUG
+#ifdef NDEBUG
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-M MCU.
-    //
     __WFI(); // Wait-For-Interrupt
 #endif
 }
 //............................................................................
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
-    Q_UNUSED_PAR(xTask);
-    Q_UNUSED_PAR(pcTaskName);
+    (void)xTask;
+    (void)pcTaskName;
     Q_ERROR();
 }
 //............................................................................
@@ -267,8 +195,6 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
 }
 
 // BSP functions =============================================================
-
-//............................................................................
 void BSP_init(void) {
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
@@ -282,41 +208,29 @@ void BSP_init(void) {
     __ISB();
     __DSB();
 
-    // enable the MemManage_Handler for MPU exception
-    SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
-
     // NOTE: SystemInit() has been already called from the startup code
     // but SystemCoreClock needs to be updated
     SystemCoreClockUpdate();
 
-    // NOTE: VFP (hardware Floating Point) unit is configured by FreeRTOS
+    // enable GPIOA clock port for the LED LD4
+    RCC->IOPENR |= (1U << 0U);
 
-    // enable clock for to the peripherals used by this application...
-    SYSCTL->RCGCGPIO  |= (1U << 5U); // enable Run mode for GPIOF
-    SYSCTL->GPIOHBCTL |= (1U << 5U); // enable AHB for GPIOF
-    __ISB();
-    __DSB();
+    // set all used GPIOA pins as push-pull output, no pull-up, pull-down
+    GPIOA->MODER   &= ~(3U << 2U*LD4_PIN);
+    GPIOA->MODER   |=  (1U << 2U*LD4_PIN);
+    GPIOA->OTYPER  &= ~(1U <<    LD4_PIN);
+    GPIOA->OSPEEDR &= ~(3U << 2U*LD4_PIN);
+    GPIOA->OSPEEDR |=  (1U << 2U*LD4_PIN);
+    GPIOA->PUPDR   &= ~(3U << 2U*LD4_PIN);
 
-    // configure LEDs (digital output)
-    GPIOF_AHB->DIR |= (LED_RED | LED_BLUE | LED_GREEN);
-    GPIOF_AHB->DEN |= (LED_RED | LED_BLUE | LED_GREEN);
-    GPIOF_AHB->DATA_Bits[LED_RED | LED_BLUE | LED_GREEN] = 0U;
+    // enable GPIOC clock port for the Button B1
+    RCC->IOPENR |=  (1U << 2U);
 
-    // configure switches...
+    // configure Button B1 pin on GPIOC as input, no pull-up, pull-down
+    GPIOC->MODER &= ~(3U << 2U*B1_PIN);
+    GPIOC->PUPDR &= ~(3U << 2U*B1_PIN);
 
-    // unlock access to the SW2 pin because it is PROTECTED
-    GPIOF_AHB->LOCK = 0x4C4F434BU; // unlock GPIOCR register for SW2
-    // commit the write (cast const away)
-    *(uint32_t volatile *)&GPIOF_AHB->CR = 0x01U;
-
-    GPIOF_AHB->DIR &= ~(BTN_SW1 | BTN_SW2); // input
-    GPIOF_AHB->DEN |= (BTN_SW1 | BTN_SW2); // digital enable
-    GPIOF_AHB->PUR |= (BTN_SW1 | BTN_SW2); // pull-up resistor enable
-
-    *(uint32_t volatile *)&GPIOF_AHB->CR = 0x00U;
-    GPIOF_AHB->LOCK = 0x0; // lock GPIOCR register for SW2
-
-    BSP_randomSeed(1234U);
+    BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
     if (!QS_INIT((void *)0)) {
@@ -325,7 +239,6 @@ void BSP_init(void) {
 
     // dictionaries...
     QS_OBJ_DICTIONARY(&l_TickHook);
-    QS_OBJ_DICTIONARY(&l_GPIOPortA_IRQHandler);
     QS_USR_DICTIONARY(PHILO_STAT);
     QS_USR_DICTIONARY(PAUSED_STAT);
 
@@ -346,13 +259,13 @@ void BSP_start(void) {
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // start the active objects/threads...
-    static QEvtPtr philoQueueSto[N_PHILO][10];
+    static QEvtPtr philoQueueSto[N_PHILO][N_PHILO];
     static StackType_t philoStack[N_PHILO][configMINIMAL_STACK_SIZE];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); // instantiate all Philosopher active objects
         QActive_setAttr(AO_Philo[n], TASK_NAME_ATTR, "Philo");
         QActive_start(AO_Philo[n],  // AO to start
-            n + 3U,                  // QP prio. of the AO
+            Q_PRIO(n + 3U, 3U),      // QP prio., FreeRTOS prio.
             philoQueueSto[n],        // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]
             philoStack[n],           // stack storage
@@ -365,7 +278,7 @@ void BSP_start(void) {
     Table_ctor(); // instantiate the Table active object
     QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
     QActive_start(AO_Table,         // AO to start
-        N_PHILO + 7U,                // QP prio. of the AO
+        Q_PRIO(N_PHILO + 7U, 7U),    // QP prio., FreeRTOS prio.
         tableQueueSto,               // event queue storage
         Q_DIM(tableQueueSto),        // queue length [events]
         tableStack,                  // stack storage
@@ -376,7 +289,12 @@ void BSP_start(void) {
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
     Q_UNUSED_PAR(n);
 
-    GPIOF_AHB->DATA_Bits[LED_GREEN] = ((stat[0] == 'e') ? LED_GREEN : 0U);
+    if (stat[0] == 'e') {
+        GPIOA->BSRR = (1U << LD4_PIN);  // turn LED on
+    }
+    else {
+        GPIOA->BSRR = (1U << (LD4_PIN + 16U));  // turn LED off
+    }
 
     // app-specific trace record...
     QS_BEGIN_ID(PHILO_STAT, AO_Table->prio)
@@ -386,7 +304,13 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
 }
 //............................................................................
 void BSP_displayPaused(uint8_t const paused) {
-    GPIOF_AHB->DATA_Bits[LED_BLUE] = ((paused != 0U) ? LED_BLUE : 0U);
+    // not enough LEDs to implement this feature
+    if (paused != 0U) {
+        //GPIOA->BSRR = (1U << LD4_PIN);  // turn LED[n] on
+    }
+    else {
+        //GPIOA->BSRR = (1U << (LD4_PIN + 16U));  // turn LED[n] off
+    }
 
     // application-specific trace record
     QS_BEGIN_ID(PAUSED_STAT, AO_Table->prio)
@@ -394,32 +318,28 @@ void BSP_displayPaused(uint8_t const paused) {
     QS_END()
 }
 //............................................................................
-void BSP_randomSeed(uint32_t const seed) {
+void BSP_randomSeed(uint32_t seed) {
     l_rndSeed = seed;
 }
 //............................................................................
 uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
-    // Some floating point code is to exercise the VFP...
-    float volatile x = 3.1415926F;
-    x = x + 2.7182818F;
 
     vTaskSuspendAll(); // lock FreeRTOS scheduler
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
-    //
     uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
     xTaskResumeAll(); // unlock the FreeRTOS scheduler
 
-    return (rnd >> 8);
+    return (rnd >> 8U);
 }
 //............................................................................
 void BSP_ledOn(void) {
-    GPIOF_AHB->DATA_Bits[LED_RED] = 0xFFU;
+    GPIOA->BSRR = (1U << LD4_PIN);  // turn LED on
 }
 //............................................................................
 void BSP_ledOff(void) {
-    GPIOF_AHB->DATA_Bits[LED_RED] = 0x00U;
+    GPIOA->BSRR = (1U << (LD4_PIN + 16U));  // turn LED off
 }
 //............................................................................
 void BSP_terminate(int16_t result) {
@@ -427,85 +347,77 @@ void BSP_terminate(int16_t result) {
 }
 
 //============================================================================
-
-// QF callbacks --------------------------------------------------------------
-
+// QF callbacks...
 void QF_onStartup(void) {
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     //SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC); // done in FreeRTOS
 
     // assign all priority bits for preemption-prio. and none to sub-prio.
+    // NOTE: this might have been changed by STM32Cube.
     NVIC_SetPriorityGrouping(0U);
 
     // set priorities of ALL ISRs used in the system, see NOTE1
-    NVIC_SetPriority(UART0_IRQn,     0U); // kernel unaware interrupt
-    NVIC_SetPriority(GPIOA_IRQn,     RTOS_AWARE_ISR_CMSIS_PRI + 0U);
-    NVIC_SetPriority(SysTick_IRQn,   RTOS_AWARE_ISR_CMSIS_PRI + 1U);
+    NVIC_SetPriority(SysTick_IRQn,   RTOS_AWARE_ISR_CMSIS_PRI + 0U);
     // ...
-
-    // enable IRQs...
-    NVIC_EnableIRQ(GPIOA_IRQn);
-
-#ifdef Q_SPY
-    NVIC_EnableIRQ(UART0_IRQn); // UART0 interrupt used for QS-RX
-#endif
 }
 //............................................................................
 void QF_onCleanup(void) {
 }
 
-// QS callbacks --------------------------------------------------------------
+//============================================================================
+// QS callbacks...
 #ifdef Q_SPY
+
+//............................................................................
+static uint16_t const UARTPrescTable[12] = {
+    1U, 2U, 4U, 6U, 8U, 10U, 12U, 16U, 32U, 64U, 128U, 256U
+};
+
+#define UART_DIV_SAMPLING16(__PCLK__, __BAUD__, __CLOCKPRESCALER__) \
+  ((((__PCLK__)/UARTPrescTable[(__CLOCKPRESCALER__)]) \
+  + ((__BAUD__)/2U)) / (__BAUD__))
+
+#define UART_PRESCALER_DIV1  0U
+
+// USART2 pins PA.2 and PA.3
+#define USART2_TX_PIN 2U
+#define USART2_RX_PIN 3U
+
 //............................................................................
 uint8_t QS_onStartup(void const *arg) {
     Q_UNUSED_PAR(arg);
 
-    static uint8_t qsTxBuf[2*1024]; // buffer for QS-TX channel
+    static uint8_t qsTxBuf[1024]; // buffer for QS-TX channel
     QS_initBuf(qsTxBuf, sizeof(qsTxBuf));
 
     static uint8_t qsRxBuf[100];    // buffer for QS-RX channel
     QS_rxInitBuf(qsRxBuf, sizeof(qsRxBuf));
 
-    // enable clock for UART0 and GPIOA (used by UART0 pins)
-    SYSCTL->RCGCUART |= (1U << 0U); // enable Run mode for UART0
-    SYSCTL->RCGCGPIO |= (1U << 0U); // enable Run mode for GPIOA
+    // enable peripheral clock for USART2
+    RCC->IOPENR  |= ( 1U <<  0U);  // Enable GPIOA clock for USART pins
+    RCC->APBENR1 |= ( 1U << 17U);  // Enable USART#2 clock
 
-    // configure UART0 pins for UART operation
-    uint32_t tmp = (1U << 0U) | (1U << 1U);
-    GPIOA->DIR   &= ~tmp;
-    GPIOA->SLR   &= ~tmp;
-    GPIOA->ODR   &= ~tmp;
-    GPIOA->PUR   &= ~tmp;
-    GPIOA->PDR   &= ~tmp;
-    GPIOA->AMSEL &= ~tmp;  // disable analog function on the pins
-    GPIOA->AFSEL |= tmp;   // enable ALT function on the pins
-    GPIOA->DEN   |= tmp;   // enable digital I/O on the pins
-    GPIOA->PCTL  &= ~0x00U;
-    GPIOA->PCTL  |= 0x11U;
+    // Configure PA to USART2_RX, PA to USART2_TX
+    GPIOA->AFR[0] &= ~((15U << 4U*USART2_RX_PIN) | (15U << 4U*USART2_TX_PIN));
+    GPIOA->AFR[0] |=  (( 1U << 4U*USART2_RX_PIN) | ( 1U << 4U*USART2_TX_PIN));
+    GPIOA->MODER  &= ~(( 3U << 2U*USART2_RX_PIN) | ( 3U << 2U*USART2_TX_PIN));
+    GPIOA->MODER  |=  (( 2U << 2U*USART2_RX_PIN) | ( 2U << 2U*USART2_TX_PIN));
 
-    // configure the UART for the desired baud rate, 8-N-1 operation
-    tmp = (((SystemCoreClock * 8U) / UART_BAUD_RATE) + 1U) / 2U;
-    UART0->IBRD   = tmp / 64U;
-    UART0->FBRD   = tmp % 64U;
-    UART0->LCRH   = (0x3U << 5U); // configure 8-N-1 operation
-    UART0->LCRH  |= (0x1U << 4U); // enable FIFOs
-    UART0->CTL    = (1U << 0U)    // UART enable
-                    | (1U << 8U)  // UART TX enable
-                    | (1U << 9U); // UART RX enable
+    // baud rate
+    USART2->BRR  = UART_DIV_SAMPLING16(
+                       SystemCoreClock, 115200U, UART_PRESCALER_DIV1);
+    USART2->CR3  = 0x0000U |      // no flow control
+                   (1U << 12U);   // disable overrun detection (OVRDIS)
+    USART2->CR2  = 0x0000U;       // 1 stop bit
+    USART2->CR1  = ((1U <<  2U) | // enable RX
+                    (1U <<  3U) | // enable TX
+                    (1U <<  5U) | // enable RX interrupt
+                    (0U << 12U) | // 8 data bits
+                    (0U << 28U) | // 8 data bits
+                    (1U <<  0U)); // enable USART
 
-    // configure UART interrupts (for the RX channel)
-    UART0->IM   |= (1U << 4U) | (1U << 6U); // enable RX and RX-TO interrupt
-    UART0->IFLS |= (0x2U << 2U);    // interrupt on RX FIFO half-full
-    // NOTE: do not enable the UART0 interrupt yet. Wait till QF_onStartup()
-
-    // configure TIMER5 to produce QS time stamp
-    SYSCTL->RCGCTIMER |= (1U << 5U); // enable run mode for Timer5
-    TIMER5->CTL  = 0U;               // disable Timer1 output
-    TIMER5->CFG  = 0x0U;             // 32-bit configuration
-    TIMER5->TAMR = (1U << 4U) | 0x02U; // up-counting periodic mode
-    TIMER5->TAILR= 0xFFFFFFFFU;      // timer interval
-    TIMER5->ICR  = 0x1U;             // TimerA timeout flag bit clears
-    TIMER5->CTL |= (1U << 0U);       // enable TimerA module
+    QS_tickPeriod_ = SystemCoreClock / BSP_TICKS_PER_SEC;
+    QS_tickTime_ = QS_tickPeriod_; // to start the timestamp at zero
 
     return 1U; // return success
 }
@@ -514,7 +426,12 @@ void QS_onCleanup(void) {
 }
 //............................................................................
 QSTimeCtr QS_onGetTime(void) { // NOTE: invoked with interrupts DISABLED
-    return TIMER5->TAV;
+    if ((SysTick->CTRL & 0x00010000U) == 0U) { // not set?
+        return QS_tickTime_ - (QSTimeCtr)SysTick->VAL;
+    }
+    else { // the rollover occurred, but the SysTick_ISR did not run yet
+        return QS_tickTime_ + QS_tickPeriod_ - (QSTimeCtr)SysTick->VAL;
+    }
 }
 //............................................................................
 // NOTE:
@@ -523,15 +440,13 @@ QSTimeCtr QS_onGetTime(void) { // NOTE: invoked with interrupts DISABLED
 void QS_onFlush(void) {
     for (;;) {
         uint16_t b = QS_getByte();
-        if (b != QS_EOD) { // NOT end-of-data
-            // busy-wait as long as TX FIFO has data to transmit
-            while ((UART0->FR & UART_FR_TXFE) == 0U) {
+        if (b != QS_EOD) {
+            while ((USART2->ISR & (1U << 7U)) == 0U) { // while TXE not empty
             }
-            // place the byte in the UART DR register
-            UART0->DR = b;
+            USART2->TDR = b;
         }
         else {
-            break; // break out of the loop
+            break;
         }
     }
 }
@@ -552,34 +467,4 @@ void QS_onCommand(uint8_t cmdId,
 #endif // Q_SPY
 //----------------------------------------------------------------------------
 
-//============================================================================
-// NOTE1:
-// The configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY constant from the
-// FreeRTOS configuration file specifies the highest ISR priority that
-// is disabled by the QF framework. The value is suitable for the
-// NVIC_SetPriority() CMSIS function.
-//
-// Only ISRs prioritized at or below the
-// configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY level (i.e.,
-// with the numerical values of priorities equal or higher than
-// configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY) are allowed to call any
-// QP/FreeRTOS services. These ISRs are "kernel-aware".
-//
-// Conversely, any ISRs prioritized above the
-// configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY priority level (i.e., with
-// the numerical values of priorities less than
-// configLIBRARY_MAX_SYSCALL_INTERRUPT_PRIORITY) are never disabled and are
-// not aware of the kernel. Such "kernel-unaware" ISRs cannot call any
-// QP/FreeRTOS services. The only mechanism by which a "kernel-unaware" ISR
-// can communicate with the QF framework is by triggering a "kernel-aware"
-// ISR, which can post/publish events.
-//
-// For more information, see article "Running the RTOS on a ARM Cortex-M Core"
-// http://www.freertos.org/RTOS-Cortex-M3-M4.html
-//
-// NOTE2:
-// The User LED is used to visualize the idle loop activity. The brightness
-// of the LED is proportional to the frequency of invocations of the idle loop.
-// Please note that the LED is toggled with interrupts locked, so no interrupt
-// execution time contributes to the brightness of the User LED.
 
