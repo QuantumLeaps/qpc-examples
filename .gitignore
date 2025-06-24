@@ -4,8 +4,11 @@
 # Prerequisites
 *.d
 
-# QUTest log files
+# QUTest output files
 *.log
+*.cov
+*.host
+*.trg
 
 # Object files
 *.o
@@ -50,9 +53,12 @@
 *.idb
 *.pdb
 
-# GCOV files
+# GCOV files and coverage logs
 *.gcda
 *.gcno
+*.cov
+*.host
+*.trg
 
 # Kernel Module Compile Results
 *.mod*

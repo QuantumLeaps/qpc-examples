@@ -9,7 +9,7 @@ def on_reset():
     glb_filter(GRP_ALL)
     loc_filter(IDS_ALL, -IDS_AO, -IDS_AP)
     ao_filter("Table_inst")
-    current_obj(OBJ_SM_AO, "Table_inst")
+    current_obj(OBJ_SM, "Table_inst")
 
 def on_setup():
     print("on_setup")

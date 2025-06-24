@@ -3,9 +3,9 @@
 #
 # Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 #
-#                   Q u a n t u m  L e a P s
-#                   ------------------------
-#                   Modern Embedded Software
+#                    Q u a n t u m  L e a P s
+#                    ------------------------
+#                    Modern Embedded Software
 #
 # SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 #
@@ -78,7 +78,7 @@ BIN_DIR := build_$(TARGET)
 # QP framework
 #
 
-# location of the QP/C framework (if not provided in an env. variable)
+# location of the QP framework (if not provided in an env. variable)
 ifeq ($(QP),)
 QP := ../../../..
 endif
@@ -105,7 +105,7 @@ INCLUDES += \
 	-I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
-# QP/C framework sources
+# QP framework sources
 #
 QP_SRCS := \
 	qep_hsm.c \
@@ -129,7 +129,8 @@ QP_SRCS := \
 
 VPATH += \
 	$(QP)/src/qf \
-	$(QP)/src/qs $(QP_PORT_DIR)
+	$(QP)/src/qs \
+	$(QP_PORT_DIR)
 
 INCLUDES += \
 	-I$(QP)/include \
@@ -148,7 +149,7 @@ CC    := gcc
 CPP   := g++
 LINK  := gcc    # for C programs
 #LINK  := g++   # for C++ programs
-COV   := gcov -f
+COV   := gcov -abcg
 
 #-----------------------------------------------------------------------------
 # basic utilities (included in QTools for Windows), see:
@@ -157,10 +158,12 @@ COV   := gcov -f
 ifeq ($(OS),Windows_NT)
 	MKDIR      := mkdir
 	RM         := rm
+	CAT        := type
 	TARGET_EXT := .exe
 else ifeq ($(OSTYPE),cygwin)
 	MKDIR      := mkdir -p
 	RM         := rm -f
+	CAT        := cat
 	TARGET_EXT := .exe
 else
 	MKDIR      := mkdir -p
@@ -187,20 +190,18 @@ endif
 #-----------------------------------------------------------------------------
 # build options
 CFLAGS := -c -g -fno-pie -std=c11 -pedantic -Wall -Wextra -W \
-	-O0 $(INCLUDES) $(DEFINES) $(DEF)
+	-O0 --coverage -fcondition-coverage \
+	$(INCLUDES) $(DEFINES) $(DEF)
 
-CPPFLAGS := -c -g -fno-pie -std=c++11 -pedantic -Wall -Wextra \
+CPPFLAGS := -c -g -fno-pie -std=c++17 -pedantic -Wall -Wextra \
+	-O0 --coverage -fcondition-coverage \
 	-fno-rtti -fno-exceptions \
-	-O0 $(INCLUDES) $(DEFINES) $(DEF)
+	$(INCLUDES) $(DEFINES) $(DEF)
+
+LINKFLAGS := --coverage -fcondition-coverage
 
 ifndef GCC_OLD
-	LINKFLAGS := -no-pie
-endif
-
-ifdef GCOV
-	CFLAGS    += -fprofile-arcs -ftest-coverage
-	CPPFLAGS  += -fprofile-arcs -ftest-coverage
-	LINKFLAGS += -lgcov --coverage
+	LINKFLAGS += -no-pie
 endif
 
 #-----------------------------------------------------------------------------
@@ -236,10 +237,10 @@ $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
 	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 run : $(TARGET_EXE)
+	-$(RM) $(BIN_DIR)/*.gcda
 	$(QUTEST) -e$(TARGET_EXE) -q$(QSPY) -l$(LOG) -o$(OPT) -- $(TESTS)
-ifdef GCOV
-	$(COV) -o $(BIN_DIR) $(PROJECT)
-endif
+	$(COV) -o $(BIN_DIR) $(PROJECT) > $(PROJECT).cov
+	$(CAT) $(PROJECT).cov
 
 $(BIN_DIR)/%.d : %.c
 	$(CC) -MM -MT $(@:.d=.o) $(CFLAGS) $< > $@
@@ -256,12 +257,12 @@ $(BIN_DIR)/%.o : %.cpp
 # create BIN_DIR and include dependencies only if needed
 ifneq ($(MAKECMDGOALS),clean)
   ifneq ($(MAKECMDGOALS),show)
-     ifneq ($(MAKECMDGOALS),debug)
+    ifneq ($(MAKECMDGOALS),debug)
 ifeq ("$(wildcard $(BIN_DIR))","")
 $(shell $(MKDIR) $(BIN_DIR))
 endif
 -include $(C_DEPS_EXT) $(CPP_DEPS_EXT)
-     endif
+    endif
   endif
 endif
 
@@ -278,6 +279,7 @@ show :
 	@echo MAKECMDGOALS = $(MAKECMDGOALS)
 	@echo TESTS        = $(TESTS)
 	@echo VPATH        = $(VPATH)
+	@echo INCLUDES     = $(INCLUDES)
 	@echo C_SRCS       = $(C_SRCS)
 	@echo CPP_SRCS     = $(CPP_SRCS)
 	@echo C_DEPS_EXT   = $(C_DEPS_EXT)

@@ -3,9 +3,8 @@
 #include "LedBar.h"
 #include "Led.h"
 
-#include "qsafe.h"        // QP Functional Safety (FuSa) System
-
-Q_DEFINE_THIS_MODULE("LedBar")
+//#include "qsafe.h"        // QP Functional Safety (FuSa) System
+//Q_DEFINE_THIS_MODULE("LedBar")
 
 //
 // Example sequence diagram for the LedBar_setPercent() implementation:
@@ -35,8 +34,7 @@ Q_DEFINE_THIS_MODULE("LedBar")
 uint32_t LedBar_setPercent(uint8_t const percent) {
     uint8_t const n_on = (uint8_t)((percent * MAX_LED) / 100U);
 
-    //! @pre percent must not exceed 100
-    Q_REQUIRE_ID(100, n_on <= MAX_LED);
+    //Q_REQUIRE_ID(100, n_on <= MAX_LED);
 
     uint32_t p = 0U; // power draw in [uW]
     uint8_t i;

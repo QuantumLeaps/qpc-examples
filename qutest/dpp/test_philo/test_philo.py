@@ -9,7 +9,7 @@ def on_reset():
     glb_filter(GRP_ALL)
     loc_filter(IDS_ALL)
     ao_filter("Philo_inst[2]")
-    current_obj(OBJ_SM_AO, "Philo_inst[2]")
+    current_obj(OBJ_AO, "Philo_inst[2]")
     current_obj(OBJ_TE, "Philo_inst[2].timeEvt")
 
 # tests...

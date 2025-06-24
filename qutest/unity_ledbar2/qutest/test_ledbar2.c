@@ -33,7 +33,7 @@ int main(void)
     QS_FUN_DICTIONARY(&LedBar2_setPercent);
 
     // filter setup...
-    QS_GLB_FILTER(QS_ALL_RECORDS);
+    QS_GLB_FILTER(GRP_ALL);
 
     return QF_run(); // run the tests
 }

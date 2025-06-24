@@ -59,7 +59,7 @@ int main(void)
     QS_OBJ_DICTIONARY(string);
 
     // filter setup...
-    QS_GLB_FILTER(QS_ALL_RECORDS);
+    QS_GLB_FILTER(GRP_ALL);
     QS_setCurrObj(AP_OBJ, string);
 
     return QF_run(); // run the tests
