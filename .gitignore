@@ -50,9 +50,12 @@
 *.idb
 *.pdb
 
-# GCOV files
+# GCOV files and coverage logs
 *.gcda
 *.gcno
+*.cov
+*.host
+*.trg
 
 # Kernel Module Compile Results
 *.mod*

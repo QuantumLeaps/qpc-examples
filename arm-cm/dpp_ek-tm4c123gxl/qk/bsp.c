@@ -1,7 +1,5 @@
 //============================================================================
 // Product: DPP example, EK-TM4C123GXL board, QK kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
@@ -36,7 +34,6 @@
 #include "bsp.h"                 // Board Support Package
 
 #include "TM4C123GH6PM.h"        // the device specific header (TI)
-#include "rom.h"                 // the built-in ROM functions (TI)
 #include "sysctl.h"              // system control driver (TI)
 #include "gpio.h"                // GPIO driver (TI)
 // add other drivers if necessary...
