@@ -19,7 +19,7 @@ void BSP_init(void) {
     QS_USR_DICTIONARY(PAUSED_STAT);
 
     // QS filters...
-    QS_GLB_FILTER(QS_ALL_RECORDS);
+    QS_GLB_FILTER(QS_GRP_ALL);
 }
 //............................................................................
 void BSP_start(void) {

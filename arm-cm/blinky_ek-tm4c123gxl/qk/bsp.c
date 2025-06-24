@@ -36,7 +36,6 @@
 #include "bsp.h"                 // Board Support Package
 
 #include "TM4C123GH6PM.h"        // the device specific header (TI)
-#include "rom.h"                 // the built-in ROM functions (TI)
 #include "sysctl.h"              // system control driver (TI)
 #include "gpio.h"                // GPIO driver (TI)
 // add other drivers if necessary...
@@ -159,8 +158,8 @@ void BSP_init(void) {
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_ALL_RECORDS);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
+    QS_GLB_FILTER(QS_GRP_ALL);     // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
 }
 //............................................................................
 void BSP_start(void) {

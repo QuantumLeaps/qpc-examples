@@ -142,7 +142,7 @@ void BSP_init(void) {
     QS_USR_DICTIONARY(PLAYER_TRIGGER);
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_ALL_RECORDS);
+    QS_GLB_FILTER(QS_GRP_ALL);
     QS_GLB_FILTER(-QS_QF_TICK);
 }
 //............................................................................

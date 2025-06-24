@@ -126,7 +126,7 @@ static QState Table_initial(Table * const me, void const * const par) {
         me->fork[n] = FREE;
         me->isHungry[n] = 0U;
 
-        QASM_INIT(SM_Philo[n], (void *)0, QS_AP_ID + n);
+        QASM_INIT(SM_Philo[n], (void *)0, QS_ID_AP + n);
         BSP_displayPhilStat(n, "thinking");
     }
 
@@ -144,7 +144,7 @@ static QState Table_active(Table * const me, QEvt const * const e) {
         //${Cont::Table::SM::active::TIMEOUT}
         case TIMEOUT_SIG: {
             uint16_t n = Q_EVT_CAST(CompTimeEvt)->compNum;
-            QASM_DISPATCH(SM_Philo[n], e, QS_AP_ID + n);
+            QASM_DISPATCH(SM_Philo[n], e, QS_ID_AP + n);
             status_ = Q_HANDLED();
             break;
         }
@@ -186,7 +186,7 @@ static QState Table_serving(Table * const me, QEvt const * const e) {
                         QEVT_INITIALIZER(EAT_SIG),
                         .philoId = n
                     };
-                    QASM_DISPATCH(SM_Philo[n], &evt.super, QS_AP_ID + n);
+                    QASM_DISPATCH(SM_Philo[n], &evt.super, QS_ID_AP + n);
 
                     me->isHungry[n] = 0U;
                     BSP_displayPhilStat(n, "eating  ");
@@ -214,7 +214,7 @@ static QState Table_serving(Table * const me, QEvt const * const e) {
                     QEVT_INITIALIZER(EAT_SIG),
                     .philoId = n
                 };
-                QASM_DISPATCH(SM_Philo[n], &evt.super, QS_AP_ID + n);
+                QASM_DISPATCH(SM_Philo[n], &evt.super, QS_ID_AP + n);
                 BSP_displayPhilStat(n, "eating  ");
                 status_ = Q_HANDLED();
             }
@@ -251,7 +251,7 @@ static QState Table_serving(Table * const me, QEvt const * const e) {
                     QEVT_INITIALIZER(EAT_SIG),
                     .philoId = m
                 };
-                QASM_DISPATCH(SM_Philo[m], &evt.super, QS_AP_ID + m);
+                QASM_DISPATCH(SM_Philo[m], &evt.super, QS_ID_AP + m);
                 BSP_displayPhilStat(m, "eating  ");
             }
             m = left(n); // check the left neighbor
@@ -266,7 +266,7 @@ static QState Table_serving(Table * const me, QEvt const * const e) {
                     QEVT_INITIALIZER(EAT_SIG),
                     .philoId = m
                 };
-                QASM_DISPATCH(SM_Philo[m], &evt.super, QS_AP_ID + m);
+                QASM_DISPATCH(SM_Philo[m], &evt.super, QS_ID_AP + m);
                 BSP_displayPhilStat(m, "eating  ");
             }
             status_ = Q_HANDLED();

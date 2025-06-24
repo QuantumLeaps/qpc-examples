@@ -221,7 +221,7 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_ALL_RECORDS);   // all records
+    QS_GLB_FILTER(QS_GRP_ALL);   // all records
     QS_GLB_FILTER(-QS_QF_TICK);      // exclude
     QS_GLB_FILTER(-QS_SCHED_LOCK);   // exclude
     QS_GLB_FILTER(-QS_SCHED_UNLOCK); // exclude

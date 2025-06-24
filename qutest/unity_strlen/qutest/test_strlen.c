@@ -36,31 +36,26 @@ static char string[128];
 
 //----------------------------------------------------------------------------
 #ifdef Q_HOST
-int main(int argc, char *argv[])
-#else
-int main(void)
+int main(int argc, char *argv[]) { // host takes command-line arguments
+    void * const qs_arg = ((argc > 1) ? argv[1] : (void*)0);
+#else // embedded target
+int main(void) { // embedded target takes no command-line arguments
+    void * const qs_arg = (void*)0;
 #endif
-{
-    QF_init();  // initialize the framework
 
-    // initialize the QS software tracing
-#ifdef Q_HOST
-    if (QS_INIT((argc > 1) ? argv[1] : (void*)0) == 0U) {
-        Q_ERROR();
+    QF_init(); // initialize the framework
+
+    if (!QS_INIT(qs_arg)) { // initialize the QS software tracing
+        Q_ERROR(); // QS initialization must succeed
     }
-#else
-    if (QS_INIT((void*)0) == 0U) {
-        Q_ERROR();
-    }
-#endif
 
     // dictionaries...
     QS_FUN_DICTIONARY(&my_strlen);
     QS_OBJ_DICTIONARY(string);
 
     // filter setup...
-    QS_GLB_FILTER(QS_ALL_RECORDS);
-    QS_setCurrObj(AP_OBJ, string);
+    QS_GLB_FILTER(QS_GRP_ALL);
+    QS_setCurrObj(QS_OBJ_AP, string);
 
     return QF_run(); // run the tests
 }

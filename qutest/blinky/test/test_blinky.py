@@ -11,7 +11,8 @@ def on_reset():
     expect("===RTC===> St-Entry Obj=l_blinky,State=Blinky_off")
     expect("@timestamp Init===> Obj=l_blinky,State=Blinky_off")
     expect_run()
-    current_obj(OBJ_SM_AO,"l_blinky")
+    current_obj(OBJ_SM,"l_blinky")
+    current_obj(OBJ_AO,"l_blinky")
     current_obj(OBJ_TE,"l_blinky.timeEvt")
 
 
@@ -19,7 +20,7 @@ test("TIMEOUT_SIG->l_blinky")
 query_curr(OBJ_SM)
 expect("@timestamp Query-SM Obj=l_blinky,State=Blinky_off")
 query_curr(OBJ_AO)
-expect("@timestamp Query-AO Obj=l_blinky,State=Blinky_off")
+expect("@timestamp Query-AO Pri=2,Que<Use=0,Free=11,Min=11>")
 query_curr(OBJ_TE)
 expect("@timestamp Query-TE Obj=l_blinky.timeEvt,Rate=0,Sig=TIMEOUT_SIG,*")
 current_obj(OBJ_MP,"EvtPool1")

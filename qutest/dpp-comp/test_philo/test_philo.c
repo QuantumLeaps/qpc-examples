@@ -40,25 +40,20 @@ QActive * const AO_Table = &Table_dummy.super;
 
 extern QAsm * const SM_Philo[N_PHILO];
 
-//............................................................................
+//----------------------------------------------------------------------------
 #ifdef Q_HOST
-int main(int argc, char *argv[])
-#else
-int main(void)
+int main(int argc, char *argv[]) { // host takes command-line arguments
+    void * const qs_arg = ((argc > 1) ? argv[1] : (void*)0);
+#else // embedded target
+int main(void) { // embedded target takes no command-line arguments
+    void * const qs_arg = (void*)0;
 #endif
-{
-    QF_init();  // initialize the framework
 
-    // initialize the QS software tracing
-#ifdef Q_HOST
-    if (QS_INIT((argc > 1) ? argv[1] : (void*)0) == 0U) {
-        Q_ERROR();
+    QF_init(); // initialize the framework
+
+    if (!QS_INIT(qs_arg)) { // initialize the QS software tracing
+        Q_ERROR(); // QS initialization must succeed
     }
-#else
-    if (QS_INIT((void*)0) == 0U) {
-        Q_ERROR();
-    }
-#endif
 
     BSP_init();      // initialize the BSP
 
@@ -79,7 +74,7 @@ int main(void)
     // construct and initialize Philo HSM components
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
-        QASM_INIT(SM_Philo[n], (void *)0, QS_AP_ID + n);
+        QASM_INIT(SM_Philo[n], (void *)0, QS_ID_AP + n);
     }
 
     // instantiate all dummy AOs...

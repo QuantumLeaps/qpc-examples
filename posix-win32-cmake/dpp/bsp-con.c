@@ -50,7 +50,7 @@ static uint32_t l_rnd; // random seed
     };
 
     // QSpy source IDs
-    static QSpyId const l_clock_tick = { QS_AP_ID };
+    static QSpyId const l_clock_tick = { QS_ID_AP };
 #endif
 
 //============================================================================
@@ -94,7 +94,7 @@ void BSP_init(int argc, char *argv[]) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_ALL_RECORDS);
+    QS_GLB_FILTER(QS_GRP_ALL);
     QS_GLB_FILTER(-QS_QF_TICK);    // exclude the tick record
 }
 //............................................................................
