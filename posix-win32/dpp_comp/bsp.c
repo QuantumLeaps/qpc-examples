@@ -99,7 +99,7 @@ void BSP_init(int argc, char *argv[]) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(GRP_ALL);
+    QS_GLB_FILTER(QS_GRP_ALL);
     QS_GLB_FILTER(-QS_QF_TICK);     // exclude the tick record
     QS_LOC_FILTER(-(N_PHILO + 4));  // exclude the "ticker" prio
 }

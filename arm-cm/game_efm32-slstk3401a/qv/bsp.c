@@ -201,9 +201,9 @@ void BSP_init(void) {
     QS_USR_DICTIONARY(COMMAND_STAT);
 
     // setup the QS filters...
-    QS_GLB_FILTER(GRP_SM); // state machine records
-    QS_GLB_FILTER(GRP_AO); // active object records
-    QS_GLB_FILTER(GRP_UA); // all user records
+    QS_GLB_FILTER(QS_GRP_SM); // state machine records
+    QS_GLB_FILTER(QS_GRP_AO); // active object records
+    QS_GLB_FILTER(QS_GRP_UA); // all user records
 }
 
 //............................................................................
