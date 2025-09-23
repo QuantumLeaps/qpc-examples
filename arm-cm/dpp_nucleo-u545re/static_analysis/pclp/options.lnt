@@ -1,0 +1,106 @@
+//============================================================================
+// QP Real-Time Embedded Framework (RTEF)
+//
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+//
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
+//
+// SPDX-License-Identifier: LicenseRef-QL-commercial
+//
+// This software is licensed under the terms of the Quantum Leaps commercial
+// licenses. Please contact Quantum Leaps for more information about the
+// available licensing options.
+//
+// RESTRICTIONS
+// You may NOT :
+// (a) redistribute, encumber, sell, rent, lease, sublicense, or otherwise
+//     transfer rights in this software,
+// (b) remove or alter any trademark, logo, copyright or other proprietary
+//     notices, legends, symbols or labels present in this software,
+// (c) plagiarize this software to sidestep the licensing obligations.
+//
+// Quantum Leaps contact information :
+// <www.state-machine.com/licensing>
+// <info@state-machine.com>
+//============================================================================
+
+// general options
+-unit_check          // perform only subset check (suppresses Global Wrapup)
+-max_threads=1       // suppress message "no '-max_threads=N' option"
+++efreeze(686)       // never suppress (see PC-Lint-Plus in Safety-Critical)
+//-vf                // print names of all source files (for debugging linting)
+
+// PCLP-9155 line comment may contain commented-out code
+// reported for QM-generated reference comments
+-efile(9155,
+ -*.c)
+
+// include directories
+-i%QP_PCLP%          // QP PCLP configuration
+
+-i%QP%/include       // QP public includes
+-i%QP%/ports/arm-cm/qk/gnu  // QP port includes
+-i..                 // application includes
+//???-libh(q*.h)        // don't treat q* headers as library (i.e., analyze)
+
+// standards
+au-misra5.lnt        // MISRA-C:2025 (MC5)
+au-ds.lnt            // Dan Saks recommendations
+-std=c11             // apply the C11 Language Standard
+
+// suppress the diagnostics from the C standard library headers...
+// NOTE: must be immediately *after* the MISRA .lnt file
+// SEE: PCLP-2025 Manual, Section 20.2
+//      "Suppressing messages from library/system headers"
+-wlib(4)
+-wlib(1)
+
+//----------------------------------------------------------------------------
+// QP/C options for QP Applications
+qpc.lnt            // QP PCLP options
+
+//----------------------------------------------------------------------------
+// additional suppression rules for this application
+
+//! MC5-D4.9(A) function-like macro
+//! @tr{DVP_QP_MC5_D04_09A}
+-esym(9026,
+ MPU_REG2OBJ_CAST)
+
+//! MC5-R1.3(R) extern variable declared outside of header
+-esym(2701,
+ Philo_inst,
+ Table_inst)
+
+//! MC5-R11.3(R) cast from pointer to object type to pointer
+//! to different object type
+-emacro(9087,
+ MPU_REG2OBJ_CAST)
+
+//! MC5-R1.3(R) cast from 'uint8_t *' (aka 'unsigned char *')
+//! to 'Philo *' increases required alignment from 1 to 4
+-emacro(2445,
+ MPU_REG2OBJ_CAST)
+-emacro(826,
+ MPU_REG2OBJ_CAST)
+
+//! MC5-R10.3(R) cannot assign 'enum (AppSignals)' to different
+//! essential type 'signed32'
+//! @tr{DVP_QP_MC5_R10_03}
+-esym(9034,
+ enum (AppSignals))
+
+//! PCLP-641 implicit conversion of enum 'AppSignals' to integral type 'int'
+-esym(641,
+ AppSignals)
+
+//! MC5-R8.13(A) parameter 'me' of function could be pointer to const
+-efunc(818,
+ Table_*,
+ Philo_*)
+
+//! PCLP-9003 could define global variable *_s within function
+-esym(9003,
+ *_s)

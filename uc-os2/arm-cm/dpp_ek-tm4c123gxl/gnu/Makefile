@@ -9,16 +9,16 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 #
-# The QP/C software is dual-licensed under the terms of the open-source GNU
-# General Public License (GPL) or under the terms of one of the closed-
-# source Quantum Leaps commercial licenses.
+# The QP software is dual-licensed under the terms of the open-source
+# GNU General Public License (GPL) or under the terms of one of the
+# closed-source Quantum Leaps commercial licenses.
 #
 # Redistributions in source code must retain this top-level comment block.
 # Plagiarizing this software to sidestep the license obligations is illegal.
 #
 # NOTE:
 # The GPL (see <www.gnu.org/licenses/gpl-3.0>) does NOT permit the
-# incorporation of the QP/C software into proprietary programs. Please
+# incorporation of the QP software into proprietary programs. Please
 # contact Quantum Leaps for commercial licensing options, which expressly
 # supersede the GPL and are designed explicitly for licensees interested
 # in using QP/C in closed-source proprietary applications.
@@ -87,8 +87,7 @@ INCLUDES  = \
 #
 
 # assembler source files
-ASM_SRCS := \
-	os_cpu_a.s
+ASM_SRCS :=
 
 # C source files
 C_SRCS := \
@@ -132,6 +131,9 @@ RTOS_SRCS := \
 	os_tmr.c \
 	os_dbg.c \
 	os_cpu_c.c
+
+RTOS_ASMS := \
+	os_cpu_a.s
 
 QS_SRCS := \
 	qs.c \
@@ -186,6 +188,7 @@ RM    := rm
 #
 
 # combine all the sources...
+ASM_SRCS += $(RTOS_ASMS)
 C_SRCS   += $(QP_SRCS)
 C_SRCS   += $(RTOS_SRCS)
 C_SRCS   += syscalls.c
@@ -194,7 +197,7 @@ ifeq (rel, $(CONF)) # Release configuration ..................................
 
 BIN_DIR := rel
 
-ASFLAGS = $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
+ASFLAGS = -mthumb $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI)
 
 CFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
 	-ffunction-sections -fdata-sections \
@@ -210,7 +213,7 @@ BIN_DIR := spy
 
 C_SRCS += $(QS_SRCS)
 
-ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
+ASFLAGS = -g -mthumb $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI)
 
 CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
 	-ffunction-sections -fdata-sections \
@@ -224,7 +227,7 @@ else # default Debug configuration ..........................................
 
 BIN_DIR := dbg
 
-ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
+ASFLAGS = -g -mthumb $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI)
 
 CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
 	-ffunction-sections -fdata-sections \

@@ -64,7 +64,6 @@ QP_PORT_DIR := $(QP)/ports/uc-os2
 VPATH = \
 	.. \
 	$(QP)/src/qf \
-	$(QP)/src/qk \
 	$(QP)/src/qs \
 	$(QP_PORT_DIR) \
 	$(QP)/3rd_party/uC-OS2/Source \
@@ -131,8 +130,7 @@ RTOS_SRCS := \
 	os_time.c \
 	os_tmr.c \
 	os_dbg.c \
-	os_cpu_c.c \
-	syscalls.c
+	os_cpu_c.c
 
 RTOS_ASMS := \
 	os_cpu_a.s
@@ -191,6 +189,7 @@ RM    := rm
 #
 
 # combine all the sources...
+ASM_SRCS += $(RTOS_ASMS)
 C_SRCS   += $(QP_SRCS)
 C_SRCS   += $(RTOS_SRCS)
 C_SRCS   += syscalls.c
@@ -199,7 +198,7 @@ ifeq (rel, $(CONF)) # Release configuration ..................................
 
 BIN_DIR := rel
 
-ASFLAGS = $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
+ASFLAGS = -mthumb $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI)
 
 CFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
 	-ffunction-sections -fdata-sections \
@@ -215,7 +214,7 @@ BIN_DIR := spy
 
 C_SRCS += $(QS_SRCS)
 
-ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
+ASFLAGS = -g -mthumb $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI)
 
 CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
 	-ffunction-sections -fdata-sections \
@@ -229,7 +228,7 @@ else # default Debug configuration ..........................................
 
 BIN_DIR := dbg
 
-ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
+ASFLAGS = -g -mthumb $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI)
 
 CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
 	-ffunction-sections -fdata-sections \
