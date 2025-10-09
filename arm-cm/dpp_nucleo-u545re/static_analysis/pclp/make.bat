@@ -36,6 +36,9 @@
 @echo make mingw32 -dQ_SPY : use mingw32 and define Q_SPY
 @echo.
 
+:: directory to produce diagnistics logs
+@set LOG_DIR=..
+
 :: NOTE: adjust to for your installation directory of PC-Lint-Plus
 @set PCLP=C:\tools\pclp\pclp64.exe
 if NOT exist "%PCLP%" (
@@ -60,14 +63,15 @@ if "%1"=="mingw32" (
 )
 
 :: cleanup
-@del *.log
+@del %LOG_DIR%\*.log
 
 :: linting -------------------------------------------------------------------
 cls
-%PCLP% -os(diag.log) %LINTFLAGS% ../../*.c
+%PCLP% -os(%LOG_DIR%/diag.log) %LINTFLAGS% ../../*.c
+::%PCLP% +os(%LOG_DIR%/diag.log) %LINTFLAGS% ../../qk/bsp.c
 
 :output
-type diag.log
+type %LOG_DIR%\diag.log
 
 :end
 @endlocal
