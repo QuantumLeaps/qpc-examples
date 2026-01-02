@@ -72,7 +72,7 @@ void assert_failed(char const * const module, int_t const id) {
 }
 
 //============================================================================
-void BSP_init(int argc, char *argv[]) {
+void BSP_init(int_t argc, char *argv[]) {
     Q_UNUSED_PAR(argc);
     Q_UNUSED_PAR(argv);
 
@@ -129,7 +129,7 @@ void BSP_start(void) {
     QTicker_ctor(the_Ticker0, 0U);   // "ticker" AO for tick rate 0
     QActive_start(&the_Ticker0->super,
         N_PHILO + 4U,   // QP priority
-        (void *)0, 0U,  // no queue
+        (const QEvt**)0, 0U, // no queue
         (void *)0, 0U,  // no stack storage
         (void *)0);     // no init. event
 
@@ -176,14 +176,14 @@ void BSP_randomSeed(uint32_t seed) {
 }
 
 //============================================================================
-#if CUST_TICK
+#ifdef CUST_TICK
 #include <sys/select.h> // for select() call used in custom tick processing
 #endif
 
 void QF_onStartup(void) {
     QF_consoleSetup();
 
-#if CUST_TICK
+#ifdef CUST_TICK
     // disable the standard clock-tick service by setting tick-rate to 0
     QF_setTickRate(0U, 10U); // zero tick-rate / ticker thread prio.
 #else
@@ -198,7 +198,7 @@ void QF_onCleanup(void) {
 //............................................................................
 void QF_onClockTick(void) {
 
-#if CUST_TICK
+#ifdef CUST_TICK
     // NOTE:
     // The standard clock-tick service has been DISABLED in QF_onStartup()
     // by setting the clock tick rate to zero.

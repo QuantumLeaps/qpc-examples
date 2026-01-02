@@ -19,8 +19,9 @@ target_sources(app PRIVATE
 #
 set(QPC_DIR ../../..)
 
-# option to turn QSPY software tracing ON or OFF
-# NOTE: change of the option might require re-building the project
+# option to turn QSPY software tracing ON or OFF (file prj.conf)
+# NOTE:
+# change of the option might require re-building the project
 #
 option(QSPY "QSPY software tracing" OFF)
 

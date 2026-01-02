@@ -6,11 +6,11 @@
 
 
 # Overview
-Dining Philosophers Problem (DPP) example with multiple
-active objects.
+Dining Philosophers Problem (DPP) example with multiple Active Objects,
+each with its own state machine.
 
-# Building and Running (Linux)
-Open a terminal in the directory of this example (`qpc/examples/zephry/dpp`).
+# Setting Up Zephyr Environment (Linux)
+Open a terminal in the directory of this example (`qpc/examples/zephry/blinky`).
 
 Depending on your Zephyr installation, you might need to shell the scripts
 to configure Zephyr environment:
@@ -20,7 +20,19 @@ source ~/zephyrproject/.venv/bin/activate
 source ~/zephyrproject/zephyr/zephyr-env.sh
 ```
 
-To build the example, type:
+# Setting Up Zephyr Environment (Windows)
+Open a command prompt in the directory of this example (`qpc\examples\zephry\blinky`).
+
+Depending on your Zephyr installation, you might need to execute the batch
+scripts to configure Zephyr environment:
+
+```
+%HOMEPATH%\zephyrproject\.venv\Scripts\activate
+%HOMEPATH%\zephyrproject\zephyr\zephyr-env.cmd
+```
+
+# Building
+To build the example on any host OS, type:
 ```
 west build -b <board>
 ```
@@ -29,28 +41,13 @@ where `<board>` is one of the
 The `dpp` example has been tested with the following boards:
 
 ```
+nucleo_c031c6
 nucleo_f103rb
 nucleo_l152re
 nucleo_h743zi
 ```
 
-## QP/Spy Build Configuration
-The [QP/Spy software tracing](https://www.state-machine.com/qtools/qpspy.html)
-is supported in this example and can be enabled by providing the command-line
-option `-DQSPY=ON` to the build process:
-
-Specific example
-```
-west build -b nucleo_h743zi -- -DQSPY=ON
-```
-
-> NOTE: The QP/Spy software tracing uses the Zephyr's console UART.
-This means that the Zephyr `printk()` facility cannot be used while
-QP/Spy is configured.
-
-
-# Flashing the Board
-To flush the board, type:
+To flash the board, type:
 ```
 west flash
 ```
@@ -60,7 +57,7 @@ The application also produces ASCII output to the serial terminal
 (if suppoted by the board):
 
 ```
-*** Booting Zephyr OS build v4.2.0-280-g9219c81b66f4 ***
+*** Booting Zephyr OS build v4.3.0-3316-ge0c706a7f5f7 ***
 Philo[0]->thinking
 Philo[1]->thinking
 Philo[2]->thinking
