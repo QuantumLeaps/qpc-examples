@@ -56,7 +56,6 @@ target_sources(app PRIVATE
  ${QPC_DIR}/src/qs/qs.c
  ${QPC_DIR}/src/qs/qs_rx.c
  ${QPC_DIR}/src/qs/qs_fp.c
- ${QPC_DIR}/src/qs/qutest.c
  ${QPC_DIR}/src/qs/qs_64bit.c
  ${QPC_DIR}/src/qs/qstamp.c
 )

@@ -152,7 +152,19 @@ void vApplicationTickHook(void) {
 
 //............................................................................
 void vApplicationIdleHook(void) {
-#ifdef NDEBUG
+#ifdef Q_SPY
+    QS_rxParse();  // parse all the received bytes
+
+    if ((USART2->ISR & (1U << 7U)) != 0U) { // TXE empty?
+        QF_INT_DISABLE();
+        uint16_t b = QS_getByte();
+        QF_INT_ENABLE();
+
+        if (b != QS_EOD) {   // not End-Of-Data?
+            USART2->TDR = b; // put into the DR register
+        }
+    }
+#elif defined NDEBUG
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-M MCU.

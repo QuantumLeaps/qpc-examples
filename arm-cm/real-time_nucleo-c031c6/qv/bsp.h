@@ -1,13 +1,11 @@
 //============================================================================
 // "real-time" example to demonstrate timing in QP/C
-// Last Updated for Version: 7.3.0
-// Date of the Last Update:  2023-10-02
+//
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
 //                   Q u a n t u m  L e a P s
 //                   ------------------------
 //                   Modern Embedded Software
-//
-// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
@@ -32,7 +30,7 @@
 #ifndef BSP_H_
 #define BSP_H_
 
-#define BSP_TICKS_PER_SEC 2500U
+#define BSP_TICKS_PER_SEC 5000U
 
 void BSP_init(void);
 void BSP_start(void);
