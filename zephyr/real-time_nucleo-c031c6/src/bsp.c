@@ -1,5 +1,5 @@
 //============================================================================
-// BSP for "real-time" Example
+// BSP for "real-time" Example, NUCLEO-C031C6 board, Zephyr RTOS
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
@@ -30,7 +30,8 @@
 #include "bsp.h"                 // Board Support Package
 #include "app.h"                 // Application interface
 
-#include "stm32c0xx.h"  // CMSIS-compliant header file for the MCU used
+#include <zephyr/drivers/gpio.h>
+#include <zephyr/sys/reboot.h>
 // add other drivers if necessary...
 
 #ifdef Q_SPY
@@ -39,7 +40,7 @@
 
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
-// Local-scope defines -----------------------------------------------------
+// Local-scope objects -----------------------------------------------------
 
 // test pins on GPIO PA (output)
 #define TST1_PIN  7U
@@ -55,7 +56,7 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 #define B1_PIN    13U
 
 //============================================================================
-// Error handler and ISRs...
+// Error handler
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
@@ -64,16 +65,13 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
+    Q_PRINTK("\nERROR in %s:%d\n", module, id);
 
 #ifndef NDEBUG
-    // light up the user LED
-    GPIOA->BSRR = (1U << TST7_PIN);  // turn LED on
-    // for debugging, hang on in an endless loop...
-    for (;;) {
-    }
+    k_panic(); // debug build: halt the system for error search...
 #endif
 
-    NVIC_SystemReset();
+    sys_reboot(SYS_REBOOT_COLD); // release build: reboot the system
     for (;;) { // explicitly "no-return"
     }
 }
@@ -85,23 +83,13 @@ void assert_failed(char const * const module, int_t const id) {
 }
 
 //............................................................................
-#ifdef __UVISION_VERSION
-// dummy initialization of the ctors (not used in C)
-void _init(void);
-void _init(void) {
-}
-#endif // __UVISION_VERSION
+static void custom_tick_callback(struct k_timer *tid); // prototype
+static void custom_tick_callback(struct k_timer *tid) {
+    Q_UNUSED_PAR(tid);
 
-// ISRs used in the application ============================================
-
-void SysTick_Handler(void); // prototype
-void SysTick_Handler(void) {
     BSP_d1on();
 
-    QTIMEEVT_TICK_X(0U, (void *)0); // time events at rate 0
-#ifdef USE_SCHED_DISABLE
-    QV_schedEnable(); // <== enable the scheduler to process next clock tick
-#endif
+    QTIMEEVT_TICK_X(0U, (void *)0);
 
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
@@ -125,13 +113,11 @@ void SysTick_Handler(void) {
             static SporadicSpecEvt const sporadicA = {
                 QEVT_INITIALIZER(SPORADIC_A_SIG),
                 .toggles = 189U,
-                .rtc_toggles = 23,
             };
             // immutable forward-press event
             static SporadicSpecEvt const sporadicB = {
                 QEVT_INITIALIZER(SPORADIC_B_SIG),
                 .toggles = 89U,
-                .rtc_toggles = 23,
             };
             QACTIVE_POST(AO_Sporadic2, &sporadicA.super, (void *)0);
             QACTIVE_POST(AO_Sporadic2, &sporadicB.super, (void *)0);
@@ -142,13 +128,13 @@ void SysTick_Handler(void) {
         }
     }
 
-    QV_ARM_ERRATUM_838869();
-
     BSP_d1off();
 }
 
 // BSP functions =============================================================
 void BSP_init(void) {
+    // NOTE: the CPU clock is configured in Zephyr (48MHz)
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -160,19 +146,6 @@ void BSP_init(void) {
                 | MPU_CTRL_ENABLE_Msk;        // enable the MPU
     __ISB();
     __DSB();
-
-    // configure the CPU clock to HSI/1 (48MHz)
-    FLASH->ACR = (FLASH->ACR & ~FLASH_ACR_LATENCY) | 0x1U;
-
-    RCC->CR |= RCC_CR_HSEON;
-    while ((RCC->CR & RCC_CR_HSERDY) != 0U) {
-    }
-    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_HPRE) | 0x0U; // RCC_HCLK_DIV_1
-    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_SW) | 0x1U; // source HSE
-    while ((RCC->CFGR & RCC_CFGR_SWS) != 0x8U) {
-    }
-    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_PPRE) | 0x0U; // APB1 prescaler=1
-    SystemCoreClockUpdate();
 
     // enable GPIO port PA clock
     RCC->IOPENR |= (1U << 0U);
@@ -207,42 +180,50 @@ void BSP_start(void) {
     // instantiate and start QP/C active objects...
     Periodic1_ctor();
     static QEvtPtr periodic1QSto[10]; // Event queue storage
+    static K_THREAD_STACK_DEFINE(periodic1Stack, 512);
     QActive_start(
         AO_Periodic1,          // AO pointer to start
-        1U,                    // QF-prio
+        Q_PRIO(1U, 4U),        // QF-prio/Zephyr-prio
         periodic1QSto,         // storage for the AO's queue
         Q_DIM(periodic1QSto),  // queue length
-        (void *)0, 0U,         // stack storage, size (not used)
+        periodic1Stack,        // stack storage (needed for FreeRTOS)
+        K_THREAD_STACK_SIZEOF(periodic1Stack), // stack size [Zephyr]
         BSP_getEvtPeriodic1(0U)); // initialization param
 
     Sporadic2_ctor();
     static QEvtPtr sporadic2QSto[8]; // Event queue storage
+    static K_THREAD_STACK_DEFINE(sporadic2Stack, 512);
     QActive_start(
         AO_Sporadic2,          // AO pointer to start
-        2U,                    // QF-prio
+        Q_PRIO(2U, 3U),        // QF-prio/Zephyr-prio
         sporadic2QSto,         // storage for the AO's queue
         Q_DIM(sporadic2QSto),  // queue length
-        (void *)0, 0U,         // stack storage, size (not used)
+        sporadic2Stack,        // stack storage (needed for FreeRTOS)
+        K_THREAD_STACK_SIZEOF(sporadic2Stack), // stack size [Zephyr]
         (void const *)0);      // initialization param -- not used
 
     Sporadic3_ctor();
     static QEvtPtr sporadic3QSto[8]; // Event queue storage
+    static K_THREAD_STACK_DEFINE(sporadic3Stack, 512);
     QActive_start(
         AO_Sporadic3,          // AO pointer to start
-        3U,                    // QF-prio
+        Q_PRIO(3U, 2U),        // QF-prio/Zephyr-prio
         sporadic3QSto,         // storage for the AO's queue
         Q_DIM(sporadic3QSto),  // queue length
-        (void *)0, 0U,         // stack storage, size (not used)
+        sporadic3Stack,        // stack storage (needed for FreeRTOS)
+        K_THREAD_STACK_SIZEOF(sporadic3Stack), // stack size [Zephyr]
         (void const *)0);      // initialization param -- not used
 
     Periodic4_ctor();
     static QEvtPtr periodic4QSto[8]; // Event queue storage
+    static K_THREAD_STACK_DEFINE(periodic4Stack, 512);
     QActive_start(
         AO_Periodic4,          // AO pointer to start
-        4U,                    // QF-prio
+        Q_PRIO(4U, 1U),        // QF-prio/Zephyr-prio
         periodic4QSto,         // storage for the AO's queue
         Q_DIM(periodic4QSto),  // queue length
-        (void *)0, 0U,         // stack storage, size (not used)
+        periodic4Stack,        // stack storage (needed for FreeRTOS)
+        K_THREAD_STACK_SIZEOF(periodic4Stack), // stack size [Zephyr]
         BSP_getEvtPeriodic4(0U)); // initialization event
 }
 //............................................................................
@@ -306,38 +287,17 @@ QEvt const *BSP_getEvtPeriodic4(uint8_t num) {
 
 // QF callbacks ==============================================================
 void QF_onStartup(void) {
-    SystemCoreClockUpdate();
-
-    // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
-    SysTick_Config((SystemCoreClock / BSP_TICKS_PER_SEC) + 1U);
-
-    // set priorities of ISRs used in the system
-    // NOTE: all interrupts are "kernel aware" in Cortex-M0+
-    NVIC_SetPriority(SysTick_IRQn, 0U);
-    // ...
+    static struct k_timer zephyr_tick_timer;
+    k_timer_init(&zephyr_tick_timer, &custom_tick_callback, NULL);
+    k_timer_start(&zephyr_tick_timer, K_TICKS(1), K_TICKS(1));
 }
 //............................................................................
 void QF_onCleanup(void) {
 }
 //............................................................................
-void QV_onIdle(void) { // CAUTION: called with interrupts DISABLED, see NOTE0
-    BSP_d7on(); // LED LD2
-#ifdef NDEBUG
-    // Put the CPU and peripherals to the low-power mode.
-    // you might need to customize the clock management for your application,
-    // see the datasheet for your particular Cortex-M MCU.
-    //
-    QV_CPU_SLEEP(); // atomically go to sleep and enable interrupts
-#else
-    QF_INT_ENABLE(); // just enable interrupts
-#endif
+#ifdef QF_IDLE
+void QF_onIdle(void) {
+    BSP_d7on();
     BSP_d7off();
 }
-
-//============================================================================
-// NOTE0:
-// The QV_onIdle() callback is called with interrupts disabled, because the
-// determination of the idle condition might change by any interrupt posting
-// an event. QV_onIdle() must internally enable interrupts, ideally
-// atomically with putting the CPU to the power-saving mode.
-//
+#endif

@@ -1,5 +1,5 @@
 //============================================================================
-// BSP for "real-time" Example
+// BSP for "real-time" Example, NUCLEO-C031C6 board, FreeRTOS kernel
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
@@ -40,6 +40,9 @@
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 // Local-scope defines -----------------------------------------------------
+// "RTOS-aware" interrupt priorities for FreeRTOS on ARM Cortex-M, NOTE1
+#define RTOS_AWARE_ISR_CMSIS_PRI \
+    (configMAX_SYSCALL_INTERRUPT_PRIORITY >> (8-__NVIC_PRIO_BITS))
 
 // test pins on GPIO PA (output)
 #define TST1_PIN  7U
@@ -55,7 +58,7 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 #define B1_PIN    13U
 
 //============================================================================
-// Error handler and ISRs...
+// Error handler
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
@@ -92,16 +95,15 @@ void _init(void) {
 }
 #endif // __UVISION_VERSION
 
-// ISRs used in the application ============================================
+// ISRs "hooks" used in the application ======================================
 
-void SysTick_Handler(void); // prototype
-void SysTick_Handler(void) {
+void vApplicationTickHook(void) {
     BSP_d1on();
 
-    QTIMEEVT_TICK_X(0U, (void *)0); // time events at rate 0
-#ifdef USE_SCHED_DISABLE
-    QV_schedEnable(); // <== enable the scheduler to process next clock tick
-#endif
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+    // process time events at rate 0
+    QTIMEEVT_TICK_FROM_ISR(0U, &xHigherPriorityTaskWoken, (void *)0);
 
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
@@ -125,26 +127,69 @@ void SysTick_Handler(void) {
             static SporadicSpecEvt const sporadicA = {
                 QEVT_INITIALIZER(SPORADIC_A_SIG),
                 .toggles = 189U,
-                .rtc_toggles = 23,
             };
             // immutable forward-press event
             static SporadicSpecEvt const sporadicB = {
                 QEVT_INITIALIZER(SPORADIC_B_SIG),
                 .toggles = 89U,
-                .rtc_toggles = 23,
             };
-            QACTIVE_POST(AO_Sporadic2, &sporadicA.super, (void *)0);
-            QACTIVE_POST(AO_Sporadic2, &sporadicB.super, (void *)0);
+            QACTIVE_POST_FROM_ISR(AO_Sporadic2, &sporadicA.super,
+                                &xHigherPriorityTaskWoken, (void *)0);
+            QACTIVE_POST_FROM_ISR(AO_Sporadic2, &sporadicB.super,
+                                &xHigherPriorityTaskWoken, (void *)0);
         }
         else { // B1 is released
-            QACTIVE_POST(AO_Periodic4, BSP_getEvtPeriodic4(0U), (void *)0);
-            QACTIVE_POST(AO_Periodic1, BSP_getEvtPeriodic1(0U), (void *)0);
+            QACTIVE_POST_FROM_ISR(AO_Periodic4, BSP_getEvtPeriodic4(0U),
+                                &xHigherPriorityTaskWoken, (void *)0);
+            QACTIVE_POST_FROM_ISR(AO_Periodic1, BSP_getEvtPeriodic1(0U),
+                                &xHigherPriorityTaskWoken, (void *)0);
         }
     }
 
-    QV_ARM_ERRATUM_838869();
+    // notify FreeRTOS to perform context switch from ISR, if needed
+    portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 
     BSP_d1off();
+}
+
+//............................................................................
+void vApplicationIdleHook(void) {
+    BSP_d7on(); // LED LD4
+    BSP_d7off();
+}
+//............................................................................
+void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
+    (void)xTask;
+    (void)pcTaskName;
+    Q_ERROR();
+}
+//............................................................................
+// configSUPPORT_STATIC_ALLOCATION is set to 1, so the application must
+// provide an implementation of vApplicationGetIdleTaskMemory() to provide
+// the memory that is used by the Idle task.
+void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
+                                    StackType_t **ppxIdleTaskStackBuffer,
+                                    uint32_t *pulIdleTaskStackSize )
+{
+    // If the buffers to be provided to the Idle task are declared inside
+    // this function then they must be declared static - otherwise they will
+    // be allocated on the stack and so not exists after this function exits.
+    //
+    static StaticTask_t xIdleTaskTCB;
+    static StackType_t uxIdleTaskStack[ configMINIMAL_STACK_SIZE ];
+
+    // Pass out a pointer to the StaticTask_t structure in which the
+    // Idle task's state will be stored.
+    *ppxIdleTaskTCBBuffer = &xIdleTaskTCB;
+
+    // Pass out the array that will be used as the Idle task's stack.
+    *ppxIdleTaskStackBuffer = uxIdleTaskStack;
+
+    // Pass out the size of the array pointed to by *ppxIdleTaskStackBuffer.
+    // Note that, as the array is necessarily of type StackType_t,
+    // configMINIMAL_STACK_SIZE is specified in words, not bytes.
+    //
+    *pulIdleTaskStackSize = Q_DIM(uxIdleTaskStack);
 }
 
 // BSP functions =============================================================
@@ -207,42 +252,50 @@ void BSP_start(void) {
     // instantiate and start QP/C active objects...
     Periodic1_ctor();
     static QEvtPtr periodic1QSto[10]; // Event queue storage
+    static StackType_t periodic1Stack[256];
     QActive_start(
         AO_Periodic1,          // AO pointer to start
         1U,                    // QF-prio
         periodic1QSto,         // storage for the AO's queue
         Q_DIM(periodic1QSto),  // queue length
-        (void *)0, 0U,         // stack storage, size (not used)
+        periodic1Stack,        // stack storage (needed for FreeRTOS)
+        sizeof(periodic1Stack),// stack size (needed for FreeRTOS)
         BSP_getEvtPeriodic1(0U)); // initialization param
 
     Sporadic2_ctor();
     static QEvtPtr sporadic2QSto[8]; // Event queue storage
+    static StackType_t sporadic2Stack[256];
     QActive_start(
         AO_Sporadic2,          // AO pointer to start
-        2U,                    // QF-prio
+        2U,                    // QF-prio/pre-thre.
         sporadic2QSto,         // storage for the AO's queue
         Q_DIM(sporadic2QSto),  // queue length
-        (void *)0, 0U,         // stack storage, size (not used)
+        sporadic2Stack,        // stack storage (needed for FreeRTOS)
+        sizeof(sporadic2Stack),// stack size (needed for FreeRTOS)
         (void const *)0);      // initialization param -- not used
 
     Sporadic3_ctor();
     static QEvtPtr sporadic3QSto[8]; // Event queue storage
+    static StackType_t sporadic3Stack[256];
     QActive_start(
         AO_Sporadic3,          // AO pointer to start
-        3U,                    // QF-prio
+        3U,                    // QF-prio/pre-thre.
         sporadic3QSto,         // storage for the AO's queue
         Q_DIM(sporadic3QSto),  // queue length
-        (void *)0, 0U,         // stack storage, size (not used)
+        sporadic3Stack,        // stack storage (needed for FreeRTOS)
+        sizeof(sporadic3Stack),// stack size (needed for FreeRTOS)
         (void const *)0);      // initialization param -- not used
 
     Periodic4_ctor();
     static QEvtPtr periodic4QSto[8]; // Event queue storage
+    static StackType_t periodic4Stack[256];
     QActive_start(
         AO_Periodic4,          // AO pointer to start
         4U,                    // QF-prio
         periodic4QSto,         // storage for the AO's queue
         Q_DIM(periodic4QSto),  // queue length
-        (void *)0, 0U,         // stack storage, size (not used)
+        periodic4Stack,        // stack storage (needed for FreeRTOS)
+        sizeof(periodic4Stack),// stack size (needed for FreeRTOS)
         BSP_getEvtPeriodic4(0U)); // initialization event
 }
 //............................................................................
@@ -319,25 +372,3 @@ void QF_onStartup(void) {
 //............................................................................
 void QF_onCleanup(void) {
 }
-//............................................................................
-void QV_onIdle(void) { // CAUTION: called with interrupts DISABLED, see NOTE0
-    BSP_d7on(); // LED LD2
-#ifdef NDEBUG
-    // Put the CPU and peripherals to the low-power mode.
-    // you might need to customize the clock management for your application,
-    // see the datasheet for your particular Cortex-M MCU.
-    //
-    QV_CPU_SLEEP(); // atomically go to sleep and enable interrupts
-#else
-    QF_INT_ENABLE(); // just enable interrupts
-#endif
-    BSP_d7off();
-}
-
-//============================================================================
-// NOTE0:
-// The QV_onIdle() callback is called with interrupts disabled, because the
-// determination of the idle condition might change by any interrupt posting
-// an event. QV_onIdle() must internally enable interrupts, ideally
-// atomically with putting the CPU to the power-saving mode.
-//

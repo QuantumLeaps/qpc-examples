@@ -70,18 +70,19 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, 10000U);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
     Q_PRINTK("\nERROR in %s:%d\n", module, id);
 
 #ifndef NDEBUG
     k_panic(); // debug build: halt the system for error search...
-#else
-    sys_reboot(SYS_REBOOT_COLD); // release build: reboot the system
 #endif
-    for (;;) { // explicitly no-return
+
+    sys_reboot(SYS_REBOOT_COLD); // release build: reboot the system
+    for (;;) { // explicitly "no-return"
     }
 }
 //............................................................................
+// assertion failure handler for the STM32 library, including the startup code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -118,8 +119,8 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL); // all records
-    QS_GLB_FILTER(-QS_QF_TICK);    // exclude the clock tick
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
 }
 //............................................................................
 void BSP_start(void) {
@@ -219,6 +220,7 @@ void BSP_randomSeed(uint32_t seed) {
 //............................................................................
 void BSP_terminate(int16_t result) {
     Q_UNUSED_PAR(result);
+    QF_stop();
 }
 
 //============================================================================
@@ -296,20 +298,6 @@ void QS_onFlush(void) {
     }
 }
 //............................................................................
-void QS_doOutput(void) {
-    uint16_t len = 0xFFFFU; // big number to get all available bytes
-
-    QF_CRIT_STAT
-    QF_CRIT_ENTRY();
-    uint8_t const *buf = QS_getBlock(&len);
-    QF_CRIT_EXIT();
-
-    // transmit the bytes via the UART...
-    for (; len != 0U; --len, ++buf) {
-        uart_poll_out(uart_dev, *buf);
-    }
-}
-//............................................................................
 void QS_onReset(void) {
     sys_reboot(SYS_REBOOT_COLD);
 }
@@ -321,6 +309,22 @@ void QS_onCommand(uint8_t cmdId,
     Q_UNUSED_PAR(param1);
     Q_UNUSED_PAR(param2);
     Q_UNUSED_PAR(param3);
+}
+//............................................................................
+void QF_onIdle(void) {
+    QS_rxParse();   // parse any QS-RX bytes
+
+    uint16_t len = 0xFFFFU; // big number to get all available bytes
+
+    QF_CRIT_STAT
+    QF_CRIT_ENTRY();
+    uint8_t const *buf = QS_getBlock(&len);
+    QF_CRIT_EXIT();
+
+    // transmit the bytes via the UART...
+    for (; len != 0U; --len, ++buf) {
+        uart_poll_out(uart_dev, *buf);
+    }
 }
 
 #endif // Q_SPY

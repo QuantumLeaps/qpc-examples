@@ -25,8 +25,7 @@ The directory qpc\3rd_party\efm32pg1b\ contains the CMSIS-compliant
 device code for the LM3S811 MCU. Please see the README file in this
 folder for more details.
 
-
-# QS Software Tracing Instrumentation
+## QS Software Tracing Instrumentation
 The example provides the "Spy" build configuration, which outputs the
 QS (Quantum Spy) software tracing data through UART0, which is connected
 to the virtual COM port of the board.
@@ -50,7 +49,12 @@ Please check the Device Manager to find the COM port number.
 The directory `qpc\examples\workstation\game-gui` contains the emulation
 of the "Fly 'n' Shoot" game on Windows GUI, either single-threaded (win32-qv)
 or multithreaded (win32). This sub-directory contains the  Visual Studio
-solution file (game-gui.sln) for Visual C++.
+solution file (game-gui.sln) for Microsoft Visual C++.
+
+<p align="center">
+<img src="qwin_ani.gif"/><br>
+<b>"Fly 'n' Shoot" game emulation running on Windows</b>
+</p>
 
 The Win32-GUI emulation is based on the QWin GUI Prototyping Toolkit, see:
 
@@ -62,14 +66,13 @@ only in the Board Support Package (bsp.c). This example demonstrates the
 developed on the workstation (Windows), but is intended for a deeply
 embedded target (EFM32-SLSTK3401A here).
 
-
-# QS Software Tracing Instrumentation
+## QS Software Tracing Instrumentation
 The "win32-gui" emulation also supports the "Spy" build configuration,
 in which case it attempts to connect to the QSPY host application via
-a TCP/IP socket (default). Here is how you launch the QSPY host utility:
-
+a TCP/IP socket (default). Here is how you launch the QSPY host utility
+(assuming that QTools have been installed and the `qtools/bin` directory
+is in the PATH):
 
 ```
 qspy
 ```
-

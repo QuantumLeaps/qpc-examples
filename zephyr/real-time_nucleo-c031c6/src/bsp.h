@@ -1,5 +1,5 @@
 //============================================================================
-// Product: Board Support Package example
+// "real-time" example to demonstrate timing in QP/C
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
@@ -34,14 +34,30 @@
 
 void BSP_init(void);
 void BSP_start(void);
-void BSP_displayPaused(uint8_t paused);
-void BSP_displayPhilStat(uint8_t n, char const *stat);
-void BSP_terminate(int16_t result);
 
-void BSP_randomSeed(uint32_t seed); // random seed
-uint32_t BSP_random(void); // pseudo-random generator
+void BSP_d1on(void);
+void BSP_d1off(void);
 
-void BSP_ledOn(void);
-void BSP_ledOff(void);
+void BSP_d2on(void);
+void BSP_d2off(void);
+
+void BSP_d3on(void);
+void BSP_d3off(void);
+
+void BSP_d4on(void);
+void BSP_d4off(void);
+
+void BSP_d5on(void);
+void BSP_d5off(void);
+
+void BSP_d6on(void);
+void BSP_d6off(void);
+
+void BSP_d7on(void);
+void BSP_d7off(void);
+
+// immutable events for Periodic active objects
+QEvt const *BSP_getEvtPeriodic1(uint8_t num);
+QEvt const *BSP_getEvtPeriodic4(uint8_t num);
 
 #endif // BSP_H_
