@@ -64,4 +64,16 @@ BSP_ledOn
 BSP_ledOff
 BSP_ledOn
 BSP_ledOff
+
+# Activating QSPY Software Tracing
+The QP/C Zephyr Module supports the
+[QSPY Software Tracing](https://www.state-machine.com/qtools/qpspy.html)
+option and will add the appropriate macros and files to build the "QSPY"
+configuration.
+
+If you wish to enable "QSPY" you can provide the option "QSPY"
+in the command-line for the build. For example:
+
+```bash
+west build -b <board> -- -DQSPY=ON
 ```

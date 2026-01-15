@@ -1,48 +1,42 @@
 //============================================================================
-// Product: calc2 Example
-// Last updated for version 8.0.1
-// Last updated on  2024-12-16
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// QP/C main function (calc example)
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "bsp.h"
-#include "calc2.h"
+#include "qpc.h"          // QP/C real-time event framework
+#include "bsp.h"          // Board Support Package
+#include "app.h"          // application
 
-#include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
+#include "safe_std.h"     // portable "safe" <stdio.h>/<string.h> facilities
 
 //Q_DEFINE_THIS_FILE
 
 //............................................................................
 int main() {
     QF_init();
-    QF_onStartup();
 
     PRINTF_S("Calculator example, QP version: %s\n"
            "Press '0' .. '9'     to enter a digit\n"
@@ -57,6 +51,8 @@ int main() {
            "Press <Esc>          to quit.\n\n",
            QP_VERSION_STR);
 
+    QF_onStartup();
+
     Calc_ctor(); // explicitly instantiate the calculator object
     QASM_INIT(the_calc, (void *)0, 0U); // trigger initial transition
 
@@ -69,7 +65,7 @@ int main() {
         uint8_t key_code = (uint8_t)QF_consoleWaitForKey();
         PRINTF_S("%c ", (key_code >= ' ') ? key_code : 'X');
 
-        QSignal sig;
+        QSignal sig = 0U; // assume invalid event
         switch (key_code) {
             case 'c': // intentionally fall through
             case 'C': {
@@ -118,12 +114,11 @@ int main() {
                 break;
             }
             default: {
-                sig = 0; // invalid event
                 break;
             }
         }
 
-        if (sig != 0) {  // valid event generated?
+        if (sig != 0) { // valid event generated?
             CalcEvt e = { QEVT_INITIALIZER(sig), key_code}; // Calculator event
             QASM_DISPATCH(the_calc, &e.super, 0U); // dispatch event
         }

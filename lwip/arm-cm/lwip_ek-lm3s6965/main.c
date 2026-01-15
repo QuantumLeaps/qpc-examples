@@ -54,7 +54,7 @@ int main(void) {
     Table_ctor();   // instantiate the Table active object
     LwIPMgr_ctor(); // instantiate all LwIP-Manager active object
 
-    BSP_init();     // initialize the Board Support Package
+    BSP_init((void *)0);     // initialize the Board Support Package
 
     QF_init(); // initialize the framework and the underlying RT kernel
 

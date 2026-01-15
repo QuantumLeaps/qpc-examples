@@ -1,6 +1,6 @@
-menu "QP/C Real-Time Embedded Framework"
+menu "QP/C real-time event framework"
   config QP_ENABLED
-    bool "QP/C Real-Time Embedded Framework"
+    bool "QP/C real-time event framework"
     default y
     help
       Select this option to enable QPC Framework

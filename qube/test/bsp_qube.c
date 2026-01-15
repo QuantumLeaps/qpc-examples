@@ -5,7 +5,8 @@
 //Q_DEFINE_THIS_FILE
 
 //..........................................................................
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
     //Qube_setAO(AO_QHsmTst); /* register the AO with Qube */
 }
 //..........................................................................

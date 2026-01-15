@@ -30,7 +30,7 @@
 
 #define BSP_TICKS_PER_SEC    100
 
-void BSP_init(void);
+void BSP_init(void const * const arg);
 
 void ISR_SysTick(void);
 void ISR_Ethernet(void);

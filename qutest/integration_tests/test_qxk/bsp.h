@@ -32,7 +32,7 @@
 #ifndef BSP_H_
 #define BSP_H_
 
-void BSP_init(void);
+void BSP_init(void const * const arg);
 void BSP_terminate(int16_t result);
 
 // for testing...

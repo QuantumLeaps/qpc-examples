@@ -50,7 +50,7 @@ def on_reset():
     expect("@timestamp BSP_CALL BSP_displayPhilStat 2 thinking")
     expect("@timestamp BSP_CALL BSP_displayPhilStat 3 thinking")
     expect("@timestamp BSP_CALL BSP_displayPhilStat 4 thinking")
-    expect("===RTC===> St-Init  Obj=Table_inst,State=QHsm_top->Table_serving")
+    expect("===RTC===> St-Init  Obj=Table_inst,State=NULL->Table_serving")
     expect("===RTC===> St-Entry Obj=Table_inst,State=Table_serving")
     expect("@timestamp Init===> Obj=Table_inst,State=Table_serving")
     expect_run()

@@ -1,37 +1,34 @@
 //============================================================================
 // Product: "Low-Power" example, EK-TM4C123GXL board, QK kernel
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
 //
-// Contact information:
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "low_power.h"           // this application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "TM4C123GH6PM.h"        // the device specific header (TI)
 #include "sysctl.h"              // system control driver (TI)
@@ -69,7 +66,36 @@ enum {
 
 #define XTAL_HZ     16000000U
 
-// ISRs used in this project =================================================
+//============================================================================
+// Error handler
+
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    //
+    // NOTE: add here your application-specific error handling
+    //
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
+
+#ifndef NDEBUG
+    // light up all LEDs
+    GPIOF->DATA_Bits[LED_GREEN | LED_RED | LED_BLUE] = 0xFFU;
+    for (;;) { // for debugging, hang on in an endless loop...
+    }
+#else
+    NVIC_SystemReset();
+    for (;;) { // explicitly "no-return"
+    }
+#endif
+}
+//............................................................................
+void assert_failed(char const * const module, int_t const id); // prototype
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
+}
+
+//============================================================================
+// ISRs...
 void SysTick_Handler(void) {
     QK_ISR_ENTRY();   // inform QK about entering an ISR
     QTIMEEVT_TICK_X(0U, (void *)0); // process time events for rate 0
@@ -93,8 +119,12 @@ void GPIOPortF_IRQHandler(void) {
     QK_ISR_EXIT(); // inform QK about exiting an ISR
 }
 
-// BSP functions ===========================================================
-void BSP_init(void) {
+//============================================================================
+// BSP functions...
+
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // NOTE The VFP (Floating Point Unit) unit is configured by QK-port
 
     // enable clock for to the peripherals used by this application...
@@ -126,6 +156,33 @@ void BSP_init(void) {
     GPIOF->IBE &= ~BTN_SW1; // only one edge generate the interrupt
     GPIOF->IEV &= ~BTN_SW1; // a falling edge triggers the interrupt
     GPIOF->IM  |= BTN_SW1;  // enable GPIOF interrupt for SW1
+
+    // initialize event pools...
+    //QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
+
+    static QSubscrList subscrSto[MAX_PUB_SIG];
+    QActive_psInit(subscrSto, Q_DIM(subscrSto)); // init publish-subscribe
+
+    // instantiate and start the active objects...
+    Blinky0_ctor();
+    static QEvtPtr l_blinky0QSto[10];  // queue storage for Blinky0
+    QActive_start(AO_Blinky0,     // AO pointer
+                  1U,             // unique QP priority of the AO
+                  l_blinky0QSto,  // storage for the AO's queue
+                  Q_DIM(l_blinky0QSto), // length of the queue [entries]
+                  (void *)0,      // stack storage (not used in QK)
+                  0U,             // stack size [bytes] (not used in QK)
+                  (void *)0);     // initial param (not used)
+
+    Blinky1_ctor();
+    static QEvtPtr l_blinky1QSto[10]; // queue storage for Blinky1
+    QActive_start(AO_Blinky1,     // AO pointer
+                  2U,             // unique QP priority of the AO
+                  l_blinky1QSto,  // storage for the AO's queue
+                  Q_DIM(l_blinky1QSto), // length of the queue [entries]
+                  (void *)0,      // stack storage (not used in QK)
+                  0U,             // stack size [bytes] (not used in QK)
+                  (void *)0);     // initial param (not used)
 }
 //............................................................................
 void BSP_led0_off(void) {
@@ -161,6 +218,7 @@ void BSP_tickRate1_on(void) {
 // QF callbacks ============================================================
 void QF_onStartup(void) {
     // set up the SysTick timer to fire at BSP_TICKS0_PER_SEC rate
+    SystemCoreClockUpdate();
     SysTick_Config(SystemCoreClock / BSP_TICKS0_PER_SEC);
 
     // assign all priority bits for preemption-prio. and none to sub-prio.
@@ -189,7 +247,6 @@ void QF_onCleanup(void) {
 }
 //............................................................................
 void QK_onIdle(void) {
-
     QF_INT_DISABLE();
     if (((l_activeSet & (1U << SYSTICK_ACTIVE)) != 0U) // rate-0 enabled?
         && QTimeEvt_noActive(0U))  // no time events at rate-0?
@@ -211,32 +268,6 @@ void QK_onIdle(void) {
     GPIOF->DATA_Bits[LED_RED] = 0xFFU; // turn LED on, see NOTE2
     __WFI(); // wait for interrupt
     GPIOF->DATA_Bits[LED_RED] = 0x00U; // turn LED off, see NOTE2
-}
-
-//............................................................................
-Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    //
-    // NOTE: add here your application-specific error handling
-    //
-    Q_UNUSED_PAR(module);
-    Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, 10000U); // report assertion to QS
-
-#ifndef NDEBUG
-    // light up all LEDs
-    GPIOF->DATA_Bits[LED_GREEN | LED_RED | LED_BLUE] = 0xFFU;
-    for (;;) { // for debugging, hang on in an endless loop...
-    }
-#else
-    NVIC_SystemReset();
-    for (;;) { // explicitly "no-return"
-    }
-#endif
-}
-//............................................................................
-void assert_failed(char const * const module, int_t const id); // prototype
-void assert_failed(char const * const module, int_t const id) {
-    Q_onError(module, id);
 }
 
 //============================================================================

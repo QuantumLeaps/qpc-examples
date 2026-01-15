@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"               // QP/C real-time event framework
-#include "blinky.h"            // Blinky Application interface
-#include "bsp.h"               // Board Support Package
+#include "qpc.h"        // QP/C real-time event framework
+#include "bsp.h"        // Board Support Package
+#include "app.h"        // Application interface
 
 //Q_DEFINE_THIS_FILE
 

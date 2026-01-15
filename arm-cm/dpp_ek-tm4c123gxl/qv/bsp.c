@@ -1,48 +1,45 @@
 //============================================================================
 // Product: DPP example, EK-TM4C123GXL board, QV kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
 //
-// Contact information:
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "TM4C123GH6PM.h"        // the device specific header (TI)
 #include "sysctl.h"              // system control driver (TI)
 #include "gpio.h"                // GPIO driver (TI)
 // add other drivers if necessary...
 
-Q_DEFINE_THIS_FILE  // define the name of this file for assertions
+//============================================================================
+Q_DEFINE_THIS_FILE  // file name for assertions
 
-// Local-scope objects -----------------------------------------------------
+// Local-scope defines -------------------------------------------------------
+// Local-scope defines -----------------------------------------------------
 // LEDs on the board
 #define LED_RED     (1U << 1U)
 #define LED_GREEN   (1U << 3U)
@@ -52,29 +49,27 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 #define BTN_SW1     (1U << 4U)
 #define BTN_SW2     (1U << 0U)
 
+// Local-scope objects -----------------------------------------------------
 static uint32_t l_rndSeed;
 
 #ifdef Q_SPY
+    enum AppRecords { // application-specific trace records
+        PHILO_STAT = QS_USER,
+        PAUSED_STAT,
+    };
 
-    // QSpy source IDs
-    static QSpyId const l_SysTick_Handler = { 0U };
-    static QSpyId const l_GPIOPortA_IRQHandler = { 0U };
+    // QS source IDs...
+    static QSpyId const l_SysTick_Handler = { QS_ID_AP };
+    static QSpyId const l_GPIOPortA_IRQHandler = { QS_ID_AP + 1U };
 
     #define UART_BAUD_RATE      115200U
     #define UART_FR_TXFE        (1U << 7U)
     #define UART_FR_RXFE        (1U << 4U)
     #define UART_TXFIFO_DEPTH   16U
-
-    enum AppRecords { // application-specific trace records
-        PHILO_STAT = QS_USER,
-        PAUSED_STAT,
-        CONTEXT_SW,
-    };
-
-#endif
+#endif // Q_SPY
 
 //============================================================================
-// Error handler and ISRs...
+// Error handler
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
@@ -89,19 +84,19 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     GPIOF_AHB->DATA_Bits[LED_GREEN | LED_RED | LED_BLUE] = 0xFFU;
     for (;;) { // for debugging, hang on in an endless loop...
     }
-#else
+#endif
     NVIC_SystemReset();
     for (;;) { // explicitly "no-return"
     }
-#endif
 }
 //............................................................................
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// ISRs used in the application ============================================
+// ISRs used in the application ==============================================
 
 void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
@@ -137,7 +132,7 @@ void SysTick_Handler(void) {
     QV_ARM_ERRATUM_838869();
 }
 //............................................................................
-// interrupt handler for testing preemptions in QXK
+// interrupt handler for testing preemptions
 void GPIOPortA_IRQHandler(void); // prototype
 void GPIOPortA_IRQHandler(void) {
     QEvt const testEvt = QEVT_INITIALIZER(MAX_PUB_SIG);
@@ -167,21 +162,12 @@ void UART0_IRQHandler(void) {
 }
 #endif // Q_SPY
 
-//............................................................................
-#ifdef QF_ON_CONTEXT_SW
-// NOTE: the context-switch callback is called with interrupts DISABLED
-void QF_onContextSw(QActive *prev, QActive *next) {
-    QS_BEGIN_INCRIT(CONTEXT_SW, 0U) // in critical section!
-        QS_OBJ(prev);
-        QS_OBJ(next);
-    QS_END_INCRIT()
-}
-#endif // QF_ON_CONTEXT_SW
-
 //============================================================================
-// BSP functions...
+// BSP...
 
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -196,10 +182,6 @@ void BSP_init(void) {
 
     // enable the MemManage_Handler for MPU exception
     SCB->SHCSR |= SCB_SHCSR_MEMFAULTENA_Msk;
-
-    // NOTE: SystemInit() has been already called from the startup code
-    // but SystemCoreClock needs to be updated
-    SystemCoreClockUpdate();
 
     // NOTE: The VFP (hardware Floating Point) unit is configured by QV
 
@@ -229,28 +211,24 @@ void BSP_init(void) {
     GPIOF_AHB->LOCK = 0x0; // lock GPIOCR register for SW2
 
     BSP_randomSeed(1234U); // seed the random number generator
-    BSP_randomSeed(1234U);
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
-    // dictionaries...
+    // QS dictionaries...
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
     QS_OBJ_DICTIONARY(&l_GPIOPortA_IRQHandler);
     QS_USR_DICTIONARY(PHILO_STAT);
     QS_USR_DICTIONARY(PAUSED_STAT);
-    QS_USR_DICTIONARY(CONTEXT_SW);
 
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -260,7 +238,6 @@ void BSP_start(void) {
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // instantiate and start AOs/threads...
-
     static QEvtPtr philoQueueSto[N_PHILO][10];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n);
@@ -320,6 +297,10 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
     return (rnd >> 8U);
 }
 //............................................................................
+void BSP_terminate(int16_t result) {
+    Q_UNUSED_PAR(result);
+}
+//............................................................................
 void BSP_ledOn(void) {
     GPIOF_AHB->DATA_Bits[LED_RED] = 0xFFU;
 }
@@ -327,15 +308,13 @@ void BSP_ledOn(void) {
 void BSP_ledOff(void) {
     GPIOF_AHB->DATA_Bits[LED_RED] = 0x00U;
 }
-//............................................................................
-void BSP_terminate(int16_t result) {
-    Q_UNUSED_PAR(result);
-}
 
 //============================================================================
 // QF callbacks...
+
 void QF_onStartup(void) {
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
+    SystemCoreClockUpdate();
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 
     // assign all priority bits for preemption-prio. and none to sub-prio.
@@ -357,6 +336,7 @@ void QF_onStartup(void) {
 //............................................................................
 void QF_onCleanup(void) {
 }
+
 //............................................................................
 void QV_onIdle(void) { // called with interrupts disabled, see NOTE0
     // toggle the User LED on and then off, see NOTE2
@@ -421,6 +401,7 @@ uint8_t QS_onStartup(void const *arg) {
     GPIOA->PCTL  |= 0x11U;
 
     // configure the UART for the desired baud rate, 8-N-1 operation
+    SystemCoreClockUpdate();
     tmp = (((SystemCoreClock * 8U) / UART_BAUD_RATE) + 1U) / 2U;
     UART0->IBRD   = tmp / 64U;
     UART0->FBRD   = tmp % 64U;
@@ -450,7 +431,7 @@ uint8_t QS_onStartup(void const *arg) {
 void QS_onCleanup(void) {
 }
 //............................................................................
-QSTimeCtr QS_onGetTime(void) {  // NOTE: invoked with interrupts DISABLED
+QSTimeCtr QS_onGetTime(void) { // NOTE: invoked with interrupts DISABLED
     return TIMER5->TAV;
 }
 //............................................................................

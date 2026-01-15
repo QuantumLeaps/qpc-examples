@@ -27,8 +27,8 @@
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "stm32c0xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
@@ -62,7 +62,7 @@ static uint32_t l_rndSeed;
         PAUSED_STAT,
     };
 
-#endif
+#endif // def Q_SPY
 
 //============================================================================
 // Error handler
@@ -82,32 +82,25 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     for (;;) {
     }
 #endif
-
     NVIC_SystemReset();
     for (;;) { // explicitly "no-return"
     }
 }
 //............................................................................
-// assertion failure handler for the STM32 library, including the startup code
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-//............................................................................
-#ifdef __UVISION_VERSION
-// dummy initialization of the ctors (not used in C)
-void _init(void);
-void _init(void) {
-}
-#endif // __UVISION_VERSION
-
-// ISRs "hooks" used in the application ======================================
+//============================================================================
+// ISRs "hooks" used in the application...
+// NOTE: only the "FromISR" API variants are allowed in vApplicationTickHook
 
 void vApplicationTickHook(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    // process time events at rate 0
+    // process time events for rate 0
     QTIMEEVT_TICK_FROM_ISR(0U, &xHigherPriorityTaskWoken, &l_TickHook);
 
     // Perform the debouncing of buttons. The algorithm for debouncing
@@ -149,10 +142,21 @@ void vApplicationTickHook(void) {
     // notify FreeRTOS to perform context switch from ISR, if needed
     portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 }
-
 //............................................................................
 void vApplicationIdleHook(void) {
-#ifdef NDEBUG
+#ifdef Q_SPY
+    QS_rxParse();  // parse all the received bytes
+
+    if ((USART2->ISR & (1U << 7U)) != 0U) { // TXE empty?
+        QF_INT_DISABLE();
+        uint16_t b = QS_getByte();
+        QF_INT_ENABLE();
+
+        if (b != QS_EOD) {   // not End-Of-Data?
+            USART2->TDR = b; // put into the DR register
+        }
+    }
+#elif defined NDEBUG
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-M MCU.
@@ -161,8 +165,8 @@ void vApplicationIdleHook(void) {
 }
 //............................................................................
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
-    (void)xTask;
-    (void)pcTaskName;
+    Q_UNUSED_PAR(xTask);
+    Q_UNUSED_PAR(pcTaskName);
     Q_ERROR();
 }
 //............................................................................
@@ -194,8 +198,12 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
     *pulIdleTaskStackSize = Q_DIM(uxIdleTaskStack);
 }
 
-// BSP functions =============================================================
-void BSP_init(void) {
+//============================================================================
+// BSP functions...
+
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -207,10 +215,6 @@ void BSP_init(void) {
                 | MPU_CTRL_ENABLE_Msk;        // enable the MPU
     __ISB();
     __DSB();
-
-    // NOTE: SystemInit() has been already called from the startup code
-    // but SystemCoreClock needs to be updated
-    SystemCoreClockUpdate();
 
     // enable GPIOA clock port for the LED LD4
     RCC->IOPENR |= (1U << 0U);
@@ -233,7 +237,7 @@ void BSP_init(void) {
     BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -245,13 +249,11 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
-    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO]; // small pool
+    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     // initialize publish-subscribe
@@ -259,7 +261,7 @@ void BSP_start(void) {
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // start the active objects/threads...
-    static QEvtPtr philoQueueSto[N_PHILO][N_PHILO];
+    static QEvtPtr philoQueueSto[N_PHILO][10];
     static StackType_t philoStack[N_PHILO][configMINIMAL_STACK_SIZE];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); // instantiate all Philosopher active objects
@@ -323,7 +325,6 @@ void BSP_randomSeed(uint32_t seed) {
 }
 //............................................................................
 uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
-
     vTaskSuspendAll(); // lock FreeRTOS scheduler
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
@@ -348,12 +349,13 @@ void BSP_terminate(int16_t result) {
 
 //============================================================================
 // QF callbacks...
+
 void QF_onStartup(void) {
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
+    //SystemCoreClockUpdate();
     //SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC); // done in FreeRTOS
 
     // assign all priority bits for preemption-prio. and none to sub-prio.
-    // NOTE: this might have been changed by STM32Cube.
     NVIC_SetPriorityGrouping(0U);
 
     // set priorities of ALL ISRs used in the system, see NOTE1
@@ -404,6 +406,7 @@ uint8_t QS_onStartup(void const *arg) {
     GPIOA->MODER  |=  (( 2U << 2U*USART2_RX_PIN) | ( 2U << 2U*USART2_TX_PIN));
 
     // baud rate
+    SystemCoreClockUpdate();
     USART2->BRR  = UART_DIV_SAMPLING16(
                        SystemCoreClock, 115200U, UART_PRESCALER_DIV1);
     USART2->CR3  = 0x0000U |      // no flow control
@@ -446,7 +449,7 @@ void QS_onFlush(void) {
             USART2->TDR = b;
         }
         else {
-            break;
+            break; // break out of the loop
         }
     }
 }

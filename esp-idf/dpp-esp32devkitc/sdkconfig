@@ -1132,7 +1132,7 @@ CONFIG_WPA_MBEDTLS_CRYPTO=y
 # end of Supplicant
 
 #
-# QP/C Real-Time Embedded Framework
+# QP/C real-time event framework
 #
 CONFIG_QP_ENABLED=y
 
@@ -1155,7 +1155,7 @@ CONFIG_QPC_LARGE_POOL_ENTRY_SIZE=32
 # end of QP/C Configuration
 
 # CONFIG_QPC_QSPY_ENABLE is not set
-# end of QP/C Real-Time Embedded Framework
+# end of QP/C real-time event framework
 # end of Component config
 
 #

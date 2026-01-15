@@ -10,7 +10,7 @@
       <TargetName>dpp-dbg</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>6190000::V6.19::ARMCLANG</pCCUsed>
+      <pCCUsed>6230000::V6.23::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -390,11 +390,6 @@
               <FilePath>..\bsp.c</FilePath>
             </File>
             <File>
-              <FileName>dpp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
-            </File>
-            <File>
               <FileName>bsp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\bsp.h</FilePath>
@@ -438,11 +433,6 @@
               <FileName>gpio.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>rom.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\rom.h</FilePath>
             </File>
             <File>
               <FileName>sysctl.h</FileName>
@@ -1021,11 +1011,6 @@
               <FilePath>..\bsp.c</FilePath>
             </File>
             <File>
-              <FileName>dpp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
-            </File>
-            <File>
               <FileName>bsp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\bsp.h</FilePath>
@@ -1069,11 +1054,6 @@
               <FileName>gpio.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>rom.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\rom.h</FilePath>
             </File>
             <File>
               <FileName>sysctl.h</FileName>
@@ -1652,11 +1632,6 @@
               <FilePath>..\bsp.c</FilePath>
             </File>
             <File>
-              <FileName>dpp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
-            </File>
-            <File>
               <FileName>bsp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\bsp.h</FilePath>
@@ -1700,11 +1675,6 @@
               <FileName>gpio.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>rom.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\rom.h</FilePath>
             </File>
             <File>
               <FileName>sysctl.h</FileName>

@@ -47,6 +47,24 @@
     <ClCompile Include="..\..\..\ports\win32-qv\qf_port.c">
       <Filter>QP</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\qs\qs_fp.c">
+      <Filter>QS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\qs\qs_rx.c">
+      <Filter>QS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\qs\qstamp.c">
+      <Filter>QS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\qs\qs.c">
+      <Filter>QS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\qs\qs_64bit.c">
+      <Filter>QS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\ports\win32-qv\qs_port.c">
+      <Filter>QS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
@@ -89,6 +107,9 @@
     </Filter>
     <Filter Include="QP">
       <UniqueIdentifier>{6b984b91-977d-4f97-83d2-f9d93895b3b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="QS">
+      <UniqueIdentifier>{9da7f787-7485-46a4-b2b5-b5d5d96a7ef9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

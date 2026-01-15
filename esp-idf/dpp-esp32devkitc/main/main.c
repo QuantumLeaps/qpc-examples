@@ -1,6 +1,8 @@
-#include "esp_log.h"
 #include "qpc.h"
-#include "dpp.h"
+#include "bsp.h"
+#include "app.h"
+
+#include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 
 //Q_DEFINE_THIS_FILE
@@ -37,8 +39,7 @@ static QSubscrList subscrSto[MAX_PUB_SIG];
 static StackType_t philoStack[N_PHILO][2048];
 static StackType_t tableStack[2048];
 
-void app_main()
-{
+void app_main() {
     uint8_t n;
 
     Philo_ctor(); // instantiate all Philosopher active objects
@@ -69,7 +70,7 @@ void app_main()
 
     QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
     QActive_start(AO_Table,          // AO to start
-        (uint_fast8_t)(N_PHILO + 1), // QP priority of the AO
+        N_PHILO + 1U,                // QP priority of the AO
         tableQueueSto,               // event queue storage
         Q_DIM(tableQueueSto),        // queue length [events]
         tableStack,                  // stack storage

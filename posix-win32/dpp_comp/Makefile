@@ -44,15 +44,15 @@
 #-----------------------------------------------------------------------------
 # project:
 #
-PROJECT := dpp
+PROJECT := dpp_comp
 
 VPATH := .
 
 INCLUDES := -I.
 
 C_SRCS := \
-	bsp.c \
 	main.c \
+	bsp.c \
 	philo.c \
 	table.c
 

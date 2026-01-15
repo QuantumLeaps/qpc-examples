@@ -108,16 +108,6 @@
 // <i>Default: 1
 #define QF_MAX_TICK_RATE 1U
 
-// <c1>Event parameter initialization (QEVT_PAR_INIT)
-// <i>Resource Acquisition Is Initialization (RAII) for dynamic events
-#define QEVT_PAR_INIT
-// </c>
-
-// <c1>Active Object stop API (QACTIVE_CAN_STOP)
-// <i>Enable Active Object stop API (Not recommended)
-//#define QACTIVE_CAN_STOP
-// </c>
-
 // <o>Event size (QF_EVENT_SIZ_SIZE)
 //   <1U=>1
 //   <2U=>2 (default)
@@ -157,15 +147,24 @@
 // <i>Default: 2 (64K bytes maximum block size)
 #define QF_MPOOL_SIZ_SIZE 2U
 
+// <c2>Enable event parameter initialization (QEVT_PAR_INIT)
+// <i>Initialize parameters of dynamic events at allocation
+// <i>(Resource Acquisition Is Initialization (RAII) for dynamic events)
+#define QEVT_PAR_INIT
+// </c>
+
+// <c1>Enable active object stop API (QACTIVE_CAN_STOP)
+// <i>NOTE: Not recommended
+//#define QACTIVE_CAN_STOP
+// </c>
+
 // </h>
 
 //..........................................................................
 // <h>QS Software Tracing
 // <i>Target-resident component of QP/Spy software tracing system
 // <i>(tracing instrumentation and command-input).
-
-// <n>NOTE: Requires command-line macro: Q_SPY
-// <i>The QS software tracing instrumentation is activated only when
+// <i>NOTE: The QS software tracing instrumentation is activated only when
 // <i>the macro Q_SPY is defined on the command-line to the compiler.
 // <i>Typically, Q_SPY is defined only in the "spy" build configuration.
 
