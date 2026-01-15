@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "dpp.h"
-#include "bsp.h"
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 Q_DEFINE_THIS_MODULE("bsp")
 
@@ -40,7 +40,9 @@ enum {
 };
 
 //............................................................................
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     BSP_randomSeed(1234U);
 
     QS_FUN_DICTIONARY(&BSP_displayPaused);

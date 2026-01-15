@@ -28,7 +28,7 @@
 //============================================================================
 #include "qpc.h"
 #include "bsp.h"
-#include "dpp.h"
+#include "app.h"
 
 //#include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 
@@ -49,7 +49,7 @@ int main(void) { // embedded target takes no command-line arguments
         Q_ERROR(); // QS initialization must succeed
     }
 
-    BSP_init();      // initialize the BSP
+    BSP_init((void *)0); // initialize the BSP
 
     // pause execution of the test and wait for the test script to continue
     QS_TEST_PAUSE();
@@ -65,13 +65,13 @@ int main(void) { // embedded target takes no command-line arguments
     // start the active objects...
     static QEvtPtr tableQueueSto[N_PHILO];
     Table_ctor(); // instantiate the Table active object
-    QActive_start(AO_Table,        // AO to start
-        N_PHILO + 1U,              // QF-priority
-        tableQueueSto,             // event queue storage
-        Q_DIM(tableQueueSto),      // queue length [events]
-        (void *)0,                 // stack storage (not used)
-        0U,                        // size of the stack [bytes]
-        (void *)0);                // initialization param
+    QActive_start(AO_Table,   // AO to start
+        N_PHILO + 1U,         // QF-priority
+        tableQueueSto,        // event queue storage
+        Q_DIM(tableQueueSto), // queue length [events]
+        (void *)0,            // stack storage (not used)
+        0U,                   // size of the stack [bytes]
+        (void *)0);           // initialization param
 
     return QF_run(); // run the QF application
 }

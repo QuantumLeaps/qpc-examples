@@ -1,5 +1,5 @@
 //============================================================================
-// Product: QUTEST fixture for the DPP example
+// Product: QUTEST fixture for the DPP components
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
@@ -28,7 +28,7 @@
 //============================================================================
 #include "qpc.h"
 #include "bsp.h"
-#include "dpp.h"
+#include "app.h"
 
 //#include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 
@@ -55,7 +55,7 @@ int main(void) { // embedded target takes no command-line arguments
         Q_ERROR(); // QS initialization must succeed
     }
 
-    BSP_init();      // initialize the BSP
+    BSP_init((void *)0); // initialize the BSP
 
     // object dictionaries...
     QS_OBJ_DICTIONARY(&Table_dummy);

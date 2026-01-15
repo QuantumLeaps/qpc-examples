@@ -1,5 +1,5 @@
 //============================================================================
-// Product: DPP example, BSP for QUTest
+// BSP for QUTest (DPP example)
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "dpp.h"
-#include "bsp.h"
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application interface
 
 Q_DEFINE_THIS_MODULE("bsp")
 
@@ -40,7 +40,9 @@ enum {
 };
 
 //............................................................................
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg); // when Q_SPY not defined
+
     BSP_randomSeed(1234U);
 
     QS_FUN_DICTIONARY(&BSP_displayPaused);
@@ -51,11 +53,11 @@ void BSP_init(void) {
     QS_USR_DICTIONARY(BSP_CALL);
 }
 //............................................................................
-void BSP_displayPhilStat(uint8_t n, char const *stat) {
+void BSP_displayPhilStat(uint8_t const n, char const * const stat) {
     QS_BEGIN_ID(BSP_CALL, 0U) // app-specific record
         QS_FUN(&BSP_displayPhilStat);
-        QS_U8(0, n);
-        QS_STR(stat);
+        QS_U8(1, n);  // Philosopher number
+        QS_STR(stat); // Philosopher status
     QS_END()
 }
 //............................................................................
@@ -85,12 +87,7 @@ uint32_t BSP_random(void) { // a fake random-number generator
     return rnd;
 }
 //............................................................................
-void BSP_randomSeed(uint32_t seed) {
-    QS_TEST_PROBE_DEF(&BSP_randomSeed)
-
-    QS_TEST_PROBE(
-        seed = qs_tp_;
-    )
+void BSP_randomSeed(uint32_t const seed) {
     l_rnd = seed;
     QS_BEGIN_ID(BSP_CALL, 0U) // app-specific record
         QS_FUN(&BSP_randomSeed);

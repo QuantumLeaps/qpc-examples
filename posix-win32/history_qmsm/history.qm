@@ -1,13 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
- <documentation>Demonstration of transitions to shallow history and deep history in QMsm-style state machines.</documentation>
+<model version="7.0.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+ <documentation>Demonstration of transitions to shallow history and deep history in QHsm-style state machines.</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
+ <!--${App}-->
+ <package name="App" stereotype="0x01">
+  <!--${App::AppSignals}-->
+  <attribute name="AppSignals" type="enum" visibility="0x04" properties="0x00">
+   <code>{
+    OPEN_SIG = Q_USER_SIG,
+    CLOSE_SIG,
+    TOAST_SIG,
+    BAKE_SIG,
+    OFF_SIG,
+    TERMINATE_SIG // terminate the application
+};</code>
+  </attribute>
+  <!--${App::ToastOven_ctor}-->
+  <operation name="ToastOven_ctor" type="void" visibility="0x00" properties="0x00">
+   <code>ToastOven *me = &amp;ToastOven_inst;
+QMsm_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;ToastOven_initial));</code>
+  </operation>
+  <!--${App::SM_ToastOven}-->
+  <attribute name="SM_ToastOven" type="QAsm * const" visibility="0x00" properties="0x00">
+   <code>= (QAsm *)&amp;ToastOven_inst;</code>
+  </attribute>
+ </package>
  <!--${SMs}-->
  <package name="SMs" stereotype="0x02">
   <!--${SMs::ToastOven}-->
   <class name="ToastOven" superclass="qpc::QMsm">
    <documentation>Oven state machine</documentation>
+   <!--${SMs::ToastOven::inst}-->
+   <attribute name="inst" type="ToastOven" visibility="0x00" properties="0x01"/>
    <!--${SMs::ToastOven::SM}-->
    <statechart properties="0x01">
     <!--${SMs::ToastOven::SM::initial}-->
@@ -78,18 +103,18 @@
       <!--${SMs::ToastOven::SM::doorClosed::heating::toasting}-->
       <state name="toasting">
        <entry>PRINTF_S(&quot;%s;&quot;, &quot;toasting&quot;);</entry>
-       <state_glyph node="6,24,12,8">
+       <state_glyph color="1" node="6,24,12,8">
         <entry box="0,3,11,2"/>
        </state_glyph>
       </state>
       <!--${SMs::ToastOven::SM::doorClosed::heating::baking}-->
       <state name="baking">
        <entry>PRINTF_S(&quot;%s;&quot;, &quot;baking&quot;);</entry>
-       <state_glyph node="22,24,12,8">
+       <state_glyph color="1" node="22,24,12,8">
         <entry box="0,3,11,2"/>
        </state_glyph>
       </state>
-      <state_glyph node="4,10,32,24">
+      <state_glyph color="2" node="4,10,32,24">
        <entry box="0,3,20,2"/>
        <exit box="0,5,20,2"/>
       </state_glyph>
@@ -97,7 +122,7 @@
      <!--${SMs::ToastOven::SM::doorClosed::off}-->
      <state name="off">
       <entry>PRINTF_S(&quot;%s;&quot;, &quot;toaster-Off&quot;);</entry>
-      <state_glyph node="38,24,12,8">
+      <state_glyph color="3" node="38,24,12,8">
        <entry box="0,3,11,2"/>
       </state_glyph>
      </state>
@@ -127,15 +152,14 @@
        <action box="-4,-2,10,2"/>
       </tran_glyph>
      </tran>
-     <state_glyph node="60,4,20,22">
+     <state_glyph color="1" node="60,4,20,22">
       <entry box="0,3,6,2"/>
       <exit box="0,5,5,2"/>
      </state_glyph>
     </state>
     <!--${SMs::ToastOven::SM::final}-->
     <state name="final">
-     <entry>PRINTF_S(&quot;\n%s\n&quot;, &quot;Bye! Bye!&quot;);
-QF_onCleanup();
+     <entry>QF_onCleanup();
 exit(0);</entry>
      <state_glyph node="60,32,16,6">
       <entry box="0,3,5,2"/>
@@ -144,53 +168,45 @@ exit(0);</entry>
     <state_diagram size="81,40"/>
    </statechart>
   </class>
-  <!--${SMs::ToastOven_ctor}-->
-  <operation name="ToastOven_ctor" type="void" visibility="0x00" properties="0x00">
-   <code>ToastOven *me = &amp;l_oven;
-QMsm_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;ToastOven_initial));</code>
-  </operation>
  </package>
  <!--${.}-->
  <directory name=".">
-  <!--${.::history.h}-->
-  <file name="history.h">
-   <text>#ifndef HISTORY_H_
-#define HISTORY_H_
+  <!--${.::app.h}-->
+  <file name="app.h">
+   <text>#ifndef APP_H_
+#define APP_H_
 
-enum ToastOvenSignals {
-    OPEN_SIG = Q_USER_SIG,
-    CLOSE_SIG,
-    TOAST_SIG,
-    BAKE_SIG,
-    OFF_SIG,
-    TERMINATE_SIG // terminate the application
-};
+$declare ${App}
 
-extern QMsm * const the_oven; // opaque pointer to the oven SM
+#endif // APP_H_</text>
+  </file>
+  <!--${.::bsp.h}-->
+  <file name="bsp.h">
+   <text>#ifndef BSP_H_
+#define BSP_H_
 
-$declare(SMs::ToastOven_ctor)
+#define BSP_TICKS_PER_SEC    100U
 
-#endif // HISTORY_H_</text>
+void BSP_init(void const * const arg);
+void BSP_showMsg(char const * const msg);
+
+#endif // BSP_H_</text>
   </file>
   <!--${.::history.c}-->
   <file name="history.c">
    <text>#include &quot;qpc.h&quot;
-#include &quot;history.h&quot;
+#include &quot;bsp.h&quot;
+#include &quot;app.h&quot;
 
 #include &quot;safe_std.h&quot; // portable &quot;safe&quot; &lt;stdio.h&gt;/&lt;string.h&gt; facilities
 #include &lt;stdlib.h&gt;
 
 //Q_DEFINE_THIS_FILE
 
-$declare(SMs::ToastOven)
+$declare ${SMs::ToastOven}
 
-static ToastOven l_oven; // the only instance of the ToastOven class
-
-// global-scope definitions -----------------------------------------
-QMsm * const the_oven = &amp;l_oven.super; // the opaque pointer
-
-$define(SMs::ToastOven_ctor)
-$define(SMs::ToastOven)</text>
+$define ${App}
+$define ${SMs::ToastOven}</text>
   </file>
  </directory>
 </model>

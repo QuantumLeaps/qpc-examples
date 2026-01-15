@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model version="7.0.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+ <documentation>&quot;Reminder&quot; state pattern example #1</documentation>
+ <!--${qpc}-->
+ <framework name="qpc"/>
+ <!--${App}-->
+ <package name="App" stereotype="0x01">
+  <!--${App::AppSignals}-->
+  <attribute name="AppSignals" type="enum" visibility="0x04" properties="0x00">
+   <code>{
+    TIMEOUT_SIG = Q_USER_SIG, // the periodic timeout signal
+    DATA_READY_SIG,           // the invented reminder signal
+    TERMINATE_SIG             // terminate the application
+};</code>
+  </attribute>
+  <!--${App::Sensor_ctor}-->
+  <operation name="Sensor_ctor" type="void" visibility="0x00" properties="0x00">
+   <documentation>static ctor</documentation>
+   <code>Sensor * const me = &amp;Sensor_inst;
+QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Sensor_initial));
+QTimeEvt_ctorX(&amp;me-&gt;timeEvt, (QActive *)me, TIMEOUT_SIG, 0U);</code>
+  </operation>
+  <!--${App::AO_Sensor}-->
+  <attribute name="AO_Sensor" type="QActive * const" visibility="0x00" properties="0x00">
+   <code>= (QActive *)&amp;Sensor_inst;</code>
+  </attribute>
+ </package>
+ <!--${AOs}-->
+ <package name="AOs" stereotype="0x02">
+  <!--${AOs::Sensor}-->
+  <class name="Sensor" superclass="qpc::QActive">
+   <documentation>&quot;Number Sensor&quot; AO</documentation>
+   <!--${AOs::Sensor::inst}-->
+   <attribute name="inst" type="Sensor" visibility="0x00" properties="0x01"/>
+   <!--${AOs::Sensor::timeEvt}-->
+   <attribute name="timeEvt" type="QTimeEvt" visibility="0x00" properties="0x00"/>
+   <!--${AOs::Sensor::pollCtr}-->
+   <attribute name="pollCtr" type="uint16_t" visibility="0x00" properties="0x00"/>
+   <!--${AOs::Sensor::procCtr}-->
+   <attribute name="procCtr" type="uint16_t" visibility="0x00" properties="0x00"/>
+   <!--${AOs::Sensor::SM}-->
+   <statechart properties="0x01">
+    <!--${AOs::Sensor::SM::initial}-->
+    <initial target="../2">
+     <action>Q_UNUSED_PAR(par);
+
+me-&gt;pollCtr = 0U;
+me-&gt;procCtr = 0U;</action>
+     <initial_glyph conn="2,2,5,1,44,8,-2">
+      <action box="0,-2,6,2"/>
+     </initial_glyph>
+    </initial>
+    <!--${AOs::Sensor::SM::final}-->
+    <state name="final">
+     <entry brief="stop">QF_stop(); // terminate the application</entry>
+     <state_glyph color="3" node="2,74,30,8">
+      <entry box="0,3,6,2"/>
+     </state_glyph>
+    </state>
+    <!--${AOs::Sensor::SM::polling}-->
+    <state name="polling">
+     <entry>// periodic timeout in 1/2 second and every 1/2 second
+QTimeEvt_armX(&amp;me-&gt;timeEvt,
+    BSP_TICKS_PER_SEC/2, BSP_TICKS_PER_SEC/2);</entry>
+     <exit>QTimeEvt_disarm(&amp;me-&gt;timeEvt);</exit>
+     <!--${AOs::Sensor::SM::polling::initial}-->
+     <initial target="../3">
+      <initial_glyph conn="4,16,5,1,36,15,-2">
+       <action box="0,-2,10,2"/>
+      </initial_glyph>
+     </initial>
+     <!--${AOs::Sensor::SM::polling::TIMEOUT}-->
+     <tran trig="TIMEOUT">
+      <action>// NOTE: this constant event is statically pre-allocated.
+// It can be posted/published as any other event.
+//
+static const QEvt reminderEvt = QEVT_INITIALIZER(DATA_READY_SIG);
+
+++me-&gt;pollCtr;
+BSP_showMsg(&quot;polling %3d\n&quot;, me-&gt;pollCtr);
+if ((me-&gt;pollCtr &amp; 0x3U) == 0U) {  // modulo 4
+    QACTIVE_POST(&amp;me-&gt;super, &amp;reminderEvt, me);
+}</action>
+      <tran_glyph conn="2,20,3,-1,28">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <!--${AOs::Sensor::SM::polling::TERMINATE}-->
+     <tran trig="TERMINATE" target="../../1">
+      <tran_glyph conn="2,24,3,1,44,52,-14">
+       <action box="0,-2,10,2"/>
+      </tran_glyph>
+     </tran>
+     <!--${AOs::Sensor::SM::polling::processing}-->
+     <state name="processing">
+      <!--${AOs::Sensor::SM::polling::processing::initial}-->
+      <initial target="../1">
+       <initial_glyph conn="7,34,5,0,12,4">
+        <action box="0,-2,10,2"/>
+       </initial_glyph>
+      </initial>
+      <!--${AOs::Sensor::SM::polling::processing::idle}-->
+      <state name="idle">
+       <entry>BSP_showMsg(&quot;idle-ENTRY;\n&quot;, 0U);</entry>
+       <!--${AOs::Sensor::SM::polling::processing::idle::DATA_READY}-->
+       <tran trig="DATA_READY" target="../../2">
+        <tran_glyph conn="6,46,3,1,28,7,-2">
+         <action box="0,-2,15,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="6,38,26,10">
+        <entry box="0,3,6,2"/>
+       </state_glyph>
+      </state>
+      <!--${AOs::Sensor::SM::polling::processing::busy}-->
+      <state name="busy">
+       <entry>BSP_showMsg(&quot;busy-ENTRY;\n&quot;, 0);</entry>
+       <!--${AOs::Sensor::SM::polling::processing::busy::TIMEOUT}-->
+       <tran trig="TIMEOUT">
+        <action>++me-&gt;procCtr;
+BSP_showMsg(&quot;processing %3d\n&quot;, me-&gt;procCtr);</action>
+        <!--${AOs::Sensor::SM::polling::processing::busy::TIMEOUT::[(me->procCtr&0x1U)==0U]}-->
+        <choice target="../../../1">
+         <guard>(me-&gt;procCtr &amp; 0x1U) == 0U</guard>
+         <choice_glyph conn="22,60,5,1,14,-18,-4">
+          <action box="1,0,22,4"/>
+         </choice_glyph>
+        </choice>
+        <!--${AOs::Sensor::SM::polling::processing::busy::TIMEOUT::[else]}-->
+        <choice>
+         <guard brief="else"/>
+         <choice_glyph conn="22,60,4,-1,5,7">
+          <action box="0,5,10,2"/>
+         </choice_glyph>
+        </choice>
+        <tran_glyph conn="6,60,3,-1,16">
+         <action box="0,-2,10,2"/>
+        </tran_glyph>
+       </tran>
+       <state_glyph node="6,50,26,18">
+        <entry box="0,3,6,2"/>
+       </state_glyph>
+      </state>
+      <state_glyph color="1" node="4,28,34,42"/>
+     </state>
+     <state_glyph node="2,6,42,66">
+      <entry box="0,3,6,2"/>
+      <exit box="0,5,6,2"/>
+     </state_glyph>
+    </state>
+    <state_diagram size="50,84"/>
+   </statechart>
+  </class>
+ </package>
+ <!--${.}-->
+ <directory name=".">
+  <!--${.::app.h}-->
+  <file name="app.h">
+   <text>#ifndef APP_H_
+#define APP_H_
+
+$declare ${App}
+
+#endif // APP_H_</text>
+  </file>
+  <!--${.::bsp.h}-->
+  <file name="bsp.h">
+   <text>#ifndef BSP_H_
+#define BSP_H_
+
+#define BSP_TICKS_PER_SEC    100U
+
+void BSP_init(void const * const arg);
+void BSP_showMsg(char const * const msg, uint8_t const num);
+
+#endif // BSP_H_</text>
+  </file>
+  <!--${.::reminder.c}-->
+  <file name="reminder.c">
+   <text>#include &quot;qpc.h&quot;        // QP/C real-time event framework
+#include &quot;bsp.h&quot;        // Board Support Package interface
+#include &quot;app.h&quot;        // Application
+
+//Q_DEFINE_THIS_FILE
+
+$declare ${AOs::Sensor}
+
+$define ${App}
+$define ${AOs::Sensor}</text>
+  </file>
+ </directory>
+</model>

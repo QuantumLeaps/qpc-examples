@@ -1,88 +1,43 @@
 //============================================================================
-// QP example for ThreadX
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// QP/C main function for ThreadX
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
-#include "bsp.h"                 // Board Support Package
-
-//Q_DEFINE_THIS_FILE
+#include "qpc.h"     // QP/C real-time event framework
+#include "bsp.h"     // Board Support Package
 
 //............................................................................
 int main() {
-    tx_kernel_enter();
-    return 0; // tx_kernel_enter() does not return
+    QF_init();       // initialize the framework and the underlying RT kernel
+    BSP_init((void *)0); // initialize the BSP
+    tx_kernel_enter(); // enter ThreadX RTOS
+    return 0;        // tx_kernel_enter() does not return
 }
 //............................................................................
 void tx_application_define(void *first_unused_memory) {
     Q_UNUSED_PAR(first_unused_memory);
-
-    QF_init();  // initialize the framework
-    BSP_init(); // initialize the Board Support Package
-
-    static QSubscrList l_subscrSto[MAX_PUB_SIG];
-    QActive_psInit(l_subscrSto, Q_DIM(l_subscrSto)); // init publish-subscribe
-
-    // initialize event pools...
-    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
-    QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
-
-    // start the active objects/threads...
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    static ULONG philoStk[N_PHILO][200]; // stacks for the Philosophers
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n); // instantiate the Philo AO
-        QActive_setAttr(AO_Philo[n], THREAD_NAME_ATTR, "Philo");
-        QActive_start(AO_Philo[n],
-
-            // NOTE: set the preemption-threshold of all Philos to
-            // the same level, so that they cannot preempt each other.
-            Q_PRIO(n + 1U, N_PHILO), // QF-prio/pre-thre.
-
-            philoQueueSto[n], Q_DIM(philoQueueSto[n]),
-            philoStk[n], sizeof(philoStk[n]),
-            (void *)0);
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    static ULONG tableStk[200]; // stack for the Table
-    Table_ctor(); // instantiate the Table AO
-    QActive_setAttr(AO_Table, THREAD_NAME_ATTR, "Table");
-    QActive_start(AO_Table,
-        N_PHILO + 1U,
-        tableQueueSto, Q_DIM(tableQueueSto),
-        tableStk, sizeof(tableStk),
-        (void *)0);
-
-    (void)QF_run();
+    (void)QF_run();  // call
 }

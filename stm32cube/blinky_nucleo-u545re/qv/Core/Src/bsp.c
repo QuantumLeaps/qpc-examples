@@ -26,22 +26,30 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"          // QP/C real-time event framework
-#include "blinky.h"       // Blinky Application interface
-#include "bsp.h"          // Board Support Package
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application interface
 
 #include "stm32u545xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
 
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
-// Local-scope defines -------------------------------------------------------
+// Local-scope constants -----------------------------------------------------
 // LED pins available on the board (just one user LED LD2--Green on PA.5)
 #define LD2_PIN  5U
 
 // Button pins available on the board (just one user Button B1 on PC.13)
 #define B1_PIN   13U
 
+// QS software tracing:
+#ifdef Q_SPY
+// QSpy source IDs
+static QSpyId const l_SysTick_Handler = { 0U };
+
+#endif // def Q_SPY
+
+//============================================================================
 // macros from STM32Cube LL:
 #define SET_BIT(REG, BIT)     ((REG) |= (BIT))
 #define CLEAR_BIT(REG, BIT)   ((REG) &= ~(BIT))
@@ -52,19 +60,13 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 #define MODIFY_REG(REG, CLEARMASK, SETMASK) \
     WRITE_REG((REG), ((READ_REG(REG) & (~(CLEARMASK))) | (SETMASK)))
 
-// Local-scope objects -----------------------------------------------------
-#ifdef Q_SPY
-// QSpy source IDs
-static QSpyId const l_SysTick_Handler = { 0U };
-
-#endif // def Q_SPY
-
 //============================================================================
+// application "runner" and error handler
+
 int QP_run(void) { // QP framework entry point (from "C")
-    QF_init();         // initialize the framework
-    BSP_init();        // initialize the BSP
-    BSP_start();       // start the AOs/Threads
-    return QF_run();   // run the QF application
+    QF_init();           // initialize the framework
+    BSP_init((void *)0); // initialize the BSP
+    return QF_run();     // run the QF application
 }
 
 //............................................................................
@@ -79,8 +81,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #ifndef NDEBUG
     // light up the user LED
     GPIOA->BSRR = (1U << LD2_PIN);  // turn LED on
-    // for debugging, hang on in an endless loop...
-    for (;;) {
+    for (;;) { // for debugging, hang on in an endless loop...
     }
 #endif
     NVIC_SystemReset();
@@ -88,7 +89,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     }
 }
 //............................................................................
-// assertion failure handler for the STM32 library, including the startup code
+// assertion failure handler for the startup code and libraries
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -151,7 +152,9 @@ static void STM32U545RE_MPU_setup(void) {
     __ISB();
 }
 //..........................................................................
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // setup the MPU...
     STM32U545RE_MPU_setup();
 
@@ -164,10 +167,6 @@ void BSP_init(void) {
 
     // enable PWR clock interface
     SET_BIT(RCC->AHB3ENR, RCC_AHB3ENR_PWREN);
-
-    // NOTE: SystemInit() has been already called from the startup code
-    // but SystemCoreClock needs to be updated
-    SystemCoreClockUpdate();
 
     // NOTE: The VFP (hardware Floating Point) unit is configured by QK
 
@@ -200,37 +199,20 @@ void BSP_init(void) {
                0U << (B1_PIN * GPIO_MODER_MODE1_Pos)); // MODE_0
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
     // dictionaries...
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
+    QS_SIG_DICTIONARY(TIMEOUT_SIG, (void *)0);
 
     // setup the QS filters...
     QS_GLB_FILTER(QS_GRP_ALL);   // all records
     QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
-    // initialize event pools
-    static QF_MPOOL_EL(QEvt) smlPoolSto[10];
-    QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
-    // initialize publish-subscribe
-    static QSubscrList subscrSto[MAX_PUB_SIG];
-    QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // instantiate and start AOs/threads...
-
-    static QEvtPtr blinkyQueueSto[10];
-    Blinky_ctor();
-    QActive_start(AO_Blinky,
-        1U,                          // QP prio. of the AO
-        blinkyQueueSto,               // event queue storage
-        Q_DIM(blinkyQueueSto),       // queue length [events]
-        (void *)0, 0U,               // no stack storage
-        (void *)0);                  // no initialization param
+    // no dynamic events -- no need to call QF_poolInit();
+    // no publish-subscribe -- no need to call QActive_psInit();
 }
 //............................................................................
 void BSP_ledOn(void) {
@@ -247,8 +229,20 @@ void BSP_terminate(int16_t result) {
 
 //============================================================================
 // QF callbacks...
+
 void QF_onStartup(void) {
+    // instantiate and start AOs/threads...
+    static QEvtPtr blinkyQueueSto[10];
+    Blinky_ctor();
+    QActive_start(AO_Blinky,
+        1U,                          // QP prio. of the AO
+        blinkyQueueSto,               // event queue storage
+        Q_DIM(blinkyQueueSto),       // queue length [events]
+        (void *)0, 0U,               // no stack storage
+        (void *)0);                  // no initialization param
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
+    SystemCoreClockUpdate();
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 
     // assign all priority bits for preemption-prio. and none to sub-prio.
@@ -314,6 +308,10 @@ static uint16_t const QS_UARTPrescTable[12] = {
     1U, 2U, 4U, 6U, 8U, 10U, 12U, 16U, 32U, 64U, 128U, 256U
 };
 
+// USART1 pins PA.9 and PA.10
+#define USART1_TX_PIN 9U
+#define USART1_RX_PIN 10U
+
 #define __LL_USART_DIV_SAMPLING16(__PERIPHCLK__, __PRESCALER__, __BAUDRATE__) \
   ((((__PERIPHCLK__)/(USART_PRESCALER_TAB[(__PRESCALER__)]))\
     + ((__BAUDRATE__)/2U))/(__BAUDRATE__))
@@ -322,15 +320,11 @@ static uint16_t const QS_UARTPrescTable[12] = {
   ((((__PCLK__)/QS_UARTPrescTable[(__CLOCKPRESCALER__)]) \
   + ((__BAUD__)/2U)) / (__BAUD__))
 
-// USART1 pins PA.9 and PA.10
-#define USART1_TX_PIN 9U
-#define USART1_RX_PIN 10U
-
 //............................................................................
 uint8_t QS_onStartup(void const *arg) {
     Q_UNUSED_PAR(arg);
 
-    static uint8_t qsTxBuf[3*1024]; // buffer for QS-TX channel
+    static uint8_t qsTxBuf[2*1024]; // buffer for QS-TX channel
     QS_initBuf(qsTxBuf, sizeof(qsTxBuf));
 
     static uint8_t qsRxBuf[100];    // buffer for QS-RX channel
@@ -469,7 +463,7 @@ void QS_onReset(void) {
 }
 //............................................................................
 void QS_onCommand(uint8_t cmdId,
-                  uint32_t param1, uint32_t param2, uint32_t param3)
+    uint32_t param1, uint32_t param2, uint32_t param3)
 {
     Q_UNUSED_PAR(cmdId);
     Q_UNUSED_PAR(param1);
@@ -495,7 +489,6 @@ void USART1_IRQHandler(void) { // used in QS-RX (kernel UNAWARE interrupt)
 }
 
 #endif // Q_SPY
-//----------------------------------------------------------------------------
 
 //============================================================================
 // NOTE1:

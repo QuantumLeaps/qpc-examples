@@ -52,6 +52,7 @@ INCLUDES := -I.
 
 C_SRCS := \
 	main.c \
+	bsp.c \
 	history.c
 
 DEFINES  :=

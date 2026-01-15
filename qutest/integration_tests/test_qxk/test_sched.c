@@ -136,7 +136,7 @@ QXThread thrX[NUM_X];
 //==========================================================================
 int main() {
     QF_init();  // initialize the framework and the underlying QXK kernel
-    BSP_init(); // initialize the Board Support Package
+    BSP_init((void *)0); // initialize the Board Support Package
 
     // initialize publish-subscribe...
     static QSubscrList subscrSto[MAX_PUB_SIG];

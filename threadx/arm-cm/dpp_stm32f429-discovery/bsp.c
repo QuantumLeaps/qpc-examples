@@ -1,37 +1,33 @@
 //============================================================================
-// DPP example, STM32F429 Discovery board, ThreadX kernel
-// Last updated for version 7.3.3
-// Last updated on  2023-12-13
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "stm32f4xx.h"  // CMSIS-compliant header file for the MCU used
 #include "stm32f4xx_exti.h"
@@ -55,6 +51,7 @@ Q_DEFINE_THIS_FILE
 #define BTN_GPIO_CLK      RCC_AHB1Periph_GPIOA
 #define BTN_B1            GPIO_Pin_0
 
+// Local-scope objects -----------------------------------------------------
 static uint32_t l_rndSeed;
 static TX_TIMER l_tick_timer; // ThreadX timer to call QTIMEEVT_TICK_X()
 
@@ -102,16 +99,15 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #ifndef NDEBUG
     // turn LED on
     LED_GPIO_PORT->BSRRL = LED4_PIN;
-    // for debugging, hang on in an endless loop...
-    for (;;) {
+    for (;;) { // for debugging, hang on in an endless loop...
     }
-#else
+#endif
     NVIC_SystemReset();
     for (;;) { // explicitly "no-return"
     }
-#endif
 }
 //............................................................................
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -157,15 +153,19 @@ static void idle_thread_fun(ULONG thread_input) { // see NOTE1
 //............................................................................
 // ISR for receiving bytes from the QSPY Back-End
 // NOTE: This ISR is "kernel-unaware" meaning that it does not interact with
-// the  or QP and is not disabled. Such ISRs don't cannot call any
+// the or QP and is not disabled. Such ISRs don't cannot call any
 // ThreadX or QP APIs.
 //
 //TBD...
 
 #endif // Q_SPY
 
-// BSP functions ===========================================================
-void BSP_init(void) {
+//============================================================================
+// BSP functions...
+
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -224,11 +224,10 @@ void BSP_init(void) {
     GPIO_struct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(BTN_GPIO_PORT, &GPIO_struct);
 
-    // seed the random number generator
-    BSP_randomSeed(1234U);
+    BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
-    if (QS_INIT((void *)0) == 0U) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -240,8 +239,16 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL); // all records
-    QS_GLB_FILTER(-QS_QF_TICK);    // exclude the clock tick
+    QS_GLB_FILTER(QS_GRP_ALL);   // all records
+    QS_GLB_FILTER(-QS_QF_TICK);  // exclude the clock tick
+
+    // initialize event pools
+    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
+    QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
+
+    // initialize publish-subscribe
+    static QSubscrList subscrSto[MAX_PUB_SIG];
+    QActive_psInit(subscrSto, Q_DIM(subscrSto));
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -296,7 +303,7 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
     uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
 
-    return (rnd >> 8);
+    return (rnd >> 8U);
 }
 //............................................................................
 void BSP_ledOn(void) {
@@ -308,13 +315,38 @@ void BSP_ledOff(void) {
 }
 //............................................................................
 void BSP_terminate(int16_t result) {
-    (void)result;
+    Q_UNUSED_PAR(result);
 }
 
-// QF callbacks ============================================================
-
-//............................................................................
+//============================================================================
+// QF callbacks...
 void QF_onStartup(void) {
+    // start the active objects/threads...
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    static ULONG philoStk[N_PHILO][200]; // stacks for the Philosophers
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n); // instantiate the Philo AO
+        QActive_setAttr(AO_Philo[n], THREAD_NAME_ATTR, "Philo");
+        QActive_start(AO_Philo[n],
+
+            // NOTE: set the preemption-threshold of all Philos to
+            // the same level, so that they cannot preempt each other.
+            Q_PRIO(n + 1U, N_PHILO), // QF-prio/pre-thre.
+
+            philoQueueSto[n], Q_DIM(philoQueueSto[n]),
+            philoStk[n], sizeof(philoStk[n]),
+            (void *)0);
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    static ULONG tableStk[200]; // stack for the Table
+    Table_ctor(); // instantiate the Table AO
+    QActive_setAttr(AO_Table, THREAD_NAME_ATTR, "Table");
+    QActive_start(AO_Table,
+        N_PHILO + 1U,
+        tableQueueSto, Q_DIM(tableQueueSto),
+        tableStk, sizeof(tableStk),
+        (void *)0);
 
     // NOTE:
     // This application uses the ThreadX timer to periodically call
@@ -356,7 +388,8 @@ void QF_onStartup(void) {
 void QF_onCleanup(void) {
 }
 
-// QS callbacks --------------------------------------------------------------
+//============================================================================
+// QS callbacks...
 #ifdef Q_SPY
 
 //............................................................................
@@ -433,7 +466,7 @@ void QS_onFlush(void) {
             USART2->DR = b;
         }
         else {
-            break; // break out of the loop
+            break;
         }
     }
 }

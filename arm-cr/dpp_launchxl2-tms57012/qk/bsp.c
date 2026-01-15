@@ -1,39 +1,34 @@
 //============================================================================
-// Product: "DPP" on LAUCHXL2-TMS570LS12 board, QK kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
+// Product: "DPP" on LAUCHXL2-TMS570LS12 board, preemptive QK kernel
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
 //
-// Contact information:
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "sys_common.h"
 #include "sys_core.h"
@@ -45,9 +40,10 @@
 #include "sci.h"
 // add other drivers if necessary...
 
-Q_DEFINE_THIS_FILE  // define the name of this file for assertions
+//============================================================================
+Q_DEFINE_THIS_FILE  // file name for assertions
 
-// Local-scope objects -----------------------------------------------------
+// Local-scope defines -------------------------------------------------------
 #define LED2_PIN    1U
 #define LED2_PORT   gioPORTB
 
@@ -65,38 +61,33 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 #define VIM_RAM     ((t_isrFuncPTR *)0xFFF82000U)
 
+// Local-scope objects -----------------------------------------------------
 static uint32_t     l_rndSeed;
 
 #ifdef Q_SPY
-
-    // QSpy source IDs
-    static QSpyId const l_rtiCompare0 = { 0U };
-    static QSpyId const l_ssiTest = { 0U };
-
     enum AppRecords { // application-specific trace records
         PHILO_STAT = QS_USER,
         PAUSED_STAT,
         CONTEXT_SW,
     };
 
-#endif
+    // QSpy source IDs...
+    static QSpyId const l_rtiCompare0 = { QS_ID_AP };
+    static QSpyId const l_ssiTest = { QS_ID_AP + 1U };
+#endif // Q_SPY
 
 //============================================================================
-// Error handler and ISRs...
+// Error handler
 
-//............................................................................
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
-    // for debugging and MUST be changed for deployment of the application
-    // (assuming that you ship your production code with assertions enabled).
+    // for debugging and MUST be changed for deployment of the application.
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
 
 #ifndef NDEBUG
-    // for debugging, hang on in an endless loop...
-    for (;;) {
+    for (;;) { // for debugging, hang on in an endless loop...
     }
 #else
     systemREG1->SYSECR = 0; // perform system reset
@@ -105,17 +96,18 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #endif
 }
 //............................................................................
+// assertion failure handler for the startup code and libraries
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// ISRs used in this project ===============================================
+// ISRs used in the application ==============================================
 // CAUTION: ISRs MUST be both __stackless and __arm!
 QK_IRQ_BEGIN(rtiCompare0)
 
     rtiREG1->INTFLAG = 1U;    // clear the interrupt source
-    QTIMEEVT_TICK_X(0U, (void *)0); // time events at rate 0
+    QTIMEEVT_TICK_X(0U, &l_rtiCompare0); // time events at rate 0
 
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
@@ -147,9 +139,9 @@ QK_IRQ_END()
 
 //............................................................................
 QK_IRQ_BEGIN(ssiTest)  // System Software Interrupt for testing
-    systemREG1->SSIF = 0x01; // clear the SSI0 source
-    // for testing...
-    QACTIVE_POST(AO_Table, Q_NEW(QEvt, MAX_PUB_SIG),&l_ssiTest);
+    systemREG1->SSIF = 0x01U; // clear the SSI0 source
+    // for testing..
+    QACTIVE_POST(AO_Table, Q_NEW(QEvt, MAX_PUB_SIG), &l_ssiTest);
 QK_IRQ_END()
 
 //............................................................................
@@ -188,9 +180,11 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 #endif // QF_ON_CONTEXT_SW
 
 //============================================================================
-// BSP functions...
+// BSP...
 
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // configure the LEDs
     gioInit();
     LED2_PORT->DIR |= (1U << LED2_PIN); // set as output
@@ -199,15 +193,14 @@ void BSP_init(void) {
     // configure the Buttons
     SWB_PORT->DIR  &= (1U << SWB_PIN);    // set as input
 
-    // initialize the random seed
-    BSP_randomSeed(1234U);
+    BSP_randomSeed(1234U); // seed the random number generator
 
-    // initialize the QS software tracing...
-    if (QS_INIT((void *)0) == 0) {
+    // initialize QS software tracing...
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
-    // dictionaries...
+    // QS dictionaries...
     QS_OBJ_DICTIONARY(&l_rtiCompare0);
     QS_OBJ_DICTIONARY(&l_ssiTest);
     QS_USR_DICTIONARY(PHILO_STAT);
@@ -217,12 +210,9 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
+    QS_GLB_FILTER(QS_GRP_ALL);  // enable all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the tick record
 
-//............................................................................
-void BSP_start(void) {
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -230,32 +220,6 @@ void BSP_start(void) {
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // instantiate and start AOs/threads...
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n);
-        QActive_start(AO_Philo[n],
-
-            // NOTE: set the preemption-threshold of all Philos to
-            // the same level, so that they cannot preempt each other.
-            Q_PRIO(n + 3U, N_PHILO + 2U), // QF-prio/pre-thre.
-
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            (void *)0, 0U,           // no stack storage
-            (void *)0);              // no initialization param
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    Table_ctor();
-    QActive_start(AO_Table,
-        N_PHILO + 7U,                // QP prio. of the AO
-        tableQueueSto,               // event queue storage
-        Q_DIM(tableQueueSto),        // queue length [events]
-        (void *)0, 0U,               // no stack storage
-        (void *)0);                  // no initialization param
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -276,6 +240,7 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
 }
 //............................................................................
 void BSP_displayPaused(uint8_t const paused) {
+    // not enough LEDs to implement this feature
     if (paused != 0U) {
         //LED2_PORT->DSET = (1U << LED2_PIN);
     }
@@ -302,6 +267,7 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
     QSchedStatus lockStat = QK_schedLock(N_PHILO);
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
+    //
     uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
     QK_schedUnlock(lockStat); // unlock the scheduler
@@ -314,9 +280,34 @@ void BSP_terminate(int16_t result) {
 }
 
 //============================================================================
-
 // QF callbacks...
+
 void QF_onStartup(void) {
+    // instantiate and start AOs/threads...
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n);
+        QActive_start(AO_Philo[n],
+
+            // NOTE: set the preemption-threshold of all Philos to
+            // the same level, so that they cannot preempt each other.
+            Q_PRIO(n + 3U, N_PHILO + 2U), // QF-prio/pre-thre.
+
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            (void *)0, 0U,           // no stack storage
+            (void *)0);              // no initialization param
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    Table_ctor();
+    QActive_start(AO_Table,
+        N_PHILO + 7U,                // QP prio. of the AO
+        tableQueueSto,               // event queue storage
+        Q_DIM(tableQueueSto),        // queue length [events]
+        (void *)0, 0U,               // no stack storage
+        (void *)0);                  // no initialization param
+
     rtiInit(); // configure RTI with UC counter of 7
     rtiSetPeriod(rtiCOUNTER_BLOCK0,
                  (uint32)((RTI_FREQ*1E6/(7+1))/BSP_TICKS_PER_SEC));
@@ -324,8 +315,8 @@ void QF_onStartup(void) {
     rtiStartCounter(rtiCOUNTER_BLOCK0);
 
     VIM_RAM[2 + 1] = (t_isrFuncPTR)&rtiCompare0; // install the IRQ
-    vimREG->FIRQPR0 &= ~(1U << 2);   // designate interrupt as IRQ, NOTE0
-    vimREG->REQMASKSET0 = (1U << 2); // enable interrupt
+    vimREG->FIRQPR0 &= ~(1U << 2U);   // designate interrupt as IRQ, NOTE0
+    vimREG->REQMASKSET0 = (1U << 2U); // enable RTI interrupt
 
     VIM_RAM[21 + 1] = (t_isrFuncPTR)&ssiTest ; // install the IRQ
     vimREG->FIRQPR0 &= ~(1U << 21);   // designate interrupt as IRQ, NOTE0
@@ -362,7 +353,6 @@ void QK_onIdle(void) {
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-R MCU.
-    //
     _gotoCPUIdle_(); // wait for interrupt
 #endif
 }

@@ -95,7 +95,7 @@
 // <12=>12 <13=>13 <14=>14 <15=>15
 // <i>Maximum # Event Pools <1..15>
 // <i>Default: 3
-#define QF_MAX_EPOOL 3U
+#define QF_MAX_EPOOL 0U
 
 // <o>Maximum # clock tick rates (QF_MAX_TICK_RATE)
 // <0=>0 no time events

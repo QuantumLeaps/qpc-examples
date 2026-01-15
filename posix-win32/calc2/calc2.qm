@@ -1,18 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+<model version="7.0.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>Improved model of the Calculator described in Chapter 4 of PSiCC2. Improvements include:
 - placing the &quot;negated1&quot; state inside &quot;operand1&quot; superstate
 - placing the &quot;negated2&quot; state inside &quot;operand2&quot; superstate
 - adding handling of operator precedence '*','/' before '+','-'</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
- <!--${Events}-->
- <package name="Events" stereotype="0x01">
-  <!--${Events::CalcEvt}-->
+ <!--${App}-->
+ <package name="App" stereotype="0x01">
+  <!--${App::CalcSignals}-->
+  <attribute name="CalcSignals" type="enum" visibility="0x04" properties="0x00">
+   <code>{
+    C_SIG = Q_USER_SIG,
+    CE_SIG,
+    DIGIT_0_SIG,
+    DIGIT_1_9_SIG,
+    POINT_SIG,
+    OPER_SIG,
+    EQUALS_SIG,
+    OFF_SIG
+};</code>
+  </attribute>
+  <!--${App::CalcEvt}-->
   <class name="CalcEvt" superclass="qpc::QEvt">
-   <!--${Events::CalcEvt::key_code}-->
+   <!--${App::CalcEvt::key_code}-->
    <attribute name="key_code" type="uint8_t" visibility="0x00" properties="0x00"/>
   </class>
+  <!--${App::Calc_ctor}-->
+  <operation name="Calc_ctor" type="void" visibility="0x00" properties="0x00">
+   <documentation>constructor</documentation>
+   <code>Calc *me = &amp;Calc_inst;
+QHsm_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Calc_initial));</code>
+  </operation>
+  <!--${App::the_calc}-->
+  <attribute name="the_calc" type="QAsm * const" visibility="0x00" properties="0x00">
+   <documentation>Global opaque pointer to the Calc inst</documentation>
+   <code>= (QAsm *)&amp;Calc_inst;</code>
+  </attribute>
  </package>
  <!--${SMs}-->
  <package name="SMs" stereotype="0x02">
@@ -172,7 +196,7 @@ This state can be exited only through the inherited C (Clear) event.
 </documentation>
       <entry>BSP_message(&quot;error-ENTRY;&quot;);</entry>
       <exit>BSP_message(&quot;error-EXIT;&quot;);</exit>
-      <state_glyph node="6,78,8,8">
+      <state_glyph color="2" node="6,78,8,8">
        <entry box="0,3,5,2"/>
        <exit box="0,5,5,2"/>
       </state_glyph>
@@ -490,12 +514,12 @@ BSP_insert((int)'.');</action>
         <action box="0,-2,6,2"/>
        </tran_glyph>
       </tran>
-      <state_glyph node="34,70,32,16">
+      <state_glyph color="1" node="34,70,32,16">
        <entry box="0,3,5,2"/>
        <exit box="0,5,5,2"/>
       </state_glyph>
      </state>
-     <state_glyph node="2,4,94,84">
+     <state_glyph color="3" node="2,4,94,84">
       <entry box="0,3,5,2"/>
       <exit box="0,5,5,2"/>
      </state_glyph>
@@ -503,57 +527,31 @@ BSP_insert((int)'.');</action>
     <!--${SMs::Calc::SM::final}-->
     <state name="final">
      <entry>BSP_message(&quot;final-ENTRY;&quot;);
-BSP_exit();</entry>
-     <state_glyph node="2,90,17,6">
+BSP_stop();</entry>
+     <state_glyph color="3" node="2,90,17,6">
       <entry box="0,3,5,2"/>
      </state_glyph>
     </state>
     <state_diagram size="100,98"/>
    </statechart>
   </class>
-  <!--${SMs::the_calc}-->
-  <attribute name="the_calc" type="QHsm * const" visibility="0x00" properties="0x00">
-   <documentation>Global opaque pointer to the Calc inst</documentation>
-   <code>= &amp;Calc_inst.super;</code>
-  </attribute>
-  <!--${SMs::Calc_ctor}-->
-  <operation name="Calc_ctor" type="void" visibility="0x00" properties="0x00">
-   <documentation>constructor</documentation>
-   <code>Calc *me = &amp;Calc_inst;
-QHsm_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Calc_initial));</code>
-  </operation>
  </package>
  <!--${.}-->
  <directory name=".">
-  <!--${.::calc2.h}-->
-  <file name="calc2.h">
-   <text>#ifndef CALC2_H
-#define CALC2_H
+  <!--${.::app.h}-->
+  <file name="app.h">
+   <text>#ifndef APP_H_
+#define APP_H_
 
-enum CalcSignals {
-    C_SIG = Q_USER_SIG,
-    CE_SIG,
-    DIGIT_0_SIG,
-    DIGIT_1_9_SIG,
-    POINT_SIG,
-    OPER_SIG,
-    EQUALS_SIG,
-    OFF_SIG
-};
+$declare ${App}
 
-$declare${Events::CalcEvt}
-$declare${SMs::Calc_ctor}
-
-extern QHsm * const the_calc;  // &quot;opaque&quot; pointer to calculator HSM
-
-#endif // CALC2_H
-</text>
+#endif // APP_H_</text>
   </file>
   <!--${.::calc2.c}-->
   <file name="calc2.c">
    <text>#include &quot;qpc.h&quot;   // QP/C
 #include &quot;bsp.h&quot;   // board support package
-#include &quot;calc2.h&quot; // application
+#include &quot;app.h&quot;   // application
 
 Q_DEFINE_THIS_FILE
 
@@ -563,11 +561,11 @@ Q_DEFINE_THIS_FILE
 #define KEY_MULT    '*'
 #define KEY_DIVIDE  '/'
 
-$declare${SMs::Calc}
+$declare ${SMs::Calc}
 
-$define${SMs::the_calc}
-$define${SMs::Calc_ctor}
-$define${SMs::Calc}</text>
+$define ${App::Calc_ctor}
+$define ${App::the_calc}
+$define ${SMs::Calc}</text>
   </file>
  </directory>
 </model>

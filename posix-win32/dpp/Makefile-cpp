@@ -50,10 +50,12 @@ VPATH := .
 INCLUDES := -I.
 
 C_SRCS := \
-	bsp.c \
 	main.c \
 	philo.c \
-	table.c
+	table.c \
+	bsp.c
+
+DEFINES  :=
 
 CPP_SRCS :=
 
@@ -66,7 +68,7 @@ OUTPUT   := $(PROJECT)
 #
 TARGET   := host
 
-DEFINES :=
+DEFINES +=
 
 BIN_DIR := build_$(TARGET)
 
@@ -107,7 +109,7 @@ INCLUDES += \
 	-I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
-# QP/C framework sources
+# QP framework sources
 #
 QP_SRCS := \
 	qep_hsm.c \
@@ -133,6 +135,7 @@ QS_SRCS := \
 
 VPATH += \
 	$(QP)/src/qf \
+	$(QP)/src/qs \
 	$(QP_PORT_DIR)
 
 INCLUDES += \
@@ -156,7 +159,8 @@ endif
 #
 CC    := gcc
 CPP   := g++
-LINK  := g++   # for C++ programs
+LINK  := gcc    # for C programs
+#LINK  := g++   # for C++ programs
 
 #-----------------------------------------------------------------------------
 # basic utilities (included in QTools for Windows), see:
@@ -195,7 +199,7 @@ ifeq (rel, $(CONF)) # Release configuration ..................................
 
 BIN_DIR := build_rel
 # gcc options:
-CFLAGS := -c -fno-pie -std=c11 -pedantic -Wall \
+CFLAGS := -c -fno-pie -std=c11 -pedantic \
 	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-O3 $(INCLUDES) $(DEFINES) $(DEF) -DNDEBUG
 
@@ -294,12 +298,12 @@ $(BIN_DIR)/%.o : %.cpp
 # create BIN_DIR and include dependencies only if needed
 ifneq ($(MAKECMDGOALS),clean)
   ifneq ($(MAKECMDGOALS),show)
-     ifneq ($(MAKECMDGOALS),debug)
+    ifneq ($(MAKECMDGOALS),debug)
 ifeq ("$(wildcard $(BIN_DIR))","")
 $(shell $(MKDIR) $(BIN_DIR))
 endif
 -include $(C_DEPS_EXT) $(CPP_DEPS_EXT)
-     endif
+    endif
   endif
 endif
 

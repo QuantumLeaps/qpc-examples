@@ -47,7 +47,7 @@ int main(void) { // embedded target takes no command-line arguments
         Q_ERROR(); // QS initialization must succeed
     }
 
-    BSP_init(); // initialize the BSP
+    BSP_init((void *)0); // initialize the BSP
 
     // pause execution of the test and wait for the test script to continue
     QS_TEST_PAUSE();

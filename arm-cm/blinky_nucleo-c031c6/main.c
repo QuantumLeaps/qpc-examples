@@ -1,5 +1,5 @@
 //============================================================================
-// QP/C application example
+// QP/C main function (for embedded target)
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
@@ -26,14 +26,12 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"                 // QP/C real-time event framework
-#include "blinky.h"              // Blinky Application interface
-#include "bsp.h"                 // Board Support Package
+#include "qpc.h"          // QP/C real-time event framework
+#include "bsp.h"          // Board Support Package
 
 //............................................................................
 int main() {
-    QF_init();       // initialize the framework and the underlying RT kernel
-    BSP_init();      // initialize the BSP
-    BSP_start();     // start the AOs/Threads
-    return QF_run(); // run the QF application
+    QF_init();            // initialize the framework and the RT kernel
+    BSP_init((void *)0);  // initialize the BSP
+    return QF_run();      // instantiate/start the AOs and run the framework
 }

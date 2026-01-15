@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "blinky.h"
-#include "bsp.h"
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application interface
 
 Q_DEFINE_THIS_FILE
 
@@ -47,7 +47,7 @@ int main(void) { // embedded target takes no command-line arguments
         Q_ERROR(); // QS initialization must succeed
     }
 
-    BSP_init(); // initialize the BSP
+    BSP_init((void *)0); // initialize the BSP
 
     // dictionaries...
     QS_SIG_DICTIONARY(TIMEOUT_SIG, (void *)0);

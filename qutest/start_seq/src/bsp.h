@@ -36,7 +36,7 @@
 
 #define BSP_TICKS_PER_SEC    100U
 
-void BSP_init(void);
+void BSP_init(void const * const arg);
 void BSP_msg(char const *msg);
 uint8_t BSP_getStatus(void);
 

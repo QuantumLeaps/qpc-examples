@@ -1,37 +1,34 @@
 //============================================================================
 // Product: DPP example, STM32F4-Discovery board, FreeRTOS kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "stm32f4xx.h"  // CMSIS-compliant header file for the MCU used
 #include "stm32f4xx_exti.h"
@@ -42,11 +39,11 @@
 
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
+// Local-scope defines -----------------------------------------------------
 // "RTOS-aware" interrupt priorities for FreeRTOS on ARM Cortex-M, NOTE1
 #define RTOS_AWARE_ISR_CMSIS_PRI \
     (configMAX_SYSCALL_INTERRUPT_PRIORITY >> (8-__NVIC_PRIO_BITS))
 
-// Local-scope objects -----------------------------------------------------
 #define LED_GPIO_PORT     GPIOD
 #define LED_GPIO_CLK      RCC_AHB1Periph_GPIOD
 
@@ -59,6 +56,7 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 #define BTN_GPIO_CLK      RCC_AHB1Periph_GPIOA
 #define BTN_B1            GPIO_Pin_0
 
+// Local-scope objects -----------------------------------------------------
 static uint32_t l_rndSeed;
 
 #ifdef Q_SPY
@@ -73,7 +71,7 @@ static uint32_t l_rndSeed;
         PAUSED_STAT,
     };
 
-#endif
+#endif // def Q_SPY
 
 //============================================================================
 // Error handler
@@ -92,20 +90,24 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     }
 #endif
     NVIC_SystemReset();
+    for (;;) { // explicitly "no-return"
+    }
 }
 //............................................................................
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// Application hooks used in this project ====================================
+//============================================================================
+// ISRs "hooks" used in the application...
 // NOTE: only the "FromISR" API variants are allowed in vApplicationTickHook
 
 void vApplicationTickHook(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    // process time events at rate 0
+    // process time events for rate 0
     QTIMEEVT_TICK_FROM_ISR(0U, &xHigherPriorityTaskWoken, &l_TickHook);
 
     // Perform the debouncing of buttons. The algorithm for debouncing
@@ -147,7 +149,6 @@ void vApplicationTickHook(void) {
     // notify FreeRTOS to perform context switch from ISR, if needed
     portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 }
-
 //............................................................................
 void vApplicationIdleHook(void) {
     // toggle the User LED on and then off, see NOTE01
@@ -172,24 +173,13 @@ void vApplicationIdleHook(void) {
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-M MCU.
-    //
-    // !!!CAUTION!!!
-    // The WFI instruction stops the CPU clock, which unfortunately disables
-    // the JTAG port, so the ST-Link debugger can no longer connect to the
-    // board. For that reason, the call to __WFI() has to be used with CAUTION.
-    //
-    // NOTE: If you find your board "frozen" like this, strap BOOT0 to VDD and
-    // reset the board, then connect with ST-Link Utilities and erase the part.
-    // The trick with BOOT(0) is it gets the part to run the System Loader
-    // instead of your broken code. When done disconnect BOOT0, and start over.
-    //
-    //__WFI(); // Wait-For-Interrupt
+    __WFI(); // Wait-For-Interrupt
 #endif
 }
 //............................................................................
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
-    (void)xTask;
-    (void)pcTaskName;
+    Q_UNUSED_PAR(xTask);
+    Q_UNUSED_PAR(pcTaskName);
     Q_ERROR();
 }
 //............................................................................
@@ -221,10 +211,12 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
     *pulIdleTaskStackSize = Q_DIM(uxIdleTaskStack);
 }
 
-// BSP functions =============================================================
+//============================================================================
+// BSP functions...
 
-//............................................................................
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -283,7 +275,7 @@ void BSP_init(void) {
     BSP_randomSeed(1234U);
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -295,45 +287,16 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
-    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO]; // small pool
+    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // start the active objects/threads...
-    static QEvtPtr philoQueueSto[N_PHILO][N_PHILO];
-    static StackType_t philoStack[N_PHILO][configMINIMAL_STACK_SIZE];
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n); // instantiate all Philosopher active objects
-        QActive_setAttr(AO_Philo[n], TASK_NAME_ATTR, "Philo");
-        QActive_start(AO_Philo[n],  // AO to start
-            Q_PRIO(n + 3U, 3U),      // QP prio., FreeRTOS prio.
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            philoStack[n],           // stack storage
-            sizeof(philoStack[n]),   // stack size [bytes]
-            (QEvt *)0);              // initialization event (not used)
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    static StackType_t tableStack[configMINIMAL_STACK_SIZE];
-    Table_ctor(); // instantiate the Table active object
-    QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
-    QActive_start(AO_Table,         // AO to start
-        Q_PRIO(N_PHILO + 7U, 7U),    // QP prio., FreeRTOS prio.
-        tableQueueSto,               // event queue storage
-        Q_DIM(tableQueueSto),        // queue length [events]
-        tableStack,                  // stack storage
-        sizeof(tableStack),          // stack size [bytes]
-        (QEvt *)0);                  // initialization event (not used)
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -381,7 +344,6 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
     vTaskSuspendAll(); // lock FreeRTOS scheduler
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
-    //
     uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
     xTaskResumeAll(); // unlock the FreeRTOS scheduler
@@ -402,10 +364,36 @@ void BSP_terminate(int16_t result) {
 }
 
 //============================================================================
-
-// QF callbacks --------------------------------------------------------------
+// QF callbacks...
 
 void QF_onStartup(void) {
+    // start the active objects/threads...
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    static StackType_t philoStack[N_PHILO][configMINIMAL_STACK_SIZE];
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n); // instantiate all Philosopher active objects
+        QActive_setAttr(AO_Philo[n], TASK_NAME_ATTR, "Philo");
+        QActive_start(AO_Philo[n],  // AO to start
+            Q_PRIO(n + 3U, 3U),      // QP prio., FreeRTOS prio.
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            philoStack[n],           // stack storage
+            sizeof(philoStack[n]),   // stack size [bytes]
+            (QEvt *)0);              // initialization event (not used)
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    static StackType_t tableStack[configMINIMAL_STACK_SIZE];
+    Table_ctor(); // instantiate the Table active object
+    QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
+    QActive_start(AO_Table,         // AO to start
+        Q_PRIO(N_PHILO + 7U, 7U),    // QP prio., FreeRTOS prio.
+        tableQueueSto,               // event queue storage
+        Q_DIM(tableQueueSto),        // queue length [events]
+        tableStack,                  // stack storage
+        sizeof(tableStack),          // stack size [bytes]
+        (QEvt *)0);                  // initialization event (not used)
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     //SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC); // done in FreeRTOS
 

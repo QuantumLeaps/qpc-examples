@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+<model version="7.0.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>Dining Philosopher Problem example with the &quot;Orthogonal Component&quot; state pattern (see https://state-machine.com/doc/Pattern_Orthogonal.pdf)
 
 The model demonstrates the following features:
@@ -12,9 +12,9 @@ The model demonstrates the following features:
 6. Component to Container communication via asynchronous event posting using the LIFO policy.</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
- <!--${Shared}-->
- <package name="Shared" stereotype="0x01">
-  <!--${Shared::AppSignals}-->
+ <!--${App}-->
+ <package name="App" stereotype="0x01">
+  <!--${App::AppSignals}-->
   <attribute name="AppSignals" type="enum" visibility="0x04" properties="0x00">
    <code>{
     EAT_SIG = Q_USER_SIG, // published by Table to let a Philo eat
@@ -29,7 +29,7 @@ The model demonstrates the following features:
     MAX_SIG         // the last signal
 };</code>
   </attribute>
-  <!--${Shared::produce_sig_dict}-->
+  <!--${App::produce_sig_dict}-->
   <operation name="produce_sig_dict?def Q_SPY" type="void" visibility="0x00" properties="0x02">
    <code>QS_SIG_DICTIONARY(EAT_SIG,     (void *)0);
 QS_SIG_DICTIONARY(DONE_SIG,    (void *)0);
@@ -40,29 +40,29 @@ QS_SIG_DICTIONARY(TEST_SIG,    (void *)0);
 QS_SIG_DICTIONARY(TIMEOUT_SIG, (void *)0);
 QS_SIG_DICTIONARY(HUNGRY_SIG,  (void *)0);</code>
   </operation>
-  <!--${Shared::N_PHILO}-->
+  <!--${App::N_PHILO}-->
   <attribute name="N_PHILO" type="uint8_t" visibility="0x03" properties="0x00">
    <code>((uint8_t)5U)</code>
   </attribute>
-  <!--${Shared::TableEvt}-->
+  <!--${App::TableEvt}-->
   <class name="TableEvt" superclass="qpc::QEvt">
-   <!--${Shared::TableEvt::philoId}-->
+   <!--${App::TableEvt::philoId}-->
    <attribute name="philoId" type="uint8_t" visibility="0x00" properties="0x00"/>
-   <!--${Shared::TableEvt::init}-->
-   <operation name="init" type="TableEvt *" visibility="0x00" properties="0x02">
-    <!--${Shared::TableEvt::init::id}-->
+   <!--${App::TableEvt::init}-->
+   <operation name="init?def QEVT_PAR_INIT" type="TableEvt *" visibility="0x00" properties="0x02">
+    <!--${App::TableEvt::init::id}-->
     <parameter name="id" type="uint8_t"/>
-    <code>if (me) {
+    <code>if (me != (TableEvt *)0) {
     me-&gt;philoId = id;
 }
 return me;</code>
    </operation>
   </class>
-  <!--${Shared::AO_Table}-->
+  <!--${App::AO_Table}-->
   <attribute name="AO_Table" type="QActive * const" visibility="0x00" properties="0x00">
-   <code>= &amp;Table_inst.super;</code>
+   <code>= Q_ACTIVE_UPCAST(&amp;Table_inst);</code>
   </attribute>
-  <!--${Shared::Table_ctor}-->
+  <!--${App::Table_ctor}-->
   <operation name="Table_ctor" type="void" visibility="0x00" properties="0x00">
    <code>Table *me = &amp;Table_inst;
 QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Table_initial));
@@ -95,9 +95,9 @@ for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
 
 QS_OBJ_DICTIONARY(&amp;Table_inst);
 
-QActive_subscribe(&amp;me-&gt;super, PAUSE_SIG);
-QActive_subscribe(&amp;me-&gt;super, SERVE_SIG);
-QActive_subscribe(&amp;me-&gt;super, TEST_SIG);
+QActive_subscribe(Q_ACTIVE_UPCAST(me), PAUSE_SIG);
+QActive_subscribe(Q_ACTIVE_UPCAST(me), SERVE_SIG);
+QActive_subscribe(Q_ACTIVE_UPCAST(me), TEST_SIG);
 
 for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
     me-&gt;fork[n] = FREE;
@@ -441,11 +441,11 @@ QACTIVE_POST_LIFO(AO_Table, &amp;pe-&gt;super);</exit>
   <!--${Comp::SM_Philo[N_PHILO]}-->
   <attribute name="SM_Philo[N_PHILO]" type="QAsm * const" visibility="0x00" properties="0x00">
    <code>= { // opaque pointers to Philo instances
-    (QAsm *)&amp;Philo_inst[0],
-    (QAsm *)&amp;Philo_inst[1],
-    (QAsm *)&amp;Philo_inst[2],
-    (QAsm *)&amp;Philo_inst[3],
-    (QAsm *)&amp;Philo_inst[4]
+    Q_ASM_UPCAST(&amp;Philo_inst[0]),
+    Q_ASM_UPCAST(&amp;Philo_inst[1]),
+    Q_ASM_UPCAST(&amp;Philo_inst[2]),
+    Q_ASM_UPCAST(&amp;Philo_inst[3]),
+    Q_ASM_UPCAST(&amp;Philo_inst[4])
 };</code>
   </attribute>
   <!--${Comp::Philo_ctor}-->
@@ -459,24 +459,44 @@ CompTimeEvt_ctor(&amp;me-&gt;timeEvt, AO_Table, n, TIMEOUT_SIG, 0U);</code>
  </package>
  <!--${.}-->
  <directory name=".">
-  <!--${.::dpp.h}-->
-  <file name="dpp.h">
-   <text>#ifndef DPP_H_
-#define DPP_H_
+  <!--${.::app.h}-->
+  <file name="app.h">
+   <text>#ifndef APP_H_
+#define APP_H_
 
-$declare ${Shared}
+$declare ${App}
 
 $declare ${Comp::CompTimeEvt}
-$declare ${Comp::SM_Philo[N_PHILO]}
 $declare ${Comp::Philo_ctor}
+$declare ${Comp::SM_Philo[N_PHILO]}
 
-#endif // DPP_H_</text>
+#endif // APP_H_</text>
+  </file>
+  <!--${.::bsp.h}-->
+  <file name="bsp.h">
+   <text>#ifndef BSP_H_
+#define BSP_H_
+
+#define BSP_TICKS_PER_SEC    100U
+
+void BSP_init(void const * const arg);
+void BSP_displayPaused(uint8_t const paused);
+void BSP_displayPhilStat(uint8_t const n, char const * const stat);
+void BSP_terminate(int16_t const result);
+
+void BSP_randomSeed(uint32_t const seed);
+uint32_t BSP_random(void);
+
+void BSP_ledOn(void);
+void BSP_ledOff(void);
+
+#endif // BSP_H_</text>
   </file>
   <!--${.::philo.c}-->
   <file name="philo.c">
-   <text>#include &quot;qpc.h&quot;
-#include &quot;dpp.h&quot;
-#include &quot;bsp.h&quot;
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
+#include &quot;bsp.h&quot;               // Board Support Package
+#include &quot;app.h&quot;               // Application interface
 
 //Q_DEFINE_THIS_FILE
 
@@ -488,14 +508,13 @@ $declare ${Comp::Philo}
 #define EAT_TIME    \
     (QTimeEvtCtr)((BSP_random() % BSP_TICKS_PER_SEC) + BSP_TICKS_PER_SEC)
 
-// definition of the whole &quot;Comp&quot; package
 $define ${Comp}</text>
   </file>
   <!--${.::table.c}-->
   <file name="table.c">
-   <text>#include &quot;qpc.h&quot;
-#include &quot;dpp.h&quot;
-#include &quot;bsp.h&quot;
+   <text>#include &quot;qpc.h&quot;               // QP/C real-time event framework
+#include &quot;bsp.h&quot;               // Board Support Package
+#include &quot;app.h&quot;               // Application interface
 
 Q_DEFINE_THIS_FILE
 
@@ -518,8 +537,8 @@ static inline uint8_t left(uint8_t const n) {
 
 $declare ${Cont::Table}
 
-$define ${Shared::Table_ctor}
-$define ${Shared::AO_Table}
+$define ${App::Table_ctor}
+$define ${App::AO_Table}
 $define ${Cont}</text>
   </file>
  </directory>

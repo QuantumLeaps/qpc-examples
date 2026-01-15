@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"          // QP/C real-time event framework
-#include "dpp.h"          // DPP Application interface
-#include "bsp.h"          // Board Support Package
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "stm32u545xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
@@ -103,7 +103,7 @@ void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
     QXK_ISR_ENTRY();   // inform QXK about entering an ISR
 
-    QTIMEEVT_TICK_X(0U, &l_SysTick_Handler); // time events at rate 0
+    QTIMEEVT_TICK_X(0U, &l_SysTick_Handler); // time events for rate 0
 
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
@@ -138,13 +138,13 @@ void SysTick_Handler(void) {
 // interrupt handler for testing preemptions in QXK
 void EXTI0_IRQHandler(void); // prototype
 void EXTI0_IRQHandler(void) {
-    QXK_ISR_ENTRY();   // inform QXK about entering an ISR
+    QXK_ISR_ENTRY(); // inform QXK about entering an ISR
 
     // for testing..
     static QEvt const testEvt = QEVT_INITIALIZER(TEST_SIG);
     QACTIVE_POST(AO_Table, &testEvt, &l_EXTI0_1_IRQHandler);
 
-    QXK_ISR_EXIT();    // inform QXK about exiting an ISR
+    QXK_ISR_EXIT();  // inform QXK about exiting an ISR
 }
 
 //............................................................................
@@ -176,7 +176,6 @@ void QF_onContextSw(QActive *prev, QActive *next) {
     QS_END_INCRIT()
 }
 #endif // QF_ON_CONTEXT_SW
-
 
 //============================================================================
 // BSP functions...
@@ -227,7 +226,9 @@ static void STM32U545RE_MPU_setup(void) {
     __ISB();
 }
 //..........................................................................
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // setup the MPU...
     STM32U545RE_MPU_setup();
 
@@ -278,7 +279,7 @@ void BSP_init(void) {
     BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -292,11 +293,9 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -304,49 +303,6 @@ void BSP_start(void) {
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // instantiate and start AOs/threads...
-    static QEvtPtr xThread1QueueSto[5];
-    static uint64_t xThread1StackSto[64];
-    XThread1_ctor();
-    QXThread_start(TH_XThread1,
-        1U,                          // QP priority of the thread
-        xThread1QueueSto,            // event queue storage
-        Q_DIM(xThread1QueueSto),     // event length [events]
-        xThread1StackSto,            // stack storage
-        sizeof(xThread1StackSto),    // stack size [bytes]
-        (void *)0);                  // no initialization param
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n);
-        QActive_start(AO_Philo[n],
-            n + 3U,                  // QF-prio/pthre. see NOTE1
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            (void *)0, 0U,           // no stack storage
-            (void *)0);              // no initialization param
-    }
-
-    static QEvtPtr xThread2QueueSto[5];
-    static uint64_t xThread2StackSto[64];
-    XThread2_ctor();
-    QXThread_start(TH_XThread2,
-        N_PHILO + 5U,                // QP priority of the thread
-        xThread2QueueSto,            // event queue storage
-        Q_DIM(xThread2QueueSto),     // event length [events]
-        xThread2StackSto,            // stack storage
-        sizeof(xThread2StackSto),    // stack size [bytes]
-        (void *)0);                  // no initialization param
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    Table_ctor();
-    QActive_start(AO_Table,
-        N_PHILO + 7U,                // QP prio. of the AO
-        tableQueueSto,               // event queue storage
-        Q_DIM(tableQueueSto),        // queue length [events]
-        (void *)0, 0U,               // no stack storage
-        (void *)0);                  // no initialization param
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -416,6 +372,50 @@ void BSP_terminate(int16_t result) {
 //============================================================================
 // QF callbacks...
 void QF_onStartup(void) {
+
+    // instantiate and start AOs/threads...
+    static QEvtPtr xThread1QueueSto[5];
+    static uint64_t xThread1StackSto[64];
+    XThread1_ctor();
+    QXThread_start(TH_XThread1,
+        1U,                          // QP priority of the thread
+        xThread1QueueSto,            // event queue storage
+        Q_DIM(xThread1QueueSto),     // event length [events]
+        xThread1StackSto,            // stack storage
+        sizeof(xThread1StackSto),    // stack size [bytes]
+        (void *)0);                  // no initialization param
+
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n);
+        QActive_start(AO_Philo[n],
+            n + 3U,                  // QF-prio/pthre. see NOTE1
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            (void *)0, 0U,           // no stack storage
+            (void *)0);              // no initialization param
+    }
+
+    static QEvtPtr xThread2QueueSto[5];
+    static uint64_t xThread2StackSto[64];
+    XThread2_ctor();
+    QXThread_start(TH_XThread2,
+        N_PHILO + 5U,                // QP priority of the thread
+        xThread2QueueSto,            // event queue storage
+        Q_DIM(xThread2QueueSto),     // event length [events]
+        xThread2StackSto,            // stack storage
+        sizeof(xThread2StackSto),    // stack size [bytes]
+        (void *)0);                  // no initialization param
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    Table_ctor();
+    QActive_start(AO_Table,
+        N_PHILO + 7U,                // QP prio. of the AO
+        tableQueueSto,               // event queue storage
+        Q_DIM(tableQueueSto),        // queue length [events]
+        (void *)0, 0U,               // no stack storage
+        (void *)0);                  // no initialization param
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 

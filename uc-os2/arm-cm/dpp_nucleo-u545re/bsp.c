@@ -1,37 +1,34 @@
 //============================================================================
 // Product: DPP example, NUCLEO-U545RE-Q board, uC/OS-II RTOS
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
-// <www.state-machine.com>
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
+// <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"          // QP/C real-time event framework
-#include "dpp.h"          // DPP Application interface
-#include "bsp.h"          // Board Support Package
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "stm32u545xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
@@ -79,13 +76,12 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, 10000U);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
 
 #ifndef NDEBUG
     // light up the user LED
     GPIOA->BSRR = (1U << LD2_PIN);  // turn LED on
-    // for debugging, hang on in an endless loop...
-    for (;;) {
+    for (;;) { // for debugging, hang on in an endless loop...
     }
 #endif
     NVIC_SystemReset();
@@ -93,7 +89,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     }
 }
 //............................................................................
-// assertion failure handler for the STM32 library, including the startup code
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -236,8 +232,12 @@ static void STM32U545RE_MPU_setup(void) {
     __ISB();
 }
 
-// BSP functions ===========================================================
-void BSP_init(void) {
+//============================================================================
+// BSP functions...
+
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // setup the MPU...
     STM32U545RE_MPU_setup();
 
@@ -288,7 +288,7 @@ void BSP_init(void) {
     BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -301,10 +301,8 @@ void BSP_init(void) {
 
     // setup the QS filters...
     QS_GLB_FILTER(QS_GRP_ALL);  // all records
-    QS_GLB_FILTER(-QS_QF_TICK);     // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -312,35 +310,6 @@ void BSP_start(void) {
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // start AOs/threads...
-    // NOTE: The QP priorities don't start at 1 because
-    // the lowest priority levels are reserved for the internal
-    // uC-OS2 tasks.
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    static OS_STK philoStack[N_PHILO][128]; // stacks for the Philos
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n);
-        QActive_start(AO_Philo[n],
-            Q_PRIO(n + 1U, n + 4U),  // QP-prio., uC-OS2 prio.
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            philoStack[n],           // private stack for uC/OS-II
-            sizeof(philoStack[n]),   // stack size [bytes]
-            (void *)0);              // no initialization param
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    static OS_STK tableStack[128]; // stack for the Table
-    Table_ctor();
-    QActive_start(AO_Table,
-        Q_PRIO(N_PHILO + 1U, N_PHILO + 4U), // QP-prio., uC-OS2 prio.
-        tableQueueSto,           // event queue storage
-        Q_DIM(tableQueueSto),    // queue length [events]
-        tableStack,              // private stack for uC/OS-II
-        sizeof(tableStack),      // stack size [bytes]
-        (void *)0);              // no initialization param
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -408,7 +377,37 @@ void BSP_terminate(int16_t result) {
 
 //============================================================================
 // QF callbacks...
+
 void QF_onStartup(void) {
+    // start AOs/threads...
+    // NOTE: The QP priorities don't start at 1 because
+    // the lowest priority levels are reserved for the internal
+    // uC-OS2 tasks.
+
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    static OS_STK philoStack[N_PHILO][128]; // stacks for the Philos
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n);
+        QActive_start(AO_Philo[n],
+            Q_PRIO(n + 1U, n + 4U),  // QP-prio., uC-OS2 prio.
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            philoStack[n],           // private stack for uC/OS-II
+            sizeof(philoStack[n]),   // stack size [bytes]
+            (void *)0);              // no initialization param
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    static OS_STK tableStack[128]; // stack for the Table
+    Table_ctor();
+    QActive_start(AO_Table,
+        Q_PRIO(N_PHILO + 1U, N_PHILO + 4U), // QP-prio., uC-OS2 prio.
+        tableQueueSto,           // event queue storage
+        Q_DIM(tableQueueSto),    // queue length [events]
+        tableStack,              // private stack for uC/OS-II
+        sizeof(tableStack),      // stack size [bytes]
+        (void *)0);              // no initialization param
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     // NOTE: do NOT call OS_CPU_SysTickInit() from uC/OS-II
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
@@ -459,7 +458,7 @@ static uint16_t const QS_UARTPrescTable[12] = {
 uint8_t QS_onStartup(void const *arg) {
     Q_UNUSED_PAR(arg);
 
-    static uint8_t qsTxBuf[3*1024]; // buffer for QS-TX channel
+    static uint8_t qsTxBuf[2*1024]; // buffer for QS-TX channel
     QS_initBuf(qsTxBuf, sizeof(qsTxBuf));
 
     static uint8_t qsRxBuf[100];    // buffer for QS-RX channel
@@ -588,7 +587,7 @@ void QS_onFlush(void) {
             USART1->TDR = b;
         }
         else {
-            break;
+            break; // break out of the loop
         }
     }
 }

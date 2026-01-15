@@ -1,38 +1,34 @@
 //============================================================================
-// Product: Board Support Package (BSP) for the Calculator example
-// Last updated for version 6.9.0
-// Last updated on  2020-06-24
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Product: Console-based BSP
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "bsp.h"
+#include "qpc.h"   // QP/C
+#include "bsp.h"   // board support package
+#include "app.h"   // application
 
 #include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 #include <stdlib.h>   // for exit()
@@ -49,6 +45,8 @@
 
 static char l_display[DISP_WIDTH + 1]; // the calculator display
 static int  l_len;  // number of displayed characters
+
+//============================================================================
 
 //............................................................................
 void BSP_clear(void) {
@@ -88,7 +86,7 @@ void BSP_show_display(void) {
     PRINTF_S("\n[%" STRINGIFY(DISP_WIDTH) "s] ", l_display);
 }
 //............................................................................
-void BSP_exit(void) {
+void BSP_stop(void) {
     PRINTF_S("\n%s\n", "Bye! Bye!");
     fflush(stdout);
     QF_onCleanup();
@@ -102,6 +100,8 @@ double BSP_get_value(void) {
 void BSP_message(char const *msg) {
     PRINTF_S("%s", msg);
 }
+
+//============================================================================
 
 //............................................................................
 void QF_onStartup(void) {
@@ -121,9 +121,4 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     FPRINTF_S(stderr, "ERROR in %s:%d", module, id);
     QF_onCleanup();
     exit(-1);
-}
-//............................................................................
-void assert_failed(char const * const module, int_t const id); // prototype
-void assert_failed(char const * const module, int_t const id) {
-    Q_onError(module, id);
 }

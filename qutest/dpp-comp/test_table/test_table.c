@@ -28,7 +28,7 @@
 //============================================================================
 #include "qpc.h"
 #include "bsp.h"
-#include "dpp.h"
+#include "app.h"
 
 //#include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 
@@ -39,11 +39,11 @@ Q_DEFINE_THIS_FILE
 static QHsmDummy l_dummyPhilo[N_PHILO];
 
 QAsm * const SM_Philo[N_PHILO] = { // opaque pointers to Philo instances
-    &l_dummyPhilo[0].super,
-    &l_dummyPhilo[1].super,
-    &l_dummyPhilo[2].super,
-    &l_dummyPhilo[3].super,
-    &l_dummyPhilo[4].super
+    Q_ASM_UPCAST(&l_dummyPhilo[0]),
+    Q_ASM_UPCAST(&l_dummyPhilo[1]),
+    Q_ASM_UPCAST(&l_dummyPhilo[2]),
+    Q_ASM_UPCAST(&l_dummyPhilo[3]),
+    Q_ASM_UPCAST(&l_dummyPhilo[4])
 };
 void Philo_ctor(uint8_t n) {
     QHsmDummy_ctor(&l_dummyPhilo[n]);
@@ -64,29 +64,29 @@ int main(void) { // embedded target takes no command-line arguments
         Q_ERROR(); // QS initialization must succeed
     }
 
-    BSP_init();      // initialize the BSP
+    BSP_init((void *)0); // initialize the BSP
 
     // pause execution of the test and wait for the test script to continue
     QS_TEST_PAUSE();
-
-    // initialize publish-subscribe...
-    static QSubscrList subscrSto[MAX_PUB_SIG];
-    QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // initialize event pools...
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO]; // small pool
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
+    // initialize publish-subscribe...
+    static QSubscrList subscrSto[MAX_PUB_SIG];
+    QActive_psInit(subscrSto, Q_DIM(subscrSto));
+
     // start the active objects...
     static QEvtPtr tableQueueSto[N_PHILO];
     Table_ctor(); // instantiate the Table active object
-    QActive_start(AO_Table,            // AO to start
-                  1U,                   // QF-priority/preemption-threshold
-                  tableQueueSto,        // event queue storage
-                  Q_DIM(tableQueueSto), // queue length [events]
-                  (void *)0,            // stack storage (not used)
-                  0U,                   // size of the stack [bytes]
-                  (void *)0);           // initialization param
+    QActive_start(AO_Table,   // AO to start
+        1U,                   // QF-priority
+        tableQueueSto,        // event queue storage
+        Q_DIM(tableQueueSto), // queue length [events]
+        (void *)0,            // stack storage (not used)
+        0U,                   // size of the stack [bytes]
+        (void *)0);           // initialization param
 
     return QF_run(); // run the QF application
 }

@@ -54,7 +54,7 @@ static union SmallEvent {
 //............................................................................
 void MainTask(void) {
     QF_init();    // initialize the framework and the underlying RT kernel
-    BSP_init();   // initialize the Board Support Package
+    BSP_init((void *)0);   // initialize the Board Support Package
 
     // object dictionaries...
     QS_OBJ_DICTIONARY(l_smlPoolSto);

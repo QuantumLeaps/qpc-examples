@@ -1,37 +1,34 @@
 //============================================================================
 // Product: "Fly 'n' Shoot" game example, EFM32-SLSTK3401A board, QV kernel
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
-//
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "game.h"
-#include "bsp.h"
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "em_device.h"  // the device specific header (SiLabs)
 #include "em_chip.h"    // Chip errata (SiLabs)
@@ -83,9 +80,39 @@ static void paintBitsClear(uint8_t x, uint8_t y,
         COMMAND_STAT
     };
 
-#endif
+#endif // def Q_SPY
 
-// ISRs used in the application ==========================================
+//============================================================================
+// Error handler and ISRs...
+
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    // NOTE: this implementation of the error handler is intended only
+    // for debugging and MUST be changed for deployment of the application
+    // (assuming that you ship your production code with assertions enabled).
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
+
+#ifndef NDEBUG
+    // light up both LEDs
+    GPIO->P[LED_PORT].DOUT |= ((1U << LED0_PIN) | (1U << LED1_PIN));
+    for (;;) { // for debugging, hang on in an endless loop...
+    }
+#endif
+    NVIC_SystemReset();
+    for (;;) { // explicitly "no-return"
+    }
+}
+//............................................................................
+// assertion failure handler for the startup and library code
+void assert_failed(char const * const module, int_t const id); // prototype
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
+}
+
+// ISRs used in the application ==============================================
+
+void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
     static QEvt const tickEvt = QEVT_INITIALIZER(TIME_TICK_SIG);
 
@@ -99,7 +126,7 @@ void SysTick_Handler(void) {
 #endif
 
     //QTIMEEVT_TICK_X(0U, &l_SysTick_Handler); // process time events for rate 0
-    QTICKER_TRIG(AO_Ticker0, &l_SysTick_Handler); // trigger ticker AO
+    QTICKER_TRIG(&QTicker_inst0, &l_SysTick_Handler); // trigger ticker AO
 
     QACTIVE_PUBLISH(&tickEvt, &l_SysTick_Handler); // publish to all subscribers
 
@@ -132,10 +159,13 @@ void SysTick_Handler(void) {
     QV_ARM_ERRATUM_838869();
 }
 //............................................................................
+// interrupt handler for testing preemptions
+void GPIO_EVEN_IRQHandler(void); // prototype
 void GPIO_EVEN_IRQHandler(void) {
     QACTIVE_POST(AO_Tunnel, Q_NEW(QEvt, MAX_PUB_SIG), // for testing...
                  &l_GPIO_EVEN_IRQHandler);
 }
+
 //............................................................................
 void USART0_RX_IRQHandler(void); // prototype
 #ifdef Q_SPY
@@ -150,6 +180,7 @@ void USART0_RX_IRQHandler(void) {
         uint32_t b = l_USART0->RXDATA;
         QS_RX_PUT(b);
     }
+
     QV_ARM_ERRATUM_838869();
 }
 #else
@@ -157,14 +188,17 @@ void USART0_RX_IRQHandler(void) {}
 #endif // Q_SPY
 
 
-// BSP functions ===========================================================
-void BSP_init(void) {
+//============================================================================
+// BSP functions...
+
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Chip errata
     CHIP_Init();
 
     // NOTE: SystemInit() already called from startup_TM4C123GH6PM.s
     // but SystemCoreClock needs to be updated
-    //
     SystemCoreClockUpdate();
 
     // NOTE The VFP (Floating Point Unit) unit is configured by QV-port
@@ -185,25 +219,53 @@ void BSP_init(void) {
     GPIO_PinModeSet(PB_PORT, PB0_PIN, gpioModeInputPull, 1);
     GPIO_PinModeSet(PB_PORT, PB1_PIN, gpioModeInputPull, 1);
 
-    // Initialize the DISPLAY driver.
+    // Initialize the DISPLAY driver
     if (!Display_init()) {
         Q_ERROR();
     }
 
-    // initialize the QS software tracing
-    if (QS_INIT((void *)0) == 0U) {
+    // initialize the QS software tracing...
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
+    // dictionaries...
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
     QS_OBJ_DICTIONARY(&l_GPIO_EVEN_IRQHandler);
     QS_USR_DICTIONARY(SCORE_STAT);
     QS_USR_DICTIONARY(COMMAND_STAT);
 
+    // object dictionaries for AOs...
+    QS_OBJ_DICTIONARY(AO_Missile);
+    QS_OBJ_DICTIONARY(AO_Ship);
+    QS_OBJ_DICTIONARY(AO_Tunnel);
+    QS_OBJ_DICTIONARY(&QTicker_inst0);
+
+    // signal dictionaries for globally published events...
+    QS_SIG_DICTIONARY(TIME_TICK_SIG,      (void *)0);
+    QS_SIG_DICTIONARY(PLAYER_TRIGGER_SIG, (void *)0);
+    QS_SIG_DICTIONARY(PLAYER_QUIT_SIG,    (void *)0);
+    QS_SIG_DICTIONARY(GAME_OVER_SIG,      (void *)0);
+
     // setup the QS filters...
     QS_GLB_FILTER(QS_GRP_SM); // state machine records
     QS_GLB_FILTER(QS_GRP_AO); // active object records
     QS_GLB_FILTER(QS_GRP_UA); // all user records
+
+    // initialize the event pools...
+    //static QF_MPOOL_EL(QEvt) smlPoolSto[10];
+    //QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
+    // NOTE:
+    // After new rounding up, the "small" memory pool has the same block-size
+    // as the next "medium" pool. If such "small" pool is initialized,
+    // the next "medium" pool will casuse an assertion (the same block-size
+    // pool already exists).
+    static QF_MPOOL_EL(ObjectImageEvt) medPoolSto[2*GAME_MINES_MAX + 20];
+    QF_poolInit(medPoolSto, sizeof(medPoolSto), sizeof(medPoolSto[0]));
+
+    // initialize publish-subscribe
+    static QSubscrList subscrSto[MAX_PUB_SIG];
+    QActive_psInit(subscrSto, Q_DIM(subscrSto));
 }
 
 //............................................................................
@@ -650,8 +712,39 @@ static void paintBitsClear(uint8_t x, uint8_t y,
     }
 }
 
-// QF callbacks ============================================================
+//============================================================================
+// QF callbacks...
 void QF_onStartup(void) {
+    // start the active objects...
+    QTicker_ctor(&QTicker_inst0, 0U); // "ticker" AO for tick rate 0
+    QActive_start(Q_ACTIVE_UPCAST(&QTicker_inst0),
+                  1U,                // QP priority
+                  0, 0, 0, 0, 0);    // no queue, no stack , no init. event
+
+    static QEvtPtr tunnelQueueSto[GAME_MINES_MAX + 5];
+    Tunnel_ctor_call();
+    QActive_start(AO_Tunnel,
+                  2U,                // QP priority
+                  tunnelQueueSto,  Q_DIM(tunnelQueueSto), // evt queue
+                  (void *)0, 0U,     // no per-thread stack
+                  (QEvt *)0);        // no initialization event
+
+    static QEvtPtr shipQueueSto[3];
+    Ship_ctor_call();
+    QActive_start(AO_Ship,
+                  3U,                // QP priority
+                  shipQueueSto,    Q_DIM(shipQueueSto), // evt queue
+                  (void *)0, 0U,     // no per-thread stack
+                  (QEvt *)0);        // no initialization event
+
+    static QEvtPtr missileQueueSto[2];
+    Missile_ctor_call();
+    QActive_start(AO_Missile,
+                  4U,                // QP priority
+                  missileQueueSto, Q_DIM(missileQueueSto), // evt queue
+                  (void *)0, 0U,     // no per-thread stack
+                  (QEvt *)0);        // no initialization event
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 
@@ -708,32 +801,6 @@ void QV_onIdle(void) {  // called with interrupts disabled, see NOTE01
 #else
     QF_INT_ENABLE(); // just enable interrupts
 #endif
-}
-
-//............................................................................
-Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    //
-    // NOTE: add here your application-specific error handling
-    //
-    Q_UNUSED_PAR(module);
-    Q_UNUSED_PAR(id);
-
-    QS_ASSERTION(module, id, 10000U); // report assertion to QS
-
-#ifndef NDEBUG
-    // light up both LEDs
-    GPIO->P[LED_PORT].DOUT |= ((1U << LED0_PIN) | (1U << LED1_PIN));
-    // for debugging, hang on in an endless loop until PB1 is pressed...
-    while ((GPIO->P[PB_PORT].DIN & (1U << PB1_PIN)) != 0) {
-    }
-#endif
-
-    NVIC_SystemReset();
-}
-//............................................................................
-void assert_failed(char const * const module, int_t const id); // prototype
-void assert_failed(char const * const module, int_t const id) {
-    Q_onError(module, id);
 }
 
 // QS callbacks ============================================================
@@ -838,20 +905,10 @@ void QS_onReset(void) {
 void QS_onCommand(uint8_t cmdId,
                   uint32_t param1, uint32_t param2, uint32_t param3)
 {
-    (void)cmdId;
-    (void)param1;
-    (void)param2;
-    (void)param3;
-    QS_BEGIN_ID(COMMAND_STAT, 0U) // app-specific record
-        QS_U8(2, cmdId);
-        QS_U32(8, param1);
-        QS_U32(8, param2);
-        QS_U32(8, param3);
-    QS_END()
-
-    if (cmdId == 10U) {
-        Q_ERROR();
-    }
+    Q_UNUSED_PAR(cmdId);
+    Q_UNUSED_PAR(param1);
+    Q_UNUSED_PAR(param2);
+    Q_UNUSED_PAR(param3);
 }
 
 #endif // Q_SPY

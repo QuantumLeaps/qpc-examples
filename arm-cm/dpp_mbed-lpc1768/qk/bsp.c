@@ -1,37 +1,34 @@
 //============================================================================
 // Product: DPP example, NXP mbed-LPC1768 board, QK kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "LPC17xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
@@ -67,7 +64,7 @@ static uint32_t l_rndSeed;
         CONTEXT_SW,
     };
 
-#endif
+#endif // def Q_SPY
 
 //============================================================================
 // Error handler and ISRs...
@@ -78,7 +75,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, 10000U);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
 
 #ifndef NDEBUG
     // light up all LEDs
@@ -86,16 +83,15 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     LPC_GPIO1->FIOSET = LED_2;  // turn LED on
     LPC_GPIO1->FIOSET = LED_3;  // turn LED on
     LPC_GPIO1->FIOSET = LED_4;  // turn LED on
-    // for debugging, hang on in an endless loop...
-    for (;;) {
+    for (;;) { // for debugging, hang on in an endless loop...
     }
-#else
+#endif
     NVIC_SystemReset();
     for (;;) { // explicitly "no-return"
     }
-#endif
 }
 //............................................................................
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -139,7 +135,7 @@ void SysTick_Handler(void) {
 #ifdef Q_SPY
     tmp = SysTick->CTRL; // clear CTRL_COUNTFLAG
     QS_tickTime_ += QS_tickPeriod_; // account for the clock rollover
-#endif // Q_SPY
+#endif
 
     QK_ISR_EXIT();  // inform QK about exiting an ISR
 }
@@ -173,7 +169,9 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 //============================================================================
 // BSP functions...
 
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -215,7 +213,7 @@ void BSP_init(void) {
     BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -229,11 +227,9 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -241,32 +237,6 @@ void BSP_start(void) {
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // instantiate and start AOs/threads...
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n);
-        QActive_start(AO_Philo[n],
-
-            // NOTE: set the preemption-threshold of all Philos to
-            // the same level, so that they cannot preempt each other.
-            Q_PRIO(n + 3U, N_PHILO + 2U), // QF-prio/pre-thre.
-
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            (void *)0, 0U,           // no stack storage
-            (void *)0);              // no initialization param
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    Table_ctor();
-    QActive_start(AO_Table,
-        N_PHILO + 7U,                // QP prio. of the AO
-        tableQueueSto,               // event queue storage
-        Q_DIM(tableQueueSto),        // queue length [events]
-        (void *)0, 0U,               // no stack storage
-        (void *)0);                  // no initialization param
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -314,7 +284,6 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
     QSchedStatus lockStat = QK_schedLock(N_PHILO);
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
-    //
     uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
     QK_schedUnlock(lockStat);
@@ -337,6 +306,31 @@ void BSP_ledOff(void) {
 //============================================================================
 // QF callbacks...
 void QF_onStartup(void) {
+    // instantiate and start AOs/threads...
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n);
+        QActive_start(AO_Philo[n],
+
+            // NOTE: set the preemption-threshold of all Philos to
+            // the same level, so that they cannot preempt each other.
+            Q_PRIO(n + 3U, N_PHILO + 2U), // QF-prio/pre-thre.
+
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            (void *)0, 0U,           // no stack storage
+            (void *)0);              // no initialization param
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    Table_ctor();
+    QActive_start(AO_Table,
+        N_PHILO + 7U,                // QP prio. of the AO
+        tableQueueSto,               // event queue storage
+        Q_DIM(tableQueueSto),        // queue length [events]
+        (void *)0, 0U,               // no stack storage
+        (void *)0);                  // no initialization param
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 
@@ -385,7 +379,6 @@ void QK_onIdle(void) {
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-M MCU.
-    //
     __WFI(); // Wait-For-Interrupt
 #endif
 }
@@ -452,7 +445,7 @@ uint8_t QS_onStartup(void const *arg) {
 void QS_onCleanup(void) {
 }
 //............................................................................
-QSTimeCtr QS_onGetTime(void) {  // NOTE: invoked with interrupts DISABLED
+QSTimeCtr QS_onGetTime(void) { // NOTE: invoked with interrupts DISABLED
     if ((SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) == 0) { // not set?
         return QS_tickTime_ - (QSTimeCtr)SysTick->VAL;
     }
@@ -594,7 +587,7 @@ static void UART0_setBaudrate(uint32_t baud) {
 // Only ISRs prioritized at or below the QF_AWARE_ISR_CMSIS_PRI level (i.e.,
 // with the numerical values of priorities equal or higher than
 // QF_AWARE_ISR_CMSIS_PRI) are allowed to call the QK_ISR_ENTRY/QK_ISR_ENTRY
-// macros or any other QF/QK  services. These ISRs are "QF-aware".
+// macros or any other QF/QK services. These ISRs are "QF-aware".
 //
 // Conversely, any ISRs prioritized above the QF_AWARE_ISR_CMSIS_PRI priority
 // level (i.e., with the numerical values of priorities less than

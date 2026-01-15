@@ -1,6 +1,6 @@
-#include "qpc.h"
-#include "bsp.h"
-#include "dpp.h"
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 //Q_DEFINE_THIS_FILE
 
@@ -12,7 +12,9 @@ enum AppRecords { // application-specific trace records
 static uint32_t l_rnd;  // random seed
 
 //............................................................................
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // QS dictionaries...
     QS_ONLY(produce_sig_dict());
     QS_USR_DICTIONARY(PHILO_STAT);

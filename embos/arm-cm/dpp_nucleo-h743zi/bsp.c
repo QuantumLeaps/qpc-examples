@@ -1,39 +1,34 @@
 //============================================================================
 // Product: "Dining Philosophers Problem" example, embOS kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 // STM32CubeH7 include files
 #include "stm32h7xx_hal.h"
@@ -63,15 +58,15 @@ static uint32_t l_rnd; // random seed
         PAUSED_STAT,
     };
 
-#endif
+#endif // def Q_SPY
 
 //============================================================================
 // Error handler
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    //
-    // NOTE: add here your application-specific error handling
-    //
+    // NOTE: this implementation of the error handler is intended only
+    // for debugging and MUST be changed for deployment of the application
+    // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
@@ -84,17 +79,18 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     for (;;) {
     }
 #endif
-
     NVIC_SystemReset();
-    for (;;) {} // explicitly no-retur
+    for (;;) { // explicitly "no-return"
+    }
 }
 //............................................................................
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// ISRs used in the application ==========================================
+// ISRs used in the application ==============================================
 #ifdef Q_SPY
 
 // ISR for receiving bytes from the QSPY Back-End
@@ -114,8 +110,7 @@ void USART3_IRQHandler(void) {
 
 // embOS application hooks =================================================
 static void tick_handler(void) { // signature of embOS tick hook routine
-    // process time events at rate 0
-    QTIMEEVT_TICK_X(0U, &l_embos_ticker);
+    QTIMEEVT_TICK_X(0U, (void *)0); // time events for rate 0
 
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
@@ -133,7 +128,7 @@ static void tick_handler(void) { // signature of embOS tick hook routine
     tmp ^= buttons.depressed;     // changed debounced depressed
     current = buttons.depressed;
 
-    if (tmp != 0U) {  // debounced Key button state changed?
+    if (tmp != 0U) { // debounced Key button state changed?
         if (current != 0U) { // is PB0 depressed?
             static QEvt const pauseEvt = QEVT_INITIALIZER(PAUSE_SIG);
             QACTIVE_PUBLISH(&pauseEvt, &l_embos_ticker);
@@ -186,24 +181,17 @@ void OS_Idle(void) {
         // Put the CPU and peripherals to the low-power mode.
         // you might need to customize the clock management for your application,
         // see the datasheet for your particular Cortex-M MCU.
-        //
-        // !!!CAUTION!!!
-        // The WFI instruction stops the CPU clock, which unfortunately disables
-        // the JTAG port, so the ST-Link debugger can no longer connect to the
-        // board. For that reason, the call to __WFI() has to be used with CAUTION.
-        //
-        // NOTE: If you find your board "frozen" like this, strap BOOT0 to VDD and
-        // reset the board, then connect with ST-Link Utilities and erase the part.
-        // The trick with BOOT(0) is it gets the part to run the System Loader
-        // instead of your broken code. When done disconnect BOOT0, and start over.
-        //
-        //__WFI(); // Wait-For-Interrupt
+        __WFI(); // Wait-For-Interrupt
 #endif
     }
 }
 
-// BSP functions ===========================================================
-void BSP_init(void) {
+//============================================================================
+// BSP functions...
+
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -242,11 +230,10 @@ void BSP_init(void) {
     // configure the User Button in GPIO Mode
     BSP_PB_Init(BUTTON_KEY, BUTTON_MODE_GPIO);
 
-    // seed the random number generator
-    BSP_randomSeed(1234U);
+    BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
-    if (QS_INIT((void *)0) == 0U) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -258,11 +245,9 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL); // all records
-    QS_GLB_FILTER(-QS_QF_TICK);    // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -270,9 +255,71 @@ void BSP_start(void) {
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
+}
+//............................................................................
+void BSP_displayPhilStat(uint8_t n, char const *stat) {
+    Q_UNUSED_PAR(n);
 
+    if (stat[0] == 'h') {
+        BSP_LED_On(LED1); // turn LED on
+    }
+    else {
+        BSP_LED_Off(LED1); // turn LED off
+    }
+    if (stat[0] == 'e') {
+        BSP_LED_On(LED2); // turn LED on
+    }
+    else {
+        BSP_LED_Off(LED2); // turn LED on
+    }
+
+    // app-specific trace record...
+    QS_BEGIN_ID(PHILO_STAT, AO_Philo[n]->prio)
+        QS_U8(1, n);  // Philosopher number
+        QS_STR(stat); // Philosopher status
+    QS_END()
+}
+//............................................................................
+void BSP_displayPaused(uint8_t paused) {
+    if (paused) {
+        BSP_LED_On(LED3); // turn LED on
+    }
+    else {
+        BSP_LED_Off(LED3); // turn LED on
+    }
+
+    QS_BEGIN_ID(PAUSED_STAT, 0U) // app-specific record
+        QS_U8(1, paused);  // Paused status
+    QS_END()
+}
+//............................................................................
+void BSP_randomSeed(uint32_t seed) {
+    l_rnd = seed;
+}
+//............................................................................
+uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
+    // exercise the FPU with some floating point computations
+    // NOTE: this code can be only called from a task that created with
+    // the option OS_TASK_OPT_SAVE_FP.
+    float volatile x = 3.1415926F;
+    x = x + 2.7182818F;
+
+    // "Super-Duper" Linear Congruential Generator (LCG)
+    // LCG(2^32, 3*7*11*13*23, 0, seed)
+    uint32_t rnd = l_rnd * (3U*7U*11U*13U*23U);
+    l_rnd = rnd; // set for the next time
+
+    return (rnd >> 8);
+}
+//............................................................................
+void BSP_terminate(int16_t result) {
+    Q_UNUSED_PAR(result);
+}
+
+//============================================================================
+// QF callbacks...
+void QF_onStartup(void) {
     // instantiate and start AOs/threads...
-
     static QEvtPtr philoQueueSto[N_PHILO][10];
     static OS_STACKPTR int philoStack[N_PHILO][128];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
@@ -296,72 +343,11 @@ void BSP_start(void) {
         tableStack,              // private stack for embOS
         sizeof(tableStack),      // stack size [bytes]
         (void *)0);              // no initialization param
-}
-//............................................................................
-void BSP_displayPhilStat(uint8_t n, char const *stat) {
-    (void)n;
 
-    if (stat[0] == 'h') {
-        BSP_LED_On(LED1); // turn LED on
-    }
-    else {
-        BSP_LED_Off(LED1); // turn LED off
-    }
-    if (stat[0] == 'e') {
-        BSP_LED_On(LED2); // turn LED on
-    }
-    else {
-        BSP_LED_Off(LED2); // turn LED on
-    }
-
-    QS_BEGIN_ID(PHILO_STAT, AO_Philo[n]->prio) // app-specific record
-        QS_U8(1, n);  // Philosopher number
-        QS_STR(stat); // Philosopher status
-    QS_END()
-}
-//............................................................................
-void BSP_displayPaused(uint8_t paused) {
-    if (paused) {
-        BSP_LED_On(LED3); // turn LED on
-    }
-    else {
-        BSP_LED_Off(LED3); // turn LED on
-    }
-
-    QS_BEGIN_ID(PAUSED_STAT, 0U) // app-specific record
-        QS_U8(1, paused);  // Paused status
-    QS_END()
-}
-//............................................................................
-uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
-    // exercise the FPU with some floating point computations
-    // NOTE: this code can be only called from a task that created with
-    // the option OS_TASK_OPT_SAVE_FP.
-    //
-    float volatile x = 3.1415926F;
-    x = x + 2.7182818F;
-
-    // "Super-Duper" Linear Congruential Generator (LCG)
-    // LCG(2^32, 3*7*11*13*23, 0, seed)
-    uint32_t rnd = l_rnd * (3U*7U*11U*13U*23U);
-    l_rnd = rnd; // set for the next time
-
-    return (rnd >> 8);
-}
-//............................................................................
-void BSP_randomSeed(uint32_t seed) {
-    l_rnd = seed;
-}
-//............................................................................
-void BSP_terminate(int16_t result) {
-    (void)result;
-}
-
-// QF callbacks ============================================================
-void QF_onStartup(void) {
     static OS_TICK_HOOK tick_hook;
     OS_TICK_AddHook(&tick_hook, &tick_handler);
 
+    // enable IRQs...
 #ifdef Q_SPY
     NVIC_SetPriority(USART3_IRQn,  0U); // kernel unaware interrupt
     NVIC_EnableIRQ(USART3_IRQn); // UART interrupt used for QS-RX
@@ -371,7 +357,8 @@ void QF_onStartup(void) {
 void QF_onCleanup(void) {
 }
 
-// QS callbacks ============================================================
+//============================================================================
+// QS callbacks...
 #ifdef Q_SPY
 
 //............................................................................
@@ -379,7 +366,7 @@ uint8_t QS_onStartup(void const *arg) {
     Q_UNUSED_PAR(arg);
 
     static uint8_t qsTxBuf[2*1024]; // buffer for QS-TX channel
-    QS_initBuf  (qsTxBuf, sizeof(qsTxBuf));
+    QS_initBuf(qsTxBuf, sizeof(qsTxBuf));
 
     static uint8_t qsRxBuf[100];    // buffer for QS-RX channel
     QS_rxInitBuf(qsRxBuf, sizeof(qsRxBuf));
@@ -433,7 +420,7 @@ void QS_onFlush(void) {
             l_uartHandle.Instance->TDR = b;
         }
         else {
-            break; // break out of the loop
+            break;
         }
     }
 }
@@ -467,4 +454,3 @@ void QS_onCommand(uint8_t cmdId,
 // trick with BOOT(0) is it gets the part to run the System Loader instead of
 // your broken code. When done disconnect BOOT0, and start over.
 //
-

@@ -1,44 +1,41 @@
 //============================================================================
 // Product: DPP example, EK-TM4C123GLX board, uC/OS-II RTOS
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"     // QP/C real-time event framework
-#include "dpp.h"     // DPP Application interface
-#include "bsp.h"     // Board Support Package
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "TM4C123GH6PM.h"        // the device specific header (TI)
 #include "sysctl.h"              // system control driver (TI)
 #include "gpio.h"                // GPIO driver (TI)
 // add other drivers if necessary...
 
-Q_DEFINE_THIS_FILE
+Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 // Local-scope objects -----------------------------------------------------
 // LEDs on the board
@@ -68,7 +65,7 @@ static uint32_t l_rndSeed;
         PAUSED_STAT,
     };
 
-#endif
+#endif // def Q_SPY
 
 //============================================================================
 // Error handler and ISRs...
@@ -86,13 +83,13 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     GPIOF_AHB->DATA_Bits[LED_GREEN | LED_RED | LED_BLUE] = 0xFFU;
     for (;;) { // for debugging, hang on in an endless loop...
     }
-#else
+#endif
     NVIC_SystemReset();
     for (;;) { // explicitly "no-return"
     }
-#endif
 }
 //............................................................................
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -193,11 +190,12 @@ void UART0_IRQHandler(void) {
 }
 #endif // Q_SPY
 
-
 //============================================================================
 // BSP functions...
 
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -244,11 +242,10 @@ void BSP_init(void) {
     *(uint32_t volatile *)&GPIOF_AHB->CR = 0x00U;
     GPIOF_AHB->LOCK = 0x0; // lock GPIOCR register for SW2
 
-    // seed the random number generator
-    BSP_randomSeed(1234U);
+    BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -262,10 +259,8 @@ void BSP_init(void) {
 
     // setup the QS filters...
     QS_GLB_FILTER(QS_GRP_ALL);  // all records
-    QS_GLB_FILTER(-QS_QF_TICK);     // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -273,35 +268,6 @@ void BSP_start(void) {
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // start AOs/threads...
-    // NOTE: The QP priorities don't start at 1 because
-    // the lowest priority levels are reserved for the internal
-    // uC-OS2 tasks.
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    static OS_STK philoStack[N_PHILO][128]; // stacks for the Philos
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n);
-        QActive_start(AO_Philo[n],
-            Q_PRIO(n + 1U, n + 4U),  // QP-prio., uC-OS2 prio.
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            philoStack[n],           // private stack for uC/OS-II
-            sizeof(philoStack[n]),   // stack size [bytes]
-            (void *)0);              // no initialization param
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    static OS_STK tableStack[128]; // stack for the Table
-    Table_ctor();
-    QActive_start(AO_Table,
-        Q_PRIO(N_PHILO + 1U, N_PHILO + 4U), // QP-prio., uC-OS2 prio.
-        tableQueueSto,           // event queue storage
-        Q_DIM(tableQueueSto),    // queue length [events]
-        tableStack,              // private stack for uC/OS-II
-        sizeof(tableStack),      // stack size [bytes]
-        (void *)0);              // no initialization param
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -358,12 +324,43 @@ void BSP_terminate(int16_t result) {
 
 //============================================================================
 // QF callbacks...
+
 void QF_onStartup(void) {
+    // start AOs/threads...
+    // NOTE: The QP priorities don't start at 1 because
+    // the lowest priority levels are reserved for the internal
+    // uC-OS2 tasks.
+
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    static OS_STK philoStack[N_PHILO][128]; // stacks for the Philos
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n);
+        QActive_start(AO_Philo[n],
+            Q_PRIO(n + 1U, n + 4U),  // QP-prio., uC-OS2 prio.
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            philoStack[n],           // private stack for uC/OS-II
+            sizeof(philoStack[n]),   // stack size [bytes]
+            (void *)0);              // no initialization param
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    static OS_STK tableStack[128]; // stack for the Table
+    Table_ctor();
+    QActive_start(AO_Table,
+        Q_PRIO(N_PHILO + 1U, N_PHILO + 4U), // QP-prio., uC-OS2 prio.
+        tableQueueSto,           // event queue storage
+        Q_DIM(tableQueueSto),    // queue length [events]
+        tableStack,              // private stack for uC/OS-II
+        sizeof(tableStack),      // stack size [bytes]
+        (void *)0);              // no initialization param
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     // NOTE: do NOT call OS_CPU_SysTickInit() from uC/OS-II
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 
     // assign all priority bits for preemption-prio. and none to sub-prio.
+    // NOTE: this might have been changed by STM32Cube.
     NVIC_SetPriorityGrouping(0U);
 
     // set priorities of ALL ISRs used in the system, see NOTE1
@@ -382,7 +379,9 @@ void QF_onStartup(void) {
 //............................................................................
 void QF_onCleanup(void) {
 }
-// QS callbacks ============================================================
+
+//============================================================================
+// QS callbacks...
 #ifdef Q_SPY
 
 //............................................................................

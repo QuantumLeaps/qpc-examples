@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+<model version="7.0.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>Real-time example, multi-stage threads</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -383,6 +383,43 @@ QV_schedDisable(3U); // &lt;== disable scheduler up to given prio.
 $declare ${Shared}
 
 #endif // APP_H_</text>
+  </file>
+  <!--${.::bsp.h}-->
+  <file name="bsp.h">
+   <text>#ifndef BSP_H_
+#define BSP_H_
+
+#define BSP_TICKS_PER_SEC 5000U
+
+void BSP_init(void const * const arg);
+void BSP_start(void);
+
+void BSP_d1on(void);
+void BSP_d1off(void);
+
+void BSP_d2on(void);
+void BSP_d2off(void);
+
+void BSP_d3on(void);
+void BSP_d3off(void);
+
+void BSP_d4on(void);
+void BSP_d4off(void);
+
+void BSP_d5on(void);
+void BSP_d5off(void);
+
+void BSP_d6on(void);
+void BSP_d6off(void);
+
+void BSP_d7on(void);
+void BSP_d7off(void);
+
+// immutable events for Periodic active objects
+QEvt const *BSP_getEvtPeriodic1(uint8_t num);
+QEvt const *BSP_getEvtPeriodic4(uint8_t num);
+
+#endif // BSP_H_</text>
   </file>
   <!--${.::periodic1.c}-->
   <file name="periodic1.c">

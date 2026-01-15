@@ -51,11 +51,14 @@ VPATH := .
 INCLUDES := -I.
 
 C_SRCS := \
+	main.c \
+	bsp.c \
 	blinky.c
 
 DEFINES  :=
 
 CPP_SRCS :=
+
 LIB_DIRS :=
 LIBS     :=
 OUTPUT   := $(PROJECT)
@@ -65,7 +68,7 @@ OUTPUT   := $(PROJECT)
 #
 TARGET   := host
 
-DEFINES :=
+DEFINES +=
 
 BIN_DIR := build_$(TARGET)
 
@@ -73,26 +76,26 @@ BIN_DIR := build_$(TARGET)
 # QP framework
 #
 
-# location of the QP/C framework (if not provided in an env. variable)
-ifeq ($(QP),)
-QP := ../../..
+# location of the QP framework (if not provided in an env. variable)
+ifeq ($(QPC),)
+QPC := ../../..
 endif
 
 ifeq ($(OS),Windows_NT)
 
 ifdef QV
-QP_PORT_DIR := $(QP)/ports/win32-qv
+QP_PORT_DIR := $(QPC)/ports/win32-qv
 else
-QP_PORT_DIR := $(QP)/ports/win32
+QP_PORT_DIR := $(QPC)/ports/win32
 endif
 LIBS += -lws2_32
 
 else
 
 ifdef QV
-QP_PORT_DIR := $(QP)/ports/posix-qv
+QP_PORT_DIR := $(QPC)/ports/posix-qv
 else
-QP_PORT_DIR := $(QP)/ports/posix
+QP_PORT_DIR := $(QPC)/ports/posix
 endif
 LIBS += -lpthread
 
@@ -102,11 +105,11 @@ VPATH += \
 	$(QP_PORT_DIR)
 
 INCLUDES += \
-	-I$(QP)/include \
+	-I$(QPC)/include \
 	-I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
-# QP/C framework sources
+# QP framework sources
 #
 QP_SRCS := \
 	qep_hsm.c \
@@ -131,51 +134,60 @@ QS_SRCS := \
 	qs_port.c
 
 VPATH += \
-	$(QP)/src/qf \
-	$(QP)/src/qs $(QP_PORT_DIR)
+	$(QPC)/src/qf \
+	$(QPC)/src/qs \
+	$(QP_PORT_DIR)
 
 INCLUDES += \
-	-I$(QP)/include \
+	-I$(QPC)/include \
 	-I$(QP_PORT_DIR)
 
 # add the QP sources to the build
 C_SRCS += $(QP_SRCS)
 
 ifeq (spy, $(CONF))  # Spy configuration
-VPATH  += $(QP)/src/qs
+VPATH  += $(QPC)/src/qs
 C_SRCS += $(QS_SRCS)
 endif
 
 #-----------------------------------------------------------------------------
-# GNU toolset:
-# NOTE:  GNU toolset (MinGW) is included in the QTools collection for Windows, see:
-#     https://www.state-machine.com/qtools
+# GNU GCC toolset for the host:
+# NOTE: GNU toolset for Windows (MinGW) is included in the QTools collection
+# for Windows, see: https://www.state-machine.com/qtools
+#
 # It is assumed that %QTOOLS%\bin directory is added to the PATH
 #
 CC    := gcc
 CPP   := g++
 LINK  := gcc    # for C programs
 #LINK  := g++   # for C++ programs
-COV   := gcov -f
 
 #-----------------------------------------------------------------------------
 # basic utilities (included in QTools for Windows), see:
 #     https://www.state-machine.com/qtools
 #
 ifeq ($(OS),Windows_NT)
+	TARGET_EXT := .exe
 	MKDIR      := mkdir
 	RM         := rm
-	TARGET_EXT := .exe
+	CAT        := type
+	COV        := gcov -abcgum
+	CODE_COV := --coverage -fcondition-coverage  # NOTE: required gcc 14 or newer
 else ifeq ($(OSTYPE),cygwin)
-	MKDIR      := mkdir -p
-	RM         := rm -f
 	TARGET_EXT := .exe
-else
 	MKDIR      := mkdir -p
 	RM         := rm -f
+	CAT        := cat
+	COV        := gcov -b
+	CODE_COV := -fprofile-arcs -ftest-coverage   # old gcc (version < 14)
+else
 	TARGET_EXT :=
+	MKDIR      := mkdir -p
+	RM         := rm -f
+	CAT        := cat
+	COV        := gcov -b
+	CODE_COV := -fprofile-arcs -ftest-coverage   # old gcc (version < 14)
 endif
-
 
 ##############################################################################
 # Typically you should not need to change anything below this line
@@ -187,10 +199,12 @@ ifeq (rel, $(CONF)) # Release configuration ..................................
 
 BIN_DIR := build_rel
 # gcc options:
-CFLAGS := -c -fno-pie -std=c11 -pedantic -Wall -Wextra -W \
+CFLAGS := -c -fno-pie -std=c11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-O3 $(INCLUDES) $(DEFINES) $(DEF) -DNDEBUG
 
-CPPFLAGS := -c -fno-pie -std=c++11 -pedantic -Wall -Wextra \
+CPPFLAGS := -c -g -fno-pie -std=c++17 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion -Wold-style-cast \
 	-fno-rtti -fno-exceptions \
 	-O3 $(INCLUDES) $(DEFINES) $(DEF) -DNDEBUG
 
@@ -199,10 +213,12 @@ else ifeq (spy, $(CONF))  # Spy configuration ................................
 BIN_DIR := build_spy
 
 # gcc options:
-CFLAGS := -c -g -fno-pie -std=c11 -pedantic -Wall -Wextra -W \
+CFLAGS := -c -g -fno-pie -std=c11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-O $(INCLUDES) $(DEFINES) $(DEF) -DQ_SPY
 
-CPPFLAGS := -c -g -fno-pie -std=c++11 -pedantic -Wall -Wextra \
+CPPFLAGS := -c -g -fno-pie -std=c++11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion -Wold-style-cast \
 	-fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES) -DQ_SPY
 
@@ -211,23 +227,25 @@ else # default Debug configuration .........................................
 BIN_DIR := build
 
 # gcc options:
-CFLAGS := -c -g -fno-pie -std=c11 -pedantic -Wall -Wextra -W \
+CFLAGS := -c -g -fno-pie -std=c11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-O $(INCLUDES) $(DEFINES) $(DEF)
 
-CPPFLAGS := -c -g -fno-pie -std=c++11 -pedantic -Wall -Wextra \
+CPPFLAGS := -c -g -fno-pie -std=c++11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion -Wold-style-cast \
 	-fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES) $(DEF)
 
 endif  # .....................................................................
 
-ifndef GCC_OLD
-	LINKFLAGS := -no-pie
+ifdef GCOV
+	CFLAGS    += $(CODE_COV)
+	CPPFLAGS  += $(CODE_COV)
+	LINKFLAGS := $(CODE_COV)
 endif
 
-ifdef GCOV
-	CFLAGS    += -fprofile-arcs -ftest-coverage
-	CPPFLAGS  += -fprofile-arcs -ftest-coverage
-	LINKFLAGS += -lgcov --coverage
+ifndef GCC_OLD
+	LINKFLAGS += -no-pie
 endif
 
 #-----------------------------------------------------------------------------
@@ -247,7 +265,6 @@ endif
 
 #-----------------------------------------------------------------------------
 # rules
-#
 
 .PHONY: clean show
 
@@ -256,7 +273,7 @@ all: $(TARGET_EXE)
 ifeq (spy, $(CONF))
 
 $(TARGET_EXE) : $(C_OBJS_EXT) $(CPP_OBJS_EXT)
-	$(CC) $(CFLAGS) $(QP)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
+	$(CC) $(CFLAGS) $(QPC)/src/qs/qstamp.c -o $(BIN_DIR)/qstamp.o
 	$(LINK) $(LINKFLAGS) $(LIB_DIRS) -o $@ $^ $(BIN_DIR)/qstamp.o $(LIBS)
 
 else
@@ -281,12 +298,12 @@ $(BIN_DIR)/%.o : %.cpp
 # create BIN_DIR and include dependencies only if needed
 ifneq ($(MAKECMDGOALS),clean)
   ifneq ($(MAKECMDGOALS),show)
-     ifneq ($(MAKECMDGOALS),debug)
+   ifneq ($(MAKECMDGOALS),debug)
 ifeq ("$(wildcard $(BIN_DIR))","")
 $(shell $(MKDIR) $(BIN_DIR))
 endif
 -include $(C_DEPS_EXT) $(CPP_DEPS_EXT)
-     endif
+   endif
   endif
 endif
 

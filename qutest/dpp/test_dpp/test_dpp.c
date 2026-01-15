@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "bsp.h"
-#include "dpp.h"
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 //#include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 
@@ -49,7 +49,7 @@ int main(void) { // embedded target takes no command-line arguments
         Q_ERROR(); // QS initialization must succeed
     }
 
-    BSP_init(); // initialize the Board Support Package
+    BSP_init((void *)0); // initialize the BSP
 
     // pause execution of the test and wait for the test script to continue
     QS_TEST_PAUSE();
@@ -62,7 +62,7 @@ int main(void) { // embedded target takes no command-line arguments
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
-    // start the active objects...
+    // start and setup dummy AOs...
     static QEvtPtr philoQueueSto[N_PHILO][10];
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         Philo_ctor(n); // instantiate all Philosopher active objects
@@ -75,15 +75,16 @@ int main(void) { // embedded target takes no command-line arguments
             (void *)0);            // initialization param
     }
 
-    static QEvtPtr tableQueueSto[N_PHILO];
+    // start the active objects...
     Table_ctor(); // instantiate the Table active object
-    QActive_start(AO_Table,       // AO to start
-        N_PHILO + 1U,              // QF-priority
-        tableQueueSto,             // event queue storage
-        Q_DIM(tableQueueSto),      // queue length [events]
-        (void *)0,                 // stack storage (not used)
-        0U,                        // size of the stack [bytes]
-        (void *)0);                // initialization param
+    static QEvtPtr tableQueueSto[N_PHILO];
+    QActive_start(AO_Table,   // AO to start
+        N_PHILO + 1U,         // QF-priority
+        tableQueueSto,        // event queue storage
+        Q_DIM(tableQueueSto), // queue length [events]
+        (void *)0,            // stack storage (not used)
+        0U,                   // size of the stack [bytes]
+        (void *)0);           // initialization param
 
     return QF_run(); // run the QF application
 }
@@ -140,7 +141,7 @@ void QS_onTestPost(void const *sender, QActive *recipient,
         case EAT_SIG:
         case DONE_SIG:
         case HUNGRY_SIG:
-            QS_BEGIN_ID(QUTEST_ON_POST, 0U) // application-specific record
+            QS_BEGIN_ID(QUTEST_ON_POST, 0U) // app-specific record
                 QS_SIG(e->sig, recipient);
                 QS_U8(0, Q_EVT_CAST(TableEvt)->philoId);
             QS_END()

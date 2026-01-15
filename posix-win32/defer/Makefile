@@ -51,6 +51,7 @@ VPATH := .
 INCLUDES := -I.
 
 C_SRCS := \
+	main.c \
 	bsp.c \
 	defer.c
 

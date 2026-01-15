@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.1" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+<model version="7.0.2" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>Low-Power example with multiple clock rates</documentation>
  <!--${qpc}-->
  <framework name="qpc"/>
@@ -212,10 +212,10 @@ QTimeEvt_ctorX(&amp;me-&gt;timeEvt1, &amp;me-&gt;super, TIMEOUT1_SIG, 1U);</code
  </package>
  <!--${.}-->
  <directory name=".">
-  <!--${.::low_power.h}-->
-  <file name="low_power.h">
-   <text>#ifndef LOW_POWER_H
-#define LOW_POWER_H
+  <!--${.::app.h}-->
+  <file name="app.h">
+   <text>#ifndef APP_H
+#define APP_H
 
 enum BlinkySignals {
     BTN_PRESSED_SIG = Q_USER_SIG, // button SW1 was pressed
@@ -242,42 +242,69 @@ $declare${AOs::Blinky1_ctor}
 
 #endif
 
-#endif // LOW_POWER_H
-</text>
+#endif // APP_H</text>
+  </file>
+  <!--${.::bsp.h}-->
+  <file name="bsp.h">
+   <text>#ifndef BSP_H_
+#define BSP_H_
+
+// The following ticks-per-second constants determine the speed of the app.
+// The default (#if 1) is the SLOW speed for humans to see the blinking.
+// Change the #if 1 into #if 0 for FAST speed appropriate for logic analyzers.
+//
+#if 1
+    #define BSP_TICKS0_PER_SEC   2U
+    #define BSP_TICKS1_PER_SEC   20U
+#else
+    #define BSP_TICKS0_PER_SEC   200U
+    #define BSP_TICKS1_PER_SEC   2000U
+#endif
+
+#if QF_MAX_TICK_RATE &lt; 2
+    #error this application requires 2 clock tick rates
+#endif
+
+void BSP_init(void const * const arg);
+
+void BSP_led0_on(void);
+void BSP_led0_off(void);
+
+void BSP_led1_on(void);
+void BSP_led1_off(void);
+
+void BSP_tickRate0_on(void);
+void BSP_tickRate1_on(void);
+
+#endif // BSP_H_</text>
   </file>
   <!--${.::blinky0.c}-->
   <file name="blinky0.c">
-   <text>#include &quot;qpc.h&quot;
-#include &quot;low_power.h&quot;
-#include &quot;bsp.h&quot;
+   <text>#include &quot;qpc.h&quot;                 // QP/C real-time event framework
+#include &quot;bsp.h&quot;                 // Board Support Package
+#include &quot;app.h&quot;                 // Application
 
 //Q_DEFINE_THIS_FILE
 
 $declare${AOs::Blinky0}
 
 $define${AOs::AO_Blinky0}
-
-$define${AOs::Blinky0}
-
 $define${AOs::Blinky0_ctor}
-</text>
+$define${AOs::Blinky0}</text>
   </file>
   <!--${.::blinky1.c}-->
   <file name="blinky1.c">
-   <text>#include &quot;qpc.h&quot;
-#include &quot;low_power.h&quot;
-#include &quot;bsp.h&quot;
+   <text>#include &quot;qpc.h&quot;                 // QP/C real-time event framework
+#include &quot;bsp.h&quot;                 // Board Support Package
+#include &quot;app.h&quot;                 // Application
 
 //Q_DEFINE_THIS_FILE
 
 $declare${AOs::Blinky1}
 
 $define${AOs::AO_Blinky1}
-
-$define${AOs::Blinky1}
-
 $define${AOs::Blinky1_ctor}
-</text>
+$define${AOs::Blinky1}</text>
   </file>
  </directory>
 </model>

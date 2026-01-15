@@ -1,39 +1,34 @@
 //============================================================================
 // Product: DPP example, STM32F4-Discovery board, QV kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
 //
-// Contact information:
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "stm32f4xx.h"  // CMSIS-compliant header file for the MCU used
 #include "stm32f4xx_exti.h"
@@ -44,7 +39,7 @@
 
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
-// Local-scope defines -----------------------------------------------------
+// Local-scope defines -------------------------------------------------------
 #define LED_GPIO_PORT     GPIOD
 #define LED_GPIO_CLK      RCC_AHB1Periph_GPIOD
 
@@ -72,34 +67,36 @@ static uint32_t l_rndSeed;
         CONTEXT_SW,
     };
 
-#endif
+#endif // def Q_SPY
 
 //============================================================================
 // Error handler and ISRs...
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    // NOTE: this implementation of the assertion handler is intended only
+    // NOTE: this implementation of the error handler is intended only
     // for debugging and MUST be changed for deployment of the application
     // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, 10000U);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
 
 #ifndef NDEBUG
     // for debugging, hang on in an endless loop...
     for (;;) {
     }
 #endif
-
     NVIC_SystemReset();
+    for (;;) { // explicitly "no-return"
+    }
 }
 //............................................................................
+// assertion failure handler for the STM32 library, including the startup code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
 }
 
-// ISRs used in the application ==========================================
+// ISRs used in the application ==============================================
 
 void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
@@ -109,8 +106,6 @@ void SysTick_Handler(void) {
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
     // and Michael Barr, page 71.
-    //
-    // state of the button debouncing
     static struct {
         uint32_t depressed;
         uint32_t previous;
@@ -176,7 +171,9 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 //============================================================================
 // BSP functions...
 
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -189,7 +186,7 @@ void BSP_init(void) {
     __ISB();
     __DSB();
 
-    // NOTE: SystemInit() has been already called from the startup code
+    // NOTE: SystemInit() already called from the startup code
     // but SystemCoreClock needs to be updated
     SystemCoreClockUpdate();
 
@@ -235,7 +232,7 @@ void BSP_init(void) {
     BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -248,11 +245,9 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -260,28 +255,6 @@ void BSP_start(void) {
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // instantiate and start AOs/threads...
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n);
-        QActive_start(AO_Philo[n],
-            n + 3U,                  // QF-prio.
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            (void *)0, 0U,           // no stack storage
-            (void *)0);              // no initialization param
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    Table_ctor();
-    QActive_start(AO_Table,
-        N_PHILO + 7U,                // QP prio. of the AO
-        tableQueueSto,               // event queue storage
-        Q_DIM(tableQueueSto),        // queue length [events]
-        (void *)0, 0U,               // no stack storage
-        (void *)0);                  // no initialization param
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -326,8 +299,7 @@ void BSP_randomSeed(uint32_t seed) {
 }
 //............................................................................
 uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
-
-    // Some flating point code is to exercise the FPU...
+    // Some floating point code is to exercise the VFP...
     float volatile x = 3.1415926F;
     x = x + 2.7182818F;
 
@@ -355,10 +327,32 @@ void BSP_terminate(int16_t result) {
 //============================================================================
 // QF callbacks...
 void QF_onStartup(void) {
+    // instantiate and start AOs/threads...
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n);
+        QActive_start(AO_Philo[n],
+            n + 3U,                  // QF-prio.
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            (void *)0, 0U,           // no stack storage
+            (void *)0);              // no initialization param
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    Table_ctor();
+    QActive_start(AO_Table,
+        N_PHILO + 7U,                // QP prio. of the AO
+        tableQueueSto,               // event queue storage
+        Q_DIM(tableQueueSto),        // queue length [events]
+        (void *)0, 0U,               // no stack storage
+        (void *)0);                  // no initialization param
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 
     // assign all priority bits for preemption-prio. and none to sub-prio.
+    // NOTE: this might have been changed by STM32Cube.
     NVIC_SetPriorityGrouping(0U);
 
     // set priorities of ALL ISRs used in the system, see NOTE1
@@ -374,9 +368,9 @@ void QF_onStartup(void) {
 //............................................................................
 void QF_onCleanup(void) {
 }
+
 //............................................................................
 void QV_onIdle(void) { // CATION: called with interrupts DISABLED, see NOTE0
-
     // toggle an LED on and then off (not enough LEDs, see NOTE02)
     LED_GPIO_PORT->BSRRL = LED6_PIN; // turn LED on
     __NOP(); // wait a little to actually see the LED glow
@@ -402,19 +396,7 @@ void QV_onIdle(void) { // CATION: called with interrupts DISABLED, see NOTE0
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-M MCU.
-    //
-    // !!!CAUTION!!!
-    // The WFI instruction stops the CPU clock, which unfortunately disables
-    // the JTAG port, so the ST-Link debugger can no longer connect to the
-    // board. For that reason, the call to __WFI() has to be used with CAUTION.
-    //
-    // NOTE: If you find your board "frozen" like this, strap BOOT0 to VDD and
-    // reset the board, then connect with ST-Link Utilities and erase the part.
-    // The trick with BOOT(0) is that it gets the part to run the System Loader
-    // instead of your broken code. When done disconnect BOOT0, and start over.
-    //
-    //QV_CPU_SLEEP(); // atomically go to sleep and enable interrupts
-    QF_INT_ENABLE(); // for now, just enable interrupts
+    QV_CPU_SLEEP(); // atomically go to sleep and enable interrupts
 #else
     QF_INT_ENABLE(); // just enable interrupts
 #endif

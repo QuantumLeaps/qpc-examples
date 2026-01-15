@@ -33,6 +33,10 @@
 #include "stm32c0xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
 
+#ifdef Q_SPY
+    #error QP/Spy software tracing not available in this application
+#endif
+
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 // Local-scope defines -----------------------------------------------------
@@ -70,6 +74,8 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #endif
 
     NVIC_SystemReset();
+    for (;;) { // explicitly "no-return"
+    }
 }
 //............................................................................
 // assertion failure handler for the STM32 library, including the startup code
@@ -125,13 +131,12 @@ void SysTick_Handler(void) {
                 .rtc_toggles = 23,
             };
             TTSched_mode(1U);
-            QACTIVE_POST(AO_Sporadic2, &sporadicA.super, &l_SysTick_Handler);
-            QACTIVE_POST(AO_Sporadic2, &sporadicB.super, &l_SysTick_Handler);
+            QACTIVE_POST(AO_Sporadic2, &sporadicA.super, (void *)0);
+            QACTIVE_POST(AO_Sporadic2, &sporadicB.super, (void *)0);
         }
         else { // B1 is released
-            TTSched_mode(0U);
-            QACTIVE_POST(AO_Periodic4, BSP_getEvtPeriodic4(0U), &l_SysTick_Handler);
-            QACTIVE_POST(AO_Periodic1, BSP_getEvtPeriodic1(0U), &l_SysTick_Handler);
+            QACTIVE_POST(AO_Periodic4, BSP_getEvtPeriodic4(0U), (void *)0);
+            QACTIVE_POST(AO_Periodic1, BSP_getEvtPeriodic1(0U), (void *)0);
         }
     }
 
@@ -140,8 +145,12 @@ void SysTick_Handler(void) {
     BSP_d1off();
 }
 
-// BSP functions =============================================================
-void BSP_init(void) {
+//============================================================================
+// BSP functions...
+
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -153,6 +162,19 @@ void BSP_init(void) {
                 | MPU_CTRL_ENABLE_Msk;        // enable the MPU
     __ISB();
     __DSB();
+
+    // configure the CPU clock to HSI/1 (48MHz)
+    FLASH->ACR = (FLASH->ACR & ~FLASH_ACR_LATENCY) | 0x1U;
+
+    RCC->CR |= RCC_CR_HSEON;
+    while ((RCC->CR & RCC_CR_HSERDY) != 0U) {
+    }
+    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_HPRE) | 0x0U; // RCC_HCLK_DIV_1
+    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_SW) | 0x1U; // source HSE
+    while ((RCC->CFGR & RCC_CFGR_SWS) != 0x8U) {
+    }
+    RCC->CFGR = (RCC->CFGR & ~RCC_CFGR_PPRE) | 0x0U; // APB1 prescaler=1
+    SystemCoreClockUpdate();
 
     // enable GPIO port PA clock
     RCC->IOPENR |= (1U << 0U);
@@ -229,26 +251,26 @@ void BSP_start(void) {
         BSP_getEvtPeriodic4(0U)); // initialization event
 }
 //............................................................................
-void BSP_d1on(void)  { GPIOA->BSRR = (1U << TST1_PIN);         }
-void BSP_d1off(void) { GPIOA->BSRR = (1U << (TST1_PIN + 16U)); }
+void BSP_d1on(void)  { GPIOA->BSRR = (1U << TST1_PIN); __NOP(); __NOP(); }
+void BSP_d1off(void) { GPIOA->BSRR = (1U << (TST1_PIN + 16U)); __NOP(); __NOP(); }
 //............................................................................
-void BSP_d2on(void)  { GPIOA->BSRR = (1U << TST2_PIN);         }
-void BSP_d2off(void) { GPIOA->BSRR = (1U << (TST2_PIN + 16U)); }
+void BSP_d2on(void)  { GPIOA->BSRR = (1U << TST2_PIN); __NOP(); __NOP(); }
+void BSP_d2off(void) { GPIOA->BSRR = (1U << (TST2_PIN + 16U)); __NOP(); __NOP(); }
 //............................................................................
-void BSP_d3on(void)  { GPIOA->BSRR = (1U << TST3_PIN);         }
-void BSP_d3off(void) { GPIOA->BSRR = (1U << (TST3_PIN + 16U)); }
+void BSP_d3on(void)  { GPIOA->BSRR = (1U << TST3_PIN); __NOP(); __NOP(); }
+void BSP_d3off(void) { GPIOA->BSRR = (1U << (TST3_PIN + 16U)); __NOP(); __NOP(); }
 //............................................................................
-void BSP_d4on(void)  { GPIOA->BSRR = (1U << TST4_PIN);         }
-void BSP_d4off(void) { GPIOA->BSRR = (1U << (TST4_PIN + 16U)); }
+void BSP_d4on(void)  { GPIOA->BSRR = (1U << TST4_PIN); __NOP(); __NOP(); }
+void BSP_d4off(void) { GPIOA->BSRR = (1U << (TST4_PIN + 16U)); __NOP(); __NOP(); }
 //............................................................................
-void BSP_d5on(void)  { GPIOA->BSRR = (1U << TST5_PIN);         }
-void BSP_d5off(void) { GPIOA->BSRR = (1U << (TST5_PIN + 16U)); }
+void BSP_d5on(void)  { GPIOA->BSRR = (1U << TST5_PIN); __NOP(); __NOP(); }
+void BSP_d5off(void) { GPIOA->BSRR = (1U << (TST5_PIN + 16U)); __NOP(); __NOP(); }
 //............................................................................
-void BSP_d6on(void)  { GPIOA->BSRR = (1U << TST6_PIN);         } // LED2
-void BSP_d6off(void) { GPIOA->BSRR = (1U << (TST6_PIN + 16U)); }
+void BSP_d6on(void)  { GPIOA->BSRR = (1U << TST6_PIN); __NOP(); __NOP(); }
+void BSP_d6off(void) { GPIOA->BSRR = (1U << (TST6_PIN + 16U)); __NOP(); __NOP(); }
 //............................................................................
-void BSP_d7on(void)  { GPIOA->BSRR = (1U << TST7_PIN);         }
-void BSP_d7off(void) { GPIOA->BSRR = (1U << (TST7_PIN + 16U)); }
+void BSP_d7on(void)  { GPIOA->BSRR = (1U << TST7_PIN); __NOP(); __NOP(); }
+void BSP_d7off(void) { GPIOA->BSRR = (1U << (TST7_PIN + 16U)); __NOP(); __NOP(); }
 
 //............................................................................
 QEvt const *BSP_getEvtPeriodic1(uint8_t num) {
@@ -302,12 +324,6 @@ void QF_onStartup(void) {
 //............................................................................
 void QF_onCleanup(void) {
 }
-//............................................................................
-#ifdef QF_ON_CONTEXT_SW
-// NOTE: the context-switch callback is called with interrupts DISABLED
-void QF_onContextSw(QActive *prev, QActive *next) {
-}
-#endif // QF_ON_CONTEXT_SW
 //............................................................................
 void QV_onIdle(void) { // CAUTION: called with interrupts DISABLED, see NOTE0
     BSP_d7on(); // LED LD2

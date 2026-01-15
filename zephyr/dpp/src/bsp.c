@@ -1,90 +1,87 @@
 //============================================================================
-// Product: "Dining Philosophers Problem" example, Zephyr RTOS kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
+// Example, Zephyr RTOS kernel
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
 //
-// Contact information:
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/sys/reboot.h>
 // add other drivers if necessary...
 
+//============================================================================
 // The devicetree node identifier for the "led0" alias.
 #define LED0_NODE DT_ALIAS(led0)
 
-Q_DEFINE_THIS_FILE
+Q_DEFINE_THIS_FILE  // file name for assertions
 
-// Local-scope objects -----------------------------------------------------
+// Local objects -------------------------------------------------------------
 static struct gpio_dt_spec const l_led0 = GPIO_DT_SPEC_GET(LED0_NODE, gpios);
 static struct k_timer zephyr_tick_timer;
 static uint32_t l_rnd; // random seed
 
 #ifdef Q_SPY
-
-    // QSpy source IDs
-    static QSpyId const timerID = { 0U };
-
     enum AppRecords { // application-specific trace records
         PHILO_STAT = QS_USER,
         PAUSED_STAT,
     };
 
-#endif
+    // QSpy source IDs
+    static QSpyId const timerID = { QS_ID_AP };
+#endif // Q_SPY
 
 //============================================================================
 // Error handler
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    // NOTE: this implementation of the assertion handler is intended only
+    // NOTE: this implementation of the error handler is intended only
     // for debugging and MUST be changed for deployment of the application
     // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, 10000U);
-    Q_PRINTK("\nERROR in %s:%d\n", module, id);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
 
 #ifndef NDEBUG
+    Q_PRINTK("\nERROR in %s:%d\n", module, id);
     k_panic(); // debug build: halt the system for error search...
-#else
-    sys_reboot(SYS_REBOOT_COLD); // release build: reboot the system
 #endif
-    for (;;) { // explicitly no-return
+
+    sys_reboot(SYS_REBOOT_COLD); // release build: reboot the system
+    for (;;) { // explicitly "no-return"
     }
 }
 //............................................................................
-void assert_failed(char const * const module, int_t const id); // prototype
-void assert_failed(char const * const module, int_t const id) {
-    Q_onError(module, id);
+// Zephyr error handler redirecting to the QP error handler
+void k_sys_fatal_error_handler(unsigned int reason,
+    const struct arch_esf *esf)
+{
+    Q_UNUSED_PAR(esf);
+    Q_onError("zephyr", reason);
 }
 
 //............................................................................
@@ -92,37 +89,36 @@ static void zephyr_tick_function(struct k_timer *tid); // prototype
 static void zephyr_tick_function(struct k_timer *tid) {
     Q_UNUSED_PAR(tid);
 
-    QTIMEEVT_TICK_X(0U, &timerID);
+    QTIMEEVT_TICK_X(0U, &timerID); // process time events at rate 0
 }
 
 //============================================================================
+// BSP...
 
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     int ret = gpio_pin_configure_dt(&l_led0, GPIO_OUTPUT_ACTIVE);
     Q_ASSERT(ret >= 0);
 
-    k_timer_init(&zephyr_tick_timer, &zephyr_tick_function, NULL);
+    k_timer_init(&zephyr_tick_timer, &zephyr_tick_function, (void *)0);
 
-    BSP_randomSeed(1234U);
-
-    // initialize the QS software tracing...
-    if (QS_INIT((void *)0) == 0) {
+    // initialize QS software tracing...
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
+    // QS dictionaries...
     QS_OBJ_DICTIONARY(&timerID);
-
     QS_USR_DICTIONARY(PHILO_STAT);
     QS_USR_DICTIONARY(PAUSED_STAT);
 
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL); // all records
-    QS_GLB_FILTER(-QS_QF_TICK);    // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // enable all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the tick record
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -131,31 +127,12 @@ void BSP_start(void) {
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
-    // instantiate and start AOs/threads...
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    static K_THREAD_STACK_DEFINE(philoStack[N_PHILO], 512);
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n);
-        QActive_start(AO_Philo[n],
-            n + 3U,                  // QF-prio. of the AO
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            philoStack[n],           // private stack for embOS
-            K_THREAD_STACK_SIZEOF(philoStack[n]), // stack size [Zephyr]
-            (void *)0);              // no initialization param
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    static K_THREAD_STACK_DEFINE(tableStack, 1024);
-    Table_ctor();
-    QActive_start(AO_Table,
-        N_PHILO + 7U,            // QP prio. of the AO
-        tableQueueSto,           // event queue storage
-        Q_DIM(tableQueueSto),    // queue length [events]
-        tableStack,              // private stack for embOS
-        K_THREAD_STACK_SIZEOF(tableStack), // stack size [Zephyr]
-        (void *)0);              // no initialization param
+    BSP_randomSeed(1234U);
+}
+//............................................................................
+void BSP_terminate(int16_t const result) {
+    Q_UNUSED_PAR(result);
+    QF_stop();
 }
 //............................................................................
 void BSP_ledOn(void) {
@@ -166,7 +143,7 @@ void BSP_ledOff(void) {
     gpio_pin_set_dt(&l_led0, false);
 }
 //............................................................................
-void BSP_displayPhilStat(uint8_t n, char const *stat) {
+void BSP_displayPhilStat(uint8_t const n, char const * const stat) {
     Q_UNUSED_PAR(n);
 
     if (stat[0] == 'e') {
@@ -184,7 +161,7 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
     QS_END()
 }
 //............................................................................
-void BSP_displayPaused(uint8_t paused) {
+void BSP_displayPaused(uint8_t const paused) {
     if (paused) {
         //BSP_ledOn();
     }
@@ -197,33 +174,48 @@ void BSP_displayPaused(uint8_t paused) {
     QS_END()
 }
 //............................................................................
-uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
-    // exercise the FPU with some floating point computations
-    // NOTE: this code can be only called from a task that created with
-    // the option OS_TASK_OPT_SAVE_FP.
-    float volatile x = 3.1415926F;
-    x = x + 2.7182818F;
-
-    // "Super-Duper" Linear Congruential Generator (LCG)
-    // LCG(2^32, 3*7*11*13*23, 0, seed)
-    //
-    uint32_t rnd = l_rnd * (3U*7U*11U*13U*23U);
-    l_rnd = rnd; // set for the next time
-
-    return (rnd >> 8);
-}
-//............................................................................
-void BSP_randomSeed(uint32_t seed) {
+void BSP_randomSeed(uint32_t const seed) {
     l_rnd = seed;
 }
 //............................................................................
-void BSP_terminate(int16_t result) {
-    Q_UNUSED_PAR(result);
+uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
+    // "Super-Duper" Linear Congruential Generator (LCG)
+    // LCG(2^32, 3*7*11*13*23, 0, seed)
+    uint32_t const rnd = l_rnd * (3U*7U*11U*13U*23U);
+    l_rnd = rnd; // set for the next time
+
+    return rnd >> 8U;
 }
 
 //============================================================================
-// QF callbacks...
+// QF...
+
 void QF_onStartup(void) {
+    // instantiate and start AOs/threads...
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    static K_THREAD_STACK_DEFINE(philoStack[N_PHILO], 512);
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n);
+        QActive_start(AO_Philo[n],
+            n + 3U,                  // QF-prio. of the AO
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            philoStack[n],           // private stack for embOS
+            K_THREAD_STACK_SIZEOF(philoStack[n]), // stack size [Zephyr]
+            (void *)0);              // no initialization param
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    static K_THREAD_STACK_DEFINE(tableStack, 512);
+    Table_ctor();
+    QActive_start(AO_Table,
+        N_PHILO + 7U,            // QP prio. of the AO
+        tableQueueSto,           // event queue storage
+        Q_DIM(tableQueueSto),    // queue length [events]
+        tableStack,              // private stack for embOS
+        K_THREAD_STACK_SIZEOF(tableStack), // stack size [Zephyr]
+        (void *)0);              // no initialization param
+
     k_timer_start(&zephyr_tick_timer, K_MSEC(1), K_MSEC(1));
     Q_PRINTK("QF_onStartup\n");
 }
@@ -232,7 +224,7 @@ void QF_onCleanup(void) {
     Q_PRINTK("QF_onCleanup\n");
 }
 
-// QS callbacks ==============================================================
+//============================================================================
 #ifdef Q_SPY
 
 #include <zephyr/drivers/uart.h>
@@ -257,7 +249,7 @@ static void uart_cb(const struct device *dev, void *user_data) {
     }
 }
 //............................................................................
-uint8_t QS_onStartup(void const *arg) {
+uint8_t QS_onStartup(void const * const arg) {
     Q_UNUSED_PAR(arg);
 
     Q_REQUIRE(uart_dev != (struct device *)0);
@@ -296,7 +288,22 @@ void QS_onFlush(void) {
     }
 }
 //............................................................................
-void QS_doOutput(void) {
+void QS_onReset(void) {
+    sys_reboot(SYS_REBOOT_COLD);
+}
+//............................................................................
+void QS_onCommand(uint8_t cmdId,
+    uint32_t param1, uint32_t param2, uint32_t param3)
+{
+    Q_UNUSED_PAR(cmdId);
+    Q_UNUSED_PAR(param1);
+    Q_UNUSED_PAR(param2);
+    Q_UNUSED_PAR(param3);
+}
+//............................................................................
+void QF_onIdle(void) {
+    QS_rxParse();   // parse any QS-RX bytes
+
     uint16_t len = 0xFFFFU; // big number to get all available bytes
 
     QF_CRIT_STAT
@@ -309,19 +316,5 @@ void QS_doOutput(void) {
         uart_poll_out(uart_dev, *buf);
     }
 }
-//............................................................................
-void QS_onReset(void) {
-    sys_reboot(SYS_REBOOT_COLD);
-}
-//............................................................................
-void QS_onCommand(uint8_t cmdId,
-                  uint32_t param1, uint32_t param2, uint32_t param3)
-{
-    Q_UNUSED_PAR(cmdId);
-    Q_UNUSED_PAR(param1);
-    Q_UNUSED_PAR(param2);
-    Q_UNUSED_PAR(param3);
-}
 
 #endif // Q_SPY
-

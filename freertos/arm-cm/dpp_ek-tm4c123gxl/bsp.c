@@ -1,37 +1,34 @@
 //============================================================================
 // Product: DPP example, EK-TM4C123GXL board, FreeRTOS kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "TM4C123GH6PM.h"        // the device specific header (TI)
 #include "sysctl.h"              // system control driver (TI)
@@ -40,6 +37,7 @@
 
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
+// Local-scope defines -------------------------------------------------------
 // LEDs and Switches of the EK-TM4C123GXL board ............................
 #define LED_RED     (1U << 1U)
 #define LED_GREEN   (1U << 3U)
@@ -71,10 +69,10 @@ static uint32_t l_rndSeed;
         PAUSED_STAT,
     };
 
-#endif
+#endif // def Q_SPY
 
 //============================================================================
-// Error handler
+// Error handler and ISRs...
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
@@ -90,13 +88,13 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // for debugging, hang on in an endless loop...
     for (;;) {
     }
-#else
+#endif
     NVIC_SystemReset();
     for (;;) { // explicitly "no-return"
     }
-#endif
 }
 //............................................................................
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -151,7 +149,7 @@ void UART0_IRQHandler(void) {
         QS_RX_PUT(b);
     }
 }
-#endif
+#endif // Q_SPY
 
 // Application hooks used in this project ====================================
 // NOTE: only the "FromISR" API variants are allowed in vApplicationTickHook
@@ -159,8 +157,8 @@ void UART0_IRQHandler(void) {
 void vApplicationTickHook(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    // process time events at rate 0
-    QTIMEEVT_TICK_FROM_ISR(0U, &xHigherPriorityTaskWoken, &l_TickHook);
+    // time events for rate 0
+    QTIMEEVT_TICK_FROM_ISR(0U, &xHigherPriorityTaskWoken, (void *)0);
 
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
@@ -178,7 +176,7 @@ void vApplicationTickHook(void) {
     tmp ^= buttons.depressed;     // changed debounced depressed
     current = buttons.depressed;
 
-    if ((tmp & BTN_SW1) != 0U) {  // debounced SW1 state changed?
+    if ((tmp & BTN_SW1) != 0U) { // debounced SW1 state changed?
         if ((current & BTN_SW1) != 0U) { // is SW1 depressed?
             static QEvt const pauseEvt = QEVT_INITIALIZER(PAUSE_SIG);
             QACTIVE_PUBLISH_FROM_ISR(&pauseEvt,
@@ -227,7 +225,6 @@ void vApplicationIdleHook(void) {
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular Cortex-M MCU.
-    //
     __WFI(); // Wait-For-Interrupt
 #endif
 }
@@ -266,10 +263,12 @@ void vApplicationGetIdleTaskMemory( StaticTask_t **ppxIdleTaskTCBBuffer,
     *pulIdleTaskStackSize = Q_DIM(uxIdleTaskStack);
 }
 
-// BSP functions =============================================================
+//============================================================================
+// BSP functions...
 
-//............................................................................
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // Configure the MPU to prevent NULL-pointer dereferencing ...
     MPU->RBAR = 0x0U                          // base address (NULL)
                 | MPU_RBAR_VALID_Msk          // valid region
@@ -316,10 +315,10 @@ void BSP_init(void) {
     *(uint32_t volatile *)&GPIOF_AHB->CR = 0x00U;
     GPIOF_AHB->LOCK = 0x0; // lock GPIOCR register for SW2
 
-    BSP_randomSeed(1234U);
+    BSP_randomSeed(1234U); // seed the random number generator
 
     // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -332,45 +331,16 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
-    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO]; // small pool
+    static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // start the active objects/threads...
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    static StackType_t philoStack[N_PHILO][configMINIMAL_STACK_SIZE];
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n); // instantiate all Philosopher active objects
-        QActive_setAttr(AO_Philo[n], TASK_NAME_ATTR, "Philo");
-        QActive_start(AO_Philo[n],  // AO to start
-            n + 3U,                  // QP prio. of the AO
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            philoStack[n],           // stack storage
-            sizeof(philoStack[n]),   // stack size [bytes]
-            (QEvt *)0);              // initialization event (not used)
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    static StackType_t tableStack[configMINIMAL_STACK_SIZE];
-    Table_ctor(); // instantiate the Table active object
-    QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
-    QActive_start(AO_Table,         // AO to start
-        N_PHILO + 7U,                // QP prio. of the AO
-        tableQueueSto,               // event queue storage
-        Q_DIM(tableQueueSto),        // queue length [events]
-        tableStack,                  // stack storage
-        sizeof(tableStack),          // stack size [bytes]
-        (QEvt *)0);                  // initialization event (not used)
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -406,12 +376,11 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
     vTaskSuspendAll(); // lock FreeRTOS scheduler
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
-    //
     uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
     xTaskResumeAll(); // unlock the FreeRTOS scheduler
 
-    return (rnd >> 8);
+    return (rnd >> 8U);
 }
 //............................................................................
 void BSP_ledOn(void) {
@@ -427,10 +396,36 @@ void BSP_terminate(int16_t result) {
 }
 
 //============================================================================
-
-// QF callbacks --------------------------------------------------------------
+// QF callbacks...
 
 void QF_onStartup(void) {
+    // start the active objects/threads...
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    static StackType_t philoStack[N_PHILO][configMINIMAL_STACK_SIZE];
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n); // instantiate all Philosopher active objects
+        QActive_setAttr(AO_Philo[n], TASK_NAME_ATTR, "Philo");
+        QActive_start(AO_Philo[n],  // AO to start
+            Q_PRIO(n + 3U, 3U),      // QP prio., FreeRTOS prio.
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            philoStack[n],           // stack storage
+            sizeof(philoStack[n]),   // stack size [bytes]
+            (QEvt *)0);              // initialization event (not used)
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    static StackType_t tableStack[configMINIMAL_STACK_SIZE];
+    Table_ctor(); // instantiate the Table active object
+    QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
+    QActive_start(AO_Table,         // AO to start
+        Q_PRIO(N_PHILO + 7U, 7U),    // QP prio., FreeRTOS prio.
+        tableQueueSto,               // event queue storage
+        Q_DIM(tableQueueSto),        // queue length [events]
+        tableStack,                  // stack storage
+        sizeof(tableStack),          // stack size [bytes]
+        (QEvt *)0);                  // initialization event (not used)
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     //SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC); // done in FreeRTOS
 
@@ -454,7 +449,8 @@ void QF_onStartup(void) {
 void QF_onCleanup(void) {
 }
 
-// QS callbacks --------------------------------------------------------------
+//============================================================================
+// QS callbacks...
 #ifdef Q_SPY
 //............................................................................
 uint8_t QS_onStartup(void const *arg) {
@@ -582,4 +578,4 @@ void QS_onCommand(uint8_t cmdId,
 // of the LED is proportional to the frequency of invocations of the idle loop.
 // Please note that the LED is toggled with interrupts locked, so no interrupt
 // execution time contributes to the brightness of the User LED.
-
+//

@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "bsp.h"
-#include "dpp.h"
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 //#include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 
@@ -54,7 +54,7 @@ int main(void) { // embedded target takes no command-line arguments
         Q_ERROR(); // QS initialization must succeed
     }
 
-    BSP_init(); // initialize the Board Support Package
+    BSP_init((void *)0); // initialize the BSP
 
     // object dictionaries...
     QS_OBJ_DICTIONARY(&Table_dummy);

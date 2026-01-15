@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"          // QP/C real-time event framework
-#include "dpp.h"          // DPP Application interface
-#include "bsp.h"          // Board Support Package
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "stm32u545xx.h"  // CMSIS-compliant header file for the MCU used
 // add other drivers if necessary...
@@ -69,7 +69,7 @@ enum AppRecords { // application-specific trace records
 #endif // def Q_SPY
 
 //============================================================================
-// Error handler and ISRs...
+// Error handler
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
@@ -82,8 +82,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #ifndef NDEBUG
     // light up the user LED
     GPIOA->BSRR = (1U << LD2_PIN);  // turn LED on
-    // for debugging, hang on in an endless loop...
-    for (;;) {
+    for (;;) { // for debugging, hang on in an endless loop...
     }
 #endif
     NVIC_SystemReset();
@@ -91,7 +90,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     }
 }
 //............................................................................
-// assertion failure handler for the STM32 library, including the startup code
+// assertion failure handler for the startup code and libraries
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -101,7 +100,7 @@ void assert_failed(char const * const module, int_t const id) {
 
 void SysTick_Handler(void); // prototype
 void SysTick_Handler(void) {
-    QTIMEEVT_TICK_X(0U, &l_SysTick_Handler); // time events at rate 0
+    QTIMEEVT_TICK_X(0U, &l_SysTick_Handler); // time events for rate 0
 
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
@@ -129,6 +128,7 @@ void SysTick_Handler(void) {
             QACTIVE_PUBLISH(&serveEvt, &l_SysTick_Handler);
         }
     }
+
     QV_ARM_ERRATUM_838869();
 }
 //............................................................................
@@ -172,9 +172,8 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 }
 #endif // QF_ON_CONTEXT_SW
 
-
 //============================================================================
-// BSP functions...
+// BSP...
 
 static void STM32U545RE_MPU_setup(void) {
     // Set Attr 0
@@ -222,7 +221,9 @@ static void STM32U545RE_MPU_setup(void) {
     __ISB();
 }
 //..........................................................................
-void BSP_init(void) {
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // setup the MPU...
     STM32U545RE_MPU_setup();
 
@@ -272,12 +273,12 @@ void BSP_init(void) {
 
     BSP_randomSeed(1234U); // seed the random number generator
 
-    // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    // initialize QS software tracing...
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
-    // dictionaries...
+    // QS dictionaries...
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
     QS_OBJ_DICTIONARY(&l_EXTI0_1_IRQHandler);
     QS_USR_DICTIONARY(PHILO_STAT);
@@ -287,11 +288,9 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // enable all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the tick record
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -299,32 +298,6 @@ void BSP_start(void) {
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // instantiate and start AOs/threads...
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n);
-        QActive_start(AO_Philo[n],
-
-            // NOTE: set the preemption-threshold of all Philos to
-            // the same level, so that they cannot preempt each other.
-            Q_PRIO(n + 3U, N_PHILO + 2U), // QF-prio/pre-thre.
-
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            (void *)0, 0U,           // no stack storage
-            (void *)0);              // no initialization param
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    Table_ctor();
-    QActive_start(AO_Table,
-        N_PHILO + 7U,                // QP prio. of the AO
-        tableQueueSto,               // event queue storage
-        Q_DIM(tableQueueSto),        // queue length [events]
-        (void *)0, 0U,               // no stack storage
-        (void *)0);                  // no initialization param
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
@@ -391,12 +364,37 @@ void BSP_terminate(int16_t result) {
 
 //============================================================================
 // QF callbacks...
+
 void QF_onStartup(void) {
+    // instantiate and start AOs/threads...
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n);
+        QActive_start(AO_Philo[n],
+
+            // NOTE: set the preemption-threshold of all Philos to
+            // the same level, so that they cannot preempt each other.
+            Q_PRIO(n + 3U, N_PHILO + 2U), // QF-prio/pre-thre.
+
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            (void *)0, 0U,           // no stack storage
+            (void *)0);              // no initialization param
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    Table_ctor();
+    QActive_start(AO_Table,
+        N_PHILO + 7U,                // QP prio. of the AO
+        tableQueueSto,               // event queue storage
+        Q_DIM(tableQueueSto),        // queue length [events]
+        (void *)0, 0U,               // no stack storage
+        (void *)0);                  // no initialization param
+
     // set up the SysTick timer to fire at BSP_TICKS_PER_SEC rate
     SysTick_Config(SystemCoreClock / BSP_TICKS_PER_SEC);
 
     // assign all priority bits for preemption-prio. and none to sub-prio.
-    // NOTE: this might have been changed by STM32Cube.
     NVIC_SetPriorityGrouping(0U);
 
     // set priorities of ALL ISRs used in the system, see NOTE1
@@ -474,7 +472,7 @@ static uint16_t const QS_UARTPrescTable[12] = {
 uint8_t QS_onStartup(void const *arg) {
     Q_UNUSED_PAR(arg);
 
-    static uint8_t qsTxBuf[3*1024]; // buffer for QS-TX channel
+    static uint8_t qsTxBuf[2*1024]; // buffer for QS-TX channel
     QS_initBuf(qsTxBuf, sizeof(qsTxBuf));
 
     static uint8_t qsRxBuf[100];    // buffer for QS-RX channel

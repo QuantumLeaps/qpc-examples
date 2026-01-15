@@ -1,39 +1,34 @@
 //============================================================================
 // Product: DPP with lwIP application, preemptive QK kernel
-// Last updated for version 7.3.2
-// Last updated on  2023-12-13
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"  // QP/C header file
-#include "dpp.h"  // application events and active objects
 #include "bsp.h"  // Board Support Package header file
+#include "dpp.h"  // application events and active objects
 
 #include "LM3S6965.h" // the device specific header (TI)
 
@@ -111,10 +106,14 @@ void SysTick_Handler(void) {
 }
 
 //............................................................................
-void BSP_init(void) {
+//============================================================================
+// BSP functions...
+
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
     // NOTE: SystemInit() already called from startup_TM4C123GH6PM.s
     // but SystemCoreClock needs to be updated
-    //
     SystemCoreClockUpdate();
 
     SYSCTL->RCGC2 |= (1 << 5); // enable clock to GPIOF (User and Eth LEDs)
@@ -151,11 +150,13 @@ void BSP_init(void) {
     // The OLED display is encapsulated inside the Table AO, so the
     // initialization of the OLED display happens in the top-most initial
     // transition of the Table AO (see Table_displayInit()).
-    //
 
-    if (QS_INIT((void *)0) == 0) {  // initialize the QS software tracing
+    // initialize the QS software tracing...
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
+
+    // dictionaries...
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
 
     // setup the QS filters...

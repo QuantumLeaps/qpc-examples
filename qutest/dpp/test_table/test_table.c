@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "bsp.h"
-#include "dpp.h"
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 //#include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 
@@ -59,7 +59,7 @@ int main(void) { // embedded target takes no command-line arguments
         Q_ERROR(); // QS initialization must succeed
     }
 
-    BSP_init(); // initialize the Board Support Package
+    BSP_init((void *)0); // initialize the BSP
 
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         QS_OBJ_ARR_DICTIONARY(&Philo_dummy[n], n);
@@ -68,13 +68,13 @@ int main(void) { // embedded target takes no command-line arguments
     // pause execution of the test and wait for the test script to continue
     QS_TEST_PAUSE();
 
-    // initialize publish-subscribe...
-    static QSubscrList subscrSto[MAX_PUB_SIG];
-    QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
     // initialize event pools...
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO]; // small pool
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
+
+    // initialize publish-subscribe...
+    static QSubscrList subscrSto[MAX_PUB_SIG];
+    QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
     // start and setup dummy AOs...
     // NOTE: You need to start dummy AOs, if you wish to subscribe
@@ -82,43 +82,45 @@ int main(void) { // embedded target takes no command-line arguments
     for (uint8_t n = 0U; n < N_PHILO; ++n) {
         QActiveDummy_ctor(&Philo_dummy[n]);
         QActive_start(&Philo_dummy[n].super,
-                     (uint_fast8_t)(n + 1U), // priority
-                     (QEvtPtr *)0, 0U, (void *)0, 0U,
-                     (QEvt const *)0);
+            n + 1U,                // priority
+            (QEvtPtr *)0,          // queue length [events]
+            0U,                    // queue length [events]
+            (void *)0,             // stack storage (not used)
+            0U,                    // size of the stack [bytes]
+            (void *)0);            // initialization param
         QActive_subscribe(AO_Philo[n], EAT_SIG);
     }
 
     // start the active objects...
     Table_ctor(); // instantiate the Table active object
     static QEvtPtr tableQueueSto[N_PHILO];
-    QActive_start(AO_Table,           // AO to start
-                  (uint_fast8_t)(N_PHILO + 1U), // QP priority of the AO
-                  tableQueueSto,        // event queue storage
-                  Q_DIM(tableQueueSto), // queue length [events]
-                  (void *)0,            // stack storage (not used)
-                  0U,                   // size of the stack [bytes]
-                  (void *)0);           // initialization param
+    QActive_start(AO_Table,   // AO to start
+        N_PHILO + 1U,         // QF-priority
+        tableQueueSto,        // event queue storage
+        Q_DIM(tableQueueSto), // queue length [events]
+        (void *)0,            // stack storage (not used)
+        0U,                   // size of the stack [bytes]
+        (void *)0);           // initialization param
 
     return QF_run(); // run the QF application
 }
 
-//............................................................................
+//============================================================================
 void QS_onTestSetup(void) {
     //PRINTF_S("%s\n", "QS_onTestSetup");
 }
 void QS_onTestTeardown(void) {
     //PRINTF_S("%s\n", "QS_onTestTeardown");
 }
-
 //............................................................................
-//! callback function to execute user commands
+// callback function to execute user commands
 void QS_onCommand(uint8_t cmdId,
                   uint32_t param1, uint32_t param2, uint32_t param3)
 {
-    (void)cmdId;
-    (void)param1;
-    (void)param2;
-    (void)param3;
+    Q_UNUSED_PAR(cmdId);
+    Q_UNUSED_PAR(param1);
+    Q_UNUSED_PAR(param2);
+    Q_UNUSED_PAR(param3);
 
     switch (cmdId) {
        case 0U: {
@@ -137,7 +139,7 @@ void QS_onCommand(uint8_t cmdId,
 }
 
 //============================================================================
-//! Host callback function to "massage" the event, if necessary
+// Host callback function to "massage" the event, if necessary
 void QS_onTestEvt(QEvt *e) {
     (void)e;
 #ifdef Q_HOST  // is this test compiled for a desktop Host computer?
@@ -145,12 +147,12 @@ void QS_onTestEvt(QEvt *e) {
 #endif // embedded Target
 }
 //............................................................................
-//! callback function to output the posted QP events (not used here)
+// callback function to output the posted QP events (not used here)
 void QS_onTestPost(void const *sender, QActive *recipient,
                    QEvt const *e, bool status)
 {
-    (void)sender;
-    (void)status;
+    Q_UNUSED_PAR(sender);
+    Q_UNUSED_PAR(status);
     switch (e->sig) {
         case EAT_SIG:
         case DONE_SIG:

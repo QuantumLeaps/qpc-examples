@@ -1,44 +1,40 @@
 //============================================================================
 // Product: DPP on MSP-EXP430F5529LP, QK kernel
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
 //
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
 //
-// Contact information:
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"                 // QP/C real-time event framework
-#include "dpp.h"                 // DPP Application interface
 #include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include <msp430f5529.h>  // MSP430 variant used
 // add other drivers if necessary...
 
-Q_DEFINE_THIS_FILE
+//============================================================================
+Q_DEFINE_THIS_FILE  // file name for assertions
 
 static uint32_t l_rndSeed;
 
@@ -59,7 +55,7 @@ static uint32_t l_rndSeed;
 
 #endif
 
-// Local-scope objects -----------------------------------------------------
+// Local-scope defines -----------------------------------------------------
 // 1MHz clock setting, see BSP_init()
 #define BSP_MCK     1000000U
 #define BSP_SMCLK   1000000U
@@ -71,7 +67,7 @@ static uint32_t l_rndSeed;
 
 
 //============================================================================
-// Error handler and ISRs...
+// Error handler
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
@@ -83,8 +79,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 
 #ifndef NDEBUG
     P4OUT |=  LED2;  // turn LED2 on
-    // for debugging, hang on in an endless loop...
-    for (;;) {
+    for (;;) { // for debugging, hang on in an endless loop...
     }
 #else
     WDTCTL = 0xDEAD;
@@ -93,6 +88,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #endif
 }
 //............................................................................
+// assertion failure handler for the startup and library code
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -111,36 +107,28 @@ void assert_failed(char const * const module, int_t const id) {
     #error MSP430 compiler not supported!
 #endif
 {
-    QK_ISR_ENTRY();    // inform QK about entering the ISR
+    QK_ISR_ENTRY();   // inform QK about entering an ISR
 
     QTIMEEVT_TICK_X(0U, &l_timer0_ISR); // time events at rate 0
 
 #ifdef Q_SPY
     QS_tickTime_ +=
-       (((BSP_SMCLK / 8) + BSP_TICKS_PER_SEC/2) / BSP_TICKS_PER_SEC) + 1;
+       (((BSP_SMCLK / 8U) + BSP_TICKS_PER_SEC/2U) / BSP_TICKS_PER_SEC) + 1U;
 #endif
 
-    QK_ISR_EXIT();     // inform QK about exiting the ISR
+    QK_ISR_EXIT();  // inform QK about exiting an ISR
 
 #ifdef NDEBUG
-    __low_power_mode_off_on_exit(); // turn the low-power mode OFF, NOTE1
+    __low_power_mode_off_on_exit(); // see NOTE1
 #endif
 }
 
+//============================================================================
+// BSP...
 
-//............................................................................
-#ifdef QF_ON_CONTEXT_SW
-// NOTE: the context-switch callback is called with interrupts DISABLED
-void QF_onContextSw(QActive *prev, QActive *next) {
-    QS_BEGIN_INCRIT(CONTEXT_SW, 0U) // in critical section!
-        QS_OBJ(prev);
-        QS_OBJ(next);
-    QS_END_INCRIT()
-}
-#endif // QF_ON_CONTEXT_SW
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
 
-// BSP functions ===========================================================
-void BSP_init(void) {
     WDTCTL = WDTPW | WDTHOLD; // stop watchdog timer
 
     // leave the MCK and SMCLK at default DCO setting
@@ -151,8 +139,8 @@ void BSP_init(void) {
 
     BSP_randomSeed(1234U);
 
-    // initialize the QS software tracing...
-    if (!QS_INIT((void *)0)) {
+    // initialize QS software tracing...
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -165,11 +153,9 @@ void BSP_init(void) {
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);   // all records
-    QS_GLB_FILTER(-QS_QF_TICK);      // exclude the clock tick
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(QS_GRP_ALL);  // all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -177,38 +163,12 @@ void BSP_start(void) {
     // initialize publish-subscribe
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
-
-    // instantiate and start AOs/threads...
-
-    static QEvtPtr philoQueueSto[N_PHILO][10];
-    for (uint8_t n = 0U; n < N_PHILO; ++n) {
-        Philo_ctor(n);
-        QActive_start(AO_Philo[n],
-
-            // NOTE: set the preemption-threshold of all Philos to
-            // the same level, so that they cannot preempt each other.
-            Q_PRIO(n + 1U, N_PHILO), // QF-prio/pre-thre.
-
-            philoQueueSto[n],        // event queue storage
-            Q_DIM(philoQueueSto[n]), // queue length [events]
-            (void *)0, 0U,           // no stack storage
-            (void *)0);              // no initialization param
-    }
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    Table_ctor();
-    QActive_start(AO_Table,
-        N_PHILO + 1U,                // QP prio. of the AO
-        tableQueueSto,               // event queue storage
-        Q_DIM(tableQueueSto),        // queue length [events]
-        (void *)0, 0U,               // no stack storage
-        (void *)0);                  // no initialization param
 }
 //............................................................................
 void BSP_displayPhilStat(uint8_t n, char const *stat) {
     Q_UNUSED_PAR(n);
 
-    if (stat[0] == 'h') { // is Philo hungry?
+    if (stat[0] == 'e') { // is Philo eating?
         P1OUT |=  LED1;  // turn LED1 on
     }
     else {
@@ -253,11 +213,11 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
 }
 //............................................................................
 void BSP_ledOn(void) {
-    //P1OUT |=  LED1;
+    //P1OUT |= LED1; // turn LED1 on
 }
 //............................................................................
 void BSP_ledOff(void) {
-    //P1OUT &= ~LED1;
+    //P1OUT &= ~LED1; // turn LED1 off
 }
 //............................................................................
 void BSP_terminate(int16_t result) {
@@ -266,20 +226,47 @@ void BSP_terminate(int16_t result) {
 
 //============================================================================
 // QF callbacks...
+
 void QF_onStartup(void) {
-    TA0CCTL0 = CCIE;  // CCR0 interrupt enabled
+    // instantiate and start AOs/threads...
+    static QEvtPtr philoQueueSto[N_PHILO][10];
+    for (uint8_t n = 0U; n < N_PHILO; ++n) {
+        Philo_ctor(n);
+        QActive_start(AO_Philo[n],
+
+            // NOTE: set the preemption-threshold of all Philos to
+            // the same level, so that they cannot preempt each other.
+            Q_PRIO(n + 1U, N_PHILO), // QF-prio/pre-thre.
+
+            philoQueueSto[n],        // event queue storage
+            Q_DIM(philoQueueSto[n]), // queue length [events]
+            (void *)0, 0U,           // no stack storage
+            (void *)0);              // no initialization param
+    }
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    Table_ctor();
+    QActive_start(AO_Table,
+        1U,                    // QP prio. of the AO
+        blinkyQueueSto,        // event queue storage
+        Q_DIM(blinkyQueueSto), // queue length [events]
+        (void *)0, 0U,         // no stack storage
+        (void *)0);            // no initialization param
+
+    TA0CCTL0 = CCIE; // CCR0 interrupt enabled
     TA0CCR0 = BSP_MCK / BSP_TICKS_PER_SEC;
     TA0CTL = TASSEL_2 + MC_1 + TACLR; // SMCLK, upmode, clear TAR
 }
 //............................................................................
 void QF_onCleanup(void) {
 }
+
 //............................................................................
 void QK_onIdle(void) {
     // toggle LED2 on and then off, see NOTE2
     QF_INT_DISABLE();
-    P4OUT |=  LED2;  // turn LED2 on
-    P4OUT &= ~LED2;  // turn LED2 off
+    P4OUT |=  LED2; // turn LED2 on
+    P4OUT &= ~LED2; // turn LED2 off
     QF_INT_ENABLE();
 
 #ifdef Q_SPY
@@ -298,8 +285,7 @@ void QK_onIdle(void) {
     // Put the CPU and peripherals to the low-power mode.
     // you might need to customize the clock management for your application,
     // see the datasheet for your particular MSP430 MCU.
-    //
-    __low_power_mode_1(); // enter LPM1; also ENABLES interrupts
+    __low_power_mode_1(); // enter LPM1; also ENABLES interrupts, see NOTE1
 #endif
 }
 
@@ -340,7 +326,8 @@ uint8_t QS_onStartup(void const *arg) {
 #if 1 // 9600 baud rate
     UCA1BR0 = 6; // 1MHz 9600 (see User's Guide)
     UCA1BR1 = 0; // 1MHz 9600
-    UCA1MCTL = UCBRS_0 | UCBRF_13 | UCOS16; // modulationUCBRSx=0, UCBRFx=0, oversampling
+    // modulation UCBRSx=0, UCBRFx=0, oversampling
+    UCA1MCTL = UCBRS_0 | UCBRF_13 | UCOS16;
 #else // 115200 baud rate
     UCA1BR0 = 9;           // 1MHz 115200 (see User's Guide)
     UCA1BR1 = 0;           // 1MHz 115200

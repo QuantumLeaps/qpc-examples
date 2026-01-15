@@ -36,6 +36,6 @@
 
 #define BSP_TICKS_PER_SEC   100U
 
-void BSP_init(void);
+void BSP_init(void const * const arg);
 
 #endif // BSP_H_

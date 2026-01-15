@@ -1,46 +1,45 @@
 //============================================================================
 // Product: BSP for DPP example (console)
-// Last updated for version 8.0.0
-// Last updated on  2024-09-18
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"      // QP/C real-time event framework
-#include "dpp.h"      // DPP Application interface
-#include "bsp.h"      // Board Support Package
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application interface
 
 #include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 #include <stdlib.h>   // for exit()
 
-Q_DEFINE_THIS_MODULE("bsp")
+Q_DEFINE_THIS_FILE
 
-// Local objects -------------------------------------------------------------
+#if (QP_VERSION < 800U)
+#error this application requires qpc version 8.0.0 or higher
+#endif
+
+// local variables -----------------------------------------------------------
 static QTicker l_Ticker0_inst; // "ticker" AO for tick rate 0
 QTicker * const the_Ticker0 = &l_Ticker0_inst;
 
@@ -54,7 +53,6 @@ static uint32_t l_rnd; // random seed
 
     // QSpy source IDs
     static QSpyId const l_clock_tick = { QS_ID_AP };
-
 #endif
 
 //============================================================================
@@ -65,17 +63,12 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     QS_EXIT();
     exit(-1);
 }
-//............................................................................
-void assert_failed(char const * const module, int_t const id); // prototype
-void assert_failed(char const * const module, int_t const id) {
-    Q_onError(module, id);
-}
 
 //============================================================================
-void BSP_init(int argc, char *argv[]) {
-    Q_UNUSED_PAR(argc);
-    Q_UNUSED_PAR(argv);
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg); // when Q_SPY not defined
 
+    QF_consoleSetup();
     PRINTF_S("Dining Philosophers Problem example"
            "\nQP %s\n"
            "Press 'p' to pause\n"
@@ -83,10 +76,8 @@ void BSP_init(int argc, char *argv[]) {
            "Press ESC to quit...\n",
            QP_VERSION_STR);
 
-    BSP_randomSeed(1234U);
-
-    // initialize the QS software tracing
-    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
+    // initialize the QS software tracing...
+    if (!QS_INIT(arg)) {
         Q_ERROR();
     }
 
@@ -100,11 +91,9 @@ void BSP_init(int argc, char *argv[]) {
 
     // setup the QS filters...
     QS_GLB_FILTER(QS_GRP_ALL);
-    QS_GLB_FILTER(-QS_QF_TICK);     // exclude the tick record
-    QS_LOC_FILTER(-(N_PHILO + 4));  // exclude the "ticker" prio
-}
-//............................................................................
-void BSP_start(void) {
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the tick record
+    QS_LOC_FILTER(-(N_PHILO + 4)); // exclude the "ticker" prio
+
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
@@ -113,31 +102,15 @@ void BSP_start(void) {
     static QSubscrList subscrSto[MAX_PUB_SIG];
     QActive_psInit(subscrSto, Q_DIM(subscrSto));
 
-    // instantiate and start AOs/threads...
-
-    QTicker_ctor(the_Ticker0, 0U);   // "ticker" AO for tick rate 0
-    QActive_start(&the_Ticker0->super,
-        N_PHILO + 4U,   // QP priority
-        (void *)0, 0U,  // no queue
-        (void *)0, 0U,  // no stack storage
-        (void *)0);     // no init. event
-
-    static QEvtPtr tableQueueSto[N_PHILO];
-    Table_ctor();
-    QActive_start(AO_Table,
-        N_PHILO + 7U,    // QP prio. of the AO
-        tableQueueSto,   // event queue storage
-        Q_DIM(tableQueueSto), // queue length [events]
-        (void *)0, 0U,   // no stack storage
-        (void *)0);      // no initialization param
+    BSP_randomSeed(1234U);
 }
 //............................................................................
-void BSP_terminate(int16_t result) {
-    (void)result;
+void BSP_terminate(int16_t const result) {
+    Q_UNUSED_PAR(result);
     QF_stop(); // stop the main "ticker thread"
 }
 //............................................................................
-void BSP_displayPhilStat(uint8_t n, char const *stat) {
+void BSP_displayPhilStat(uint8_t const n, char const * const stat) {
     PRINTF_S("Philosopher %2d is %s\n", (int)n, stat);
 
     // application-specific record
@@ -147,7 +120,7 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
     QS_END()
 }
 //............................................................................
-void BSP_displayPaused(uint8_t paused) {
+void BSP_displayPaused(uint8_t const paused) {
     PRINTF_S("Paused is %s\n", paused ? "ON" : "OFF");
 }
 //............................................................................
@@ -157,17 +130,33 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
     //
     uint32_t rnd = l_rnd * (3U*7U*11U*13U*23U);
     l_rnd = rnd;
-    return rnd >> 8;
+    return rnd >> 8U;
 }
 //............................................................................
-void BSP_randomSeed(uint32_t seed) {
+void BSP_randomSeed(uint32_t const seed) {
     l_rnd = seed;
 }
 
 //============================================================================
 void QF_onStartup(void) {
-    QF_consoleSetup();
-    QF_setTickRate(BSP_TICKS_PER_SEC, 10); // desired tick rate/ticker-prio
+    // instantiate and start AOs...
+    QTicker_ctor(the_Ticker0, 0U);   // "ticker" AO for tick rate 0
+    QActive_start(&the_Ticker0->super,
+        N_PHILO + 4U,   // QP priority
+        (QEvtPtr*)0, 0U, // no queue
+        (void *)0, 0U,  // no stack storage
+        (void *)0);     // no init. event
+
+    static QEvtPtr tableQueueSto[N_PHILO];
+    Table_ctor();
+    QActive_start(AO_Table,
+        N_PHILO + 7U,            // QP prio. of the AO
+        tableQueueSto,           // event queue storage
+        Q_DIM(tableQueueSto),    // queue length [events]
+        (void *)0, 0U,           // no stack storage
+        (void *)0);              // no initialization param
+
+    QF_setTickRate(BSP_TICKS_PER_SEC, 50U); // desired tick rate/ticker-prio
 }
 //............................................................................
 void QF_onCleanup(void) {
@@ -176,7 +165,6 @@ void QF_onCleanup(void) {
 }
 //............................................................................
 void QF_onClockTick(void) {
-
     //QTIMEEVT_TICK_X(0U, &l_clock_tick); // process time events at rate 0
     QTICKER_TRIG(the_Ticker0, &l_clock_tick); // trigger ticker AO
 
@@ -205,12 +193,11 @@ void QF_onClockTick(void) {
 }
 
 //============================================================================
-#ifdef Q_SPY // define QS callbacks
+#ifdef Q_SPY
 
 //............................................................................
-//! callback function to execute user commands
 void QS_onCommand(uint8_t cmdId,
-                  uint32_t param1, uint32_t param2, uint32_t param3)
+    uint32_t param1, uint32_t param2, uint32_t param3)
 {
     Q_UNUSED_PAR(cmdId);
     Q_UNUSED_PAR(param1);
@@ -219,3 +206,5 @@ void QS_onCommand(uint8_t cmdId,
 }
 
 #endif // Q_SPY
+
+

@@ -1,66 +1,85 @@
 //============================================================================
-// Product: Console-based BSP
-// Last Updated for Version: 8.0.0
-// Date of the Last Update:  2024-09-16
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// BSP for the "defer" example
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"
-#include "bsp.h"
+#include "qpc.h"                 // QP/C real-time event framework
+#include "bsp.h"                 // Board Support Package
+#include "app.h"                 // Application
 
 #include "safe_std.h" // portable "safe" <stdio.h>/<string.h> facilities
 #include <stdlib.h>   // for exit()
 
-Q_DEFINE_THIS_FILE
+//Q_DEFINE_THIS_FILE
 
 #ifdef Q_SPY
-static uint8_t const l_QF_onClockTick = 0;
+    #error This application does not provide Spy build configuration
 #endif
 
-//............................................................................
-void BSP_init(int argc, char *argv[]) {
-    (void)argc;
-    (void)argv;
+//============================================================================
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    FPRINTF_S(stderr, ">>>> ERROR in %s:%d <<<<", module, id);
+    QF_onCleanup();
+    exit(-1);
+}
 
-    if (QS_INIT((argc > 1) ? argv[1] : (void *)0) == 0U) {
-        Q_ERROR();
-    }
-    QS_OBJ_DICTIONARY(&l_QF_onClockTick);
+//============================================================================
+// BSP functions...
 
-    // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);
-    QS_GLB_FILTER(-QS_QF_TICK);
+void BSP_init(void const * const arg) {
+    Q_UNUSED_PAR(arg);
+
+    QF_consoleSetup();
+    PRINTF_S("Deferred Event state pattern\nQP version: %s\n"
+           "Press 'n' to generate a new request\n"
+           "Press ESC to quit...\n",
+           QP_VERSION_STR);
+
+    // initialize event pool(s) for dynamic events...
+    static QF_MPOOL_EL(RequestEvt) smlPoolSto[20]; // storage for small pool
+    QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
+
+    // publish-subscribe not used, no call to QActive_psInit()
 }
 //............................................................................
+void BSP_showMsg(char const * const msg, uint8_t const num) {
+    PRINTF_S(msg, num);
+}
+
+//============================================================================
 void QF_onStartup(void) {
-    QF_setTickRate(BSP_TICKS_PER_SEC, 30); // set the desired tick rate
-    QF_consoleSetup();
+    // instantiate and start the active objects...
+    TServer_ctor();
+    static QEvtPtr tserverQSto[10]; // event queue storage for TServer AO
+    QActive_start(AO_TServer,
+                  1U,
+                  tserverQSto, Q_DIM(tserverQSto),
+                  (void *)0, 0U, (void *)0);
+
+    QF_setTickRate(BSP_TICKS_PER_SEC, 50U); // desired tick rate/ticker-prio
 }
 //............................................................................
 void QF_onCleanup(void) {
@@ -69,50 +88,24 @@ void QF_onCleanup(void) {
 }
 //............................................................................
 void QF_onClockTick(void) {
-    QTIMEEVT_TICK_X(0U, &l_QF_onClockTick); // perform QF clock tick processing
-
-    QS_RX_INPUT(); // handle the QS-RX input
-    QS_OUTPUT();   // handle the QS output
+    QTIMEEVT_TICK_X(0U, (void *)0); // clock tick processing for rate 0
 
     int key = QF_consoleGetKey();
     if (key != 0) { // any key pressed?
-        BSP_onKeyboardInput((uint8_t)key);
+        switch (key) {
+            case 'n': { // 'n': new request?
+                static uint8_t reqCtr = 0U; // count the requests
+                RequestEvt *e = Q_NEW(RequestEvt, NEW_REQUEST_SIG);
+                e->ref_num = (++reqCtr); // set the reference number
+                // post directly to TServer active object
+                QACTIVE_POST(AO_TServer, (QEvt *)e, (void *)0);
+                break;
+            }
+            case '\033': { // ESC pressed?
+                static QEvt const terminateEvt = QEVT_INITIALIZER(TERMINATE_SIG);
+                QACTIVE_POST(AO_TServer, &terminateEvt, (void *)0);
+                break;
+            }
+        }
     }
 }
-//----------------------------------------------------------------------------
-#ifdef Q_SPY // define QS callbacks
-
-//............................................................................
-//! callback function to execute user commands
-void QS_onCommand(uint8_t cmdId,
-                  uint32_t param1, uint32_t param2, uint32_t param3)
-{
-    switch (cmdId) {
-       case 0U: {
-           break;
-       }
-       default:
-           break;
-    }
-
-    // unused parameters
-    (void)param1;
-    (void)param2;
-    (void)param3;
-}
-
-#endif // Q_SPY
-//----------------------------------------------------------------------------
-
-//............................................................................
-Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    FPRINTF_S(stderr, "ERROR in %s:%d", module, id);
-    QF_onCleanup();
-    exit(-1);
-}
-//............................................................................
-void assert_failed(char const * const module, int_t const id); // prototype
-void assert_failed(char const * const module, int_t const id) {
-    Q_onError(module, id);
-}
-
