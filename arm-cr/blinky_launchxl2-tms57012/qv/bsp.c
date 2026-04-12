@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"                 // QP/C real-time event framework
-#include "bsp.h"                 // Board Support Package
-#include "app.h"                 // Application
+#include "qpc.h"          // QP/C real-time event framework
+#include "bsp.h"          // Board Support Package
+#include "app.h"          // Application
 
 #include "sys_common.h"
 #include "sys_core.h"
@@ -41,7 +41,7 @@
 // add other drivers if necessary...
 
 //============================================================================
-Q_DEFINE_THIS_FILE  // file name for assertions
+Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 // Local-scope defines -------------------------------------------------------
 #define LED2_PIN    1U
@@ -64,12 +64,14 @@ Q_DEFINE_THIS_FILE  // file name for assertions
 // Local-scope objects -----------------------------------------------------
 
 #ifdef Q_SPY
+    // QSpy source IDs...
+    static QSpyId const l_rtiCompare0 = { QS_ID_AP };
+    static QSpyId const l_ssiTest = { QS_ID_AP + 1U };
+
     enum AppRecords { // application-specific trace records
         LED_STAT = QS_USER,
     };
 
-    // QSpy source IDs...
-    static QSpyId const l_rtiCompare0 = { QS_ID_AP };
 #endif // Q_SPY
 
 //============================================================================
@@ -85,11 +87,10 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #ifndef NDEBUG
     for (;;) { // for debugging, hang on in an endless loop...
     }
-#else
+#endif
     systemREG1->SYSECR = 0; // perform system reset
     for (;;) { // explicitly "no-return"
     }
-#endif
 }
 //............................................................................
 // assertion failure handler for the startup code and libraries
@@ -137,6 +138,7 @@ void sciHighLevel(void) {
 //============================================================================
 // BSP...
 
+//............................................................................
 void BSP_init(void const * const arg) {
     Q_UNUSED_PAR(arg);
 
@@ -155,6 +157,7 @@ void BSP_init(void const * const arg) {
 
     // QS dictionaries...
     QS_OBJ_DICTIONARY(&l_rtiCompare0);
+    QS_OBJ_DICTIONARY(&l_ssiTest);
     QS_SIG_DICTIONARY(TIMEOUT_SIG, (void *)0);
     QS_USR_DICTIONARY(LED_STAT);
 
@@ -186,7 +189,7 @@ void BSP_ledOn(void) {
 //............................................................................
 void BSP_ledOff(void) {
     LED2_PORT->DCLR = (1U << LED2_PIN);
-    // application-specific record
+    // application-specific trace record
     QS_BEGIN_ID(LED_STAT, AO_Blinky->prio)
         QS_STR("OFF"); // LED status
     QS_END()
@@ -199,14 +202,14 @@ void QF_onStartup(void) {
     rtiInit(); // configure RTI with UC counter of 7
     rtiSetPeriod(rtiCOUNTER_BLOCK0,
                  (uint32)((RTI_FREQ*1E6/(7+1))/BSP_TICKS_PER_SEC));
-    rtiEnableNotification(rtiNOTIFICATION_COMPARE0);
+    rtiEnableNotification(rtiNOTIFICATION_COMPARE0); // enable interrupt
     rtiStartCounter(rtiCOUNTER_BLOCK0);
 
     // NOTE: don't need to install the IRQ handler in VIM_RAM, because
     // the standard handler rtiCompare0Interrupt() installed in the
     // HALCoGen code is adequate
     vimREG->FIRQPR0 &= ~(1U << 2U);   // designate interrupt as IRQ, NOTE0
-    vimREG->REQMASKSET0 = (1U << 2U); // enable RTI interrupt
+    vimREG->REQMASKSET0 = (1U << 2U); // enable interrupt
 
     QF_INT_ENABLE_ALL(); // enable all interrupts (IRQ and FIQ)
 }
@@ -305,6 +308,7 @@ void QS_onCommand(uint8_t cmdId,
 }
 
 #endif // Q_SPY
+//----------------------------------------------------------------------------
 
 //============================================================================
 // NOTE0:

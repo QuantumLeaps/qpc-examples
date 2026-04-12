@@ -179,7 +179,7 @@ MKDIR := mkdir
 RM    := rm
 
 #-----------------------------------------------------------------------------
-# build options for various configurations for ARM Cortex-M
+# build options for various configurations
 #
 
 # combine all the sources...

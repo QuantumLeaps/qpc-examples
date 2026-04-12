@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"                 // QP/C real-time event framework
-#include "bsp.h"                 // Board Support Package
-#include "app.h"                 // Application
+#include "qpc.h"          // QP/C real-time event framework
+#include "bsp.h"          // Board Support Package
+#include "app.h"          // Application
 
 #include "sys_common.h"
 #include "sys_core.h"
@@ -41,7 +41,7 @@
 // add other drivers if necessary...
 
 //============================================================================
-Q_DEFINE_THIS_FILE  // file name for assertions
+Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 // Local-scope defines -------------------------------------------------------
 #define LED2_PIN    1U
@@ -64,13 +64,14 @@ Q_DEFINE_THIS_FILE  // file name for assertions
 // Local-scope objects -----------------------------------------------------
 
 #ifdef Q_SPY
+    // QSpy source IDs...
+    static QSpyId const l_rtiCompare0 = { QS_ID_AP };
+    static QSpyId const l_ssiTest = { QS_ID_AP + 1U };
+
     enum AppRecords { // application-specific trace records
         LED_STAT = QS_USER,
     };
 
-    // QSpy source IDs...
-    static QSpyId const l_rtiCompare0 = { QS_ID_AP };
-    static QSpyId const l_ssiTest = { QS_ID_AP + 1U };
 #endif // Q_SPY
 
 //============================================================================
@@ -86,11 +87,10 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #ifndef NDEBUG
     for (;;) { // for debugging, hang on in an endless loop...
     }
-#else
+#endif
     systemREG1->SYSECR = 0; // perform system reset
     for (;;) { // explicitly "no-return"
     }
-#endif
 }
 //............................................................................
 // assertion failure handler for the startup code and libraries
@@ -224,7 +224,7 @@ void QF_onCleanup(void) {
 }
 //............................................................................
 void QK_onIdle(void) {
-    // toggle User LED on and then off, see NOTE01
+    // toggle LED1 on and then off, see NOTE1
     QF_INT_DISABLE();
     LED3_PORT->DSET = (1U << LED3_PIN);
     LED3_PORT->DCLR = (1U << LED3_PIN);
@@ -312,6 +312,7 @@ void QS_onCommand(uint8_t cmdId,
 }
 
 #endif // Q_SPY
+//----------------------------------------------------------------------------
 
 //============================================================================
 // NOTE0:

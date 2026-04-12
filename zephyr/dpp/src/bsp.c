@@ -1,5 +1,5 @@
 //============================================================================
-// Example, Zephyr RTOS kernel
+// QP/C Real-Time Event Framework (RTEF)
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
@@ -46,13 +46,14 @@ static struct k_timer zephyr_tick_timer;
 static uint32_t l_rnd; // random seed
 
 #ifdef Q_SPY
+    // QSpy source IDs
+    static QSpyId const timerID = { QS_ID_AP };
+
     enum AppRecords { // application-specific trace records
         PHILO_STAT = QS_USER,
         PAUSED_STAT,
     };
 
-    // QSpy source IDs
-    static QSpyId const timerID = { QS_ID_AP };
 #endif // Q_SPY
 
 //============================================================================
@@ -70,7 +71,6 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     Q_PRINTK("\nERROR in %s:%d\n", module, id);
     k_panic(); // debug build: halt the system for error search...
 #endif
-
     sys_reboot(SYS_REBOOT_COLD); // release build: reboot the system
     for (;;) { // explicitly "no-return"
     }
@@ -302,7 +302,7 @@ void QS_onCommand(uint8_t cmdId,
 }
 //............................................................................
 void QF_onIdle(void) {
-    QS_rxParse();   // parse any QS-RX bytes
+    QS_rxParse(); // parse any QS-RX bytes
 
     uint16_t len = 0xFFFFU; // big number to get all available bytes
 

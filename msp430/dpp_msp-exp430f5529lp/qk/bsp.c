@@ -184,8 +184,8 @@ void BSP_init(void const * const arg) {
     Table_ctor();
     QActive_start(AO_Table,
         1U,                    // QP prio. of the AO
-        blinkyQueueSto,        // event queue storage
-        Q_DIM(blinkyQueueSto), // queue length [events]
+        tableQueueSto,         // event queue storage
+        Q_DIM(tableQueueSto),  // queue length [events]
         (void *)0, 0U,         // no stack storage
         (void *)0);            // no initialization param
 }

@@ -61,15 +61,14 @@ static uint32_t l_rndSeed;
         PAUSED_STAT,
     };
 
-#endif // def Q_SPY
+#endif // Q_SPY
 
 //============================================================================
 // Error handler
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
-    // for debugging and MUST be changed for deployment of the application
-    // (assuming that you ship your production code with assertions enabled).
+    // for debugging and MUST be changed for deployment of the application.
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
@@ -124,7 +123,7 @@ void USART3_IRQHandler(void) {
         l_uartHandle.Instance->ISR &= ~USART_ISR_RXNE_RXFNE; // clear int.
     }
 }
-#endif
+#endif // Q_SPY
 
 // Application hooks used in this project ====================================
 // NOTE: only the "FromISR" API variants are allowed in vApplicationTickHook
@@ -132,7 +131,7 @@ void USART3_IRQHandler(void) {
 void vApplicationTickHook(void) {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    // process time events for rate 0
+    // process time events at rate 0
     QTIMEEVT_TICK_FROM_ISR(0U, &xHigherPriorityTaskWoken, &l_TickHook);
 
     // Perform the debouncing of buttons. The algorithm for debouncing
@@ -299,7 +298,7 @@ void BSP_init(void const * const arg) {
     QS_GLB_FILTER(QS_GRP_ALL);  // all records
     QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
 
-    // initialize event pools
+    // initialize event pools for mutable events
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
     QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
 
@@ -326,7 +325,7 @@ void BSP_init(void const * const arg) {
     static StackType_t tableStack[configMINIMAL_STACK_SIZE];
     Table_ctor(); // instantiate the Table active object
     QActive_setAttr(AO_Table, TASK_NAME_ATTR, "Table");
-    QActive_start(AO_Table,         // AO to start
+    QActive_start(AO_Table,          // AO to start
         Q_PRIO(N_PHILO + 7U, 7U),    // QP prio., FreeRTOS prio.
         tableQueueSto,               // event queue storage
         Q_DIM(tableQueueSto),        // queue length [events]
@@ -371,18 +370,18 @@ void BSP_randomSeed(uint32_t const seed) {
 }
 //............................................................................
 uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
-    // Some floating point code is to exercise the VFP...
+    // Some flating point code is to exercise the FPU...
     double volatile x = 3.1415926;
     x = x + 2.7182818;
 
     vTaskSuspendAll(); // lock FreeRTOS scheduler
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
-    uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
+    uint32_t const rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
     xTaskResumeAll(); // unlock the FreeRTOS scheduler
 
-    return (rnd >> 8U);
+    return rnd >> 8U;
 }
 //............................................................................
 void BSP_ledOn(void) {
@@ -538,4 +537,3 @@ void QS_onCommand(uint8_t cmdId,
 // of the LED is proportional to the frequency of invocations of the idle loop.
 // Please note that the LED is toggled with interrupts locked, so no interrupt
 // execution time contributes to the brightness of the User LED.
-

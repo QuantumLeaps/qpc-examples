@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"                 // QP/C real-time event framework
-#include "bsp.h"                 // Board Support Package
-#include "app.h"                 // Application
+#include "qpc.h"          // QP/C real-time event framework
+#include "bsp.h"          // Board Support Package
+#include "app.h"          // Application
 
 #include "sys_common.h"
 #include "sys_core.h"
@@ -41,7 +41,7 @@
 // add other drivers if necessary...
 
 //============================================================================
-Q_DEFINE_THIS_FILE  // file name for assertions
+Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 // Local-scope defines -------------------------------------------------------
 #define LED2_PIN    1U
@@ -65,15 +65,16 @@ Q_DEFINE_THIS_FILE  // file name for assertions
 static uint32_t     l_rndSeed;
 
 #ifdef Q_SPY
+    // QSpy source IDs...
+    static QSpyId const l_rtiCompare0 = { QS_ID_AP };
+    static QSpyId const l_ssiTest = { QS_ID_AP + 1U };
+
     enum AppRecords { // application-specific trace records
         PHILO_STAT = QS_USER,
         PAUSED_STAT,
         CONTEXT_SW,
     };
 
-    // QSpy source IDs...
-    static QSpyId const l_rtiCompare0 = { QS_ID_AP };
-    static QSpyId const l_ssiTest = { QS_ID_AP + 1U };
 #endif // Q_SPY
 
 //============================================================================
@@ -89,11 +90,10 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #ifndef NDEBUG
     for (;;) { // for debugging, hang on in an endless loop...
     }
-#else
+#endif
     systemREG1->SYSECR = 0; // perform system reset
     for (;;) { // explicitly "no-return"
     }
-#endif
 }
 //............................................................................
 // assertion failure handler for the startup code and libraries
@@ -182,6 +182,7 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 //============================================================================
 // BSP...
 
+//............................................................................
 void BSP_init(void const * const arg) {
     Q_UNUSED_PAR(arg);
 
@@ -206,7 +207,6 @@ void BSP_init(void const * const arg) {
     QS_USR_DICTIONARY(PHILO_STAT);
     QS_USR_DICTIONARY(PAUSED_STAT);
     QS_USR_DICTIONARY(CONTEXT_SW);
-
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
@@ -257,7 +257,7 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
         LED2_PORT->DCLR = (1U << LED2_PIN);
     }
 
-    // app-specific trace record...
+    // application-specific trace record
     QS_BEGIN_ID(PHILO_STAT, AO_Table->prio)
         QS_U8(1, n);  // Philosopher number
         QS_STR(stat); // Philosopher status
@@ -292,12 +292,11 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
     QSchedStatus lockStat = QK_schedLock(N_PHILO);
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
-    //
-    uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
+    uint32_t const rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
     QK_schedUnlock(lockStat); // unlock the scheduler
 
-    return (rnd >> 8U);
+    return rnd >> 8U;
 }
 //............................................................................
 void BSP_terminate(int16_t result) {
@@ -311,12 +310,12 @@ void QF_onStartup(void) {
     rtiInit(); // configure RTI with UC counter of 7
     rtiSetPeriod(rtiCOUNTER_BLOCK0,
                  (uint32)((RTI_FREQ*1E6/(7+1))/BSP_TICKS_PER_SEC));
-    rtiEnableNotification(rtiNOTIFICATION_COMPARE0);
+    rtiEnableNotification(rtiNOTIFICATION_COMPARE0); // enable interrupt
     rtiStartCounter(rtiCOUNTER_BLOCK0);
 
     VIM_RAM[2 + 1] = (t_isrFuncPTR)&rtiCompare0; // install the IRQ
     vimREG->FIRQPR0 &= ~(1U << 2U);   // designate interrupt as IRQ, NOTE0
-    vimREG->REQMASKSET0 = (1U << 2U); // enable RTI interrupt
+    vimREG->REQMASKSET0 = (1U << 2U); // enable interrupt
 
     VIM_RAM[21 + 1] = (t_isrFuncPTR)&ssiTest ; // install the IRQ
     vimREG->FIRQPR0 &= ~(1U << 21);   // designate interrupt as IRQ, NOTE0
@@ -326,6 +325,7 @@ void QF_onStartup(void) {
 }
 //............................................................................
 void QF_onCleanup(void) {
+    QS_EXIT();
 }
 //............................................................................
 void QK_onIdle(void) {
@@ -339,7 +339,7 @@ void QK_onIdle(void) {
     QS_rxParse();  // parse all the received bytes
 
     //if (sciIsTxReady(scilinREG)) {
-    if ((scilinREG->FLR & (uint32)SCI_TX_INT) != 0U) {  // is TX empty?
+    if ((scilinREG->FLR & (uint32)SCI_TX_INT) != 0U) { // is TX empty?
         QF_INT_DISABLE();
         uint16_t b = QS_getByte();
         QF_INT_ENABLE();
@@ -408,7 +408,7 @@ void QS_onReset(void) {
 }
 //............................................................................
 void QS_onCommand(uint8_t cmdId,
-                  uint32_t param1, uint32_t param2, uint32_t param3)
+    uint32_t param1, uint32_t param2, uint32_t param3)
 {
     Q_UNUSED_PAR(cmdId);
     Q_UNUSED_PAR(param1);
@@ -431,4 +431,3 @@ void QS_onCommand(uint8_t cmdId,
 // of the LED is proportional to the frequency of invocations of the idle loop.
 // Please note that the LED is toggled with interrupts locked, so no interrupt
 // execution time contributes to the brightness of the User LED.
-//

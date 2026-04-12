@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"                 // QP/C real-time event framework
-#include "bsp.h"                 // Board Support Package
-#include "app.h"                 // Application
+#include "qpc.h"          // QP/C real-time event framework
+#include "bsp.h"          // Board Support Package
+#include "app.h"          // Application
 
 #include "sys_common.h"
 #include "sys_core.h"
@@ -40,9 +40,10 @@
 #include "sci.h"
 // add other drivers if necessary...
 
+//============================================================================
 Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
-// Local-scope objects -----------------------------------------------------
+// Local-scope defines -------------------------------------------------------
 #define LED2_PIN    1U
 #define LED2_PORT   gioPORTB
 
@@ -60,13 +61,13 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 #define VIM_RAM     ((t_isrFuncPTR *)0xFFF82000U)
 
+// Local-scope objects -----------------------------------------------------
 static uint32_t     l_rndSeed;
 
 #ifdef Q_SPY
-
-    // QSpy source IDs
-    static QSpyId const l_rtiCompare0 = { 0U };
-    static QSpyId const l_ssiTest = { 0U };
+    // QSpy source IDs...
+    static QSpyId const l_rtiCompare0 = { QS_ID_AP };
+    static QSpyId const l_ssiTest = { QS_ID_AP + 1U };
 
     enum AppRecords { // application-specific trace records
         PHILO_STAT = QS_USER,
@@ -74,15 +75,14 @@ static uint32_t     l_rndSeed;
         CONTEXT_SW,
     };
 
-#endif
+#endif // Q_SPY
 
 //============================================================================
-// Error handler and ISRs...
+// Error handler
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
-    // for debugging and MUST be changed for deployment of the application
-    // (assuming that you ship your production code with assertions enabled).
+    // for debugging and MUST be changed for deployment of the application.
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
@@ -96,7 +96,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     }
 }
 //............................................................................
-// assertion failure handler for the STM32 library, including the startup code
+// assertion failure handler for the startup code and libraries
 void assert_failed(char const * const module, int_t const id); // prototype
 void assert_failed(char const * const module, int_t const id) {
     Q_onError(module, id);
@@ -110,7 +110,7 @@ void assert_failed(char const * const module, int_t const id) {
 void rtiNotification(uint32 notification) {
 
     rtiREG1->INTFLAG = 1U;    // clear the interrupt source
-    QTIMEEVT_TICK_X(0U, (void *)0); // time events at rate 0
+    QTIMEEVT_TICK_X(0U, &l_rtiCompare0); // time events at rate 0
 
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
@@ -174,7 +174,7 @@ void QF_onContextSw(QActive *prev, QActive *next) {
 #endif // QF_ON_CONTEXT_SW
 
 //============================================================================
-// BSP functions...
+// BSP...
 
 void BSP_init(void const * const arg) {
     Q_UNUSED_PAR(arg);
@@ -200,12 +200,11 @@ void BSP_init(void const * const arg) {
     QS_USR_DICTIONARY(PHILO_STAT);
     QS_USR_DICTIONARY(PAUSED_STAT);
     QS_USR_DICTIONARY(CONTEXT_SW);
-
     QS_ONLY(produce_sig_dict());
 
     // setup the QS filters...
-    QS_GLB_FILTER(QS_GRP_ALL);  // all records
-    QS_GLB_FILTER(-QS_QF_TICK); // exclude the clock tick
+    QS_GLB_FILTER(QS_GRP_ALL);  // enable all records
+    QS_GLB_FILTER(-QS_QF_TICK); // exclude the tick record
 
     // initialize event pools
     static QF_MPOOL_EL(TableEvt) smlPoolSto[2*N_PHILO];
@@ -247,7 +246,7 @@ void BSP_displayPhilStat(uint8_t n, char const *stat) {
         LED2_PORT->DCLR = (1U << LED2_PIN);
     }
 
-    // app-specific trace record...
+    // application-specific trace record
     QS_BEGIN_ID(PHILO_STAT, AO_Table->prio)
         QS_U8(1, n);  // Philosopher number
         QS_STR(stat); // Philosopher status
@@ -280,10 +279,10 @@ uint32_t BSP_random(void) { // a very cheap pseudo-random-number generator
 
     // "Super-Duper" Linear Congruential Generator (LCG)
     // LCG(2^32, 3*7*11*13*23, 0, seed)
-    uint32_t rnd = l_rndSeed * (3U*7U*11U*13U*23U);
+    uint32_t const rnd = l_rndSeed * (3U*7U*11U*13U*23U);
     l_rndSeed = rnd; // set for the next time
 
-    return (rnd >> 8U);
+    return rnd >> 8U;
 }
 //............................................................................
 void BSP_terminate(int16_t result) {
@@ -292,6 +291,7 @@ void BSP_terminate(int16_t result) {
 
 //============================================================================
 // QF callbacks...
+
 void QF_onStartup(void) {
     rtiInit(); // configure RTI with UC counter of 7
     rtiSetPeriod(rtiCOUNTER_BLOCK0,
@@ -303,6 +303,7 @@ void QF_onStartup(void) {
 }
 //............................................................................
 void QF_onCleanup(void) {
+    QS_EXIT();
 }
 //............................................................................
 void QV_onIdle(void) { // CATION: called with interrupts DISABLED, NOTE1
@@ -384,7 +385,7 @@ void QS_onReset(void) {
 }
 //............................................................................
 void QS_onCommand(uint8_t cmdId,
-                  uint32_t param1, uint32_t param2, uint32_t param3)
+    uint32_t param1, uint32_t param2, uint32_t param3)
 {
     Q_UNUSED_PAR(cmdId);
     Q_UNUSED_PAR(param1);
@@ -413,4 +414,3 @@ void QS_onCommand(uint8_t cmdId,
 // of the LED is proportional to the frequency of invocations of the idle loop.
 // Please note that the LED is toggled with interrupts locked, so no interrupt
 // execution time contributes to the brightness of the User LED.
-//

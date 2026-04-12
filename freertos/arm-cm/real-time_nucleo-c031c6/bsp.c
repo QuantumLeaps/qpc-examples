@@ -62,8 +62,7 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
-    // for debugging and MUST be changed for deployment of the application
-    // (assuming that you ship your production code with assertions enabled).
+    // for debugging and MUST be changed for deployment of the application.
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
@@ -71,8 +70,7 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
 #ifndef NDEBUG
     // light up the user LED
     GPIOA->BSRR = (1U << TST7_PIN);  // turn LED on
-    // for debugging, hang on in an endless loop...
-    for (;;) {
+    for (;;) { // for debugging, hang on in an endless loop...
     }
 #endif
     NVIC_SystemReset();
@@ -101,7 +99,7 @@ void vApplicationTickHook(void) {
 
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
-    // process time events for rate 0
+    // process time events at rate 0
     QTIMEEVT_TICK_FROM_ISR(0U, &xHigherPriorityTaskWoken, (void *)0);
 
     // Perform the debouncing of buttons. The algorithm for debouncing
