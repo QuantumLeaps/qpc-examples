@@ -1,32 +1,29 @@
 //============================================================================
-// QP configuration file example
-// Last updated for version: 8.0.0
-// Last updated on: 2024-09-25
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// QP/C configuration file (FreeRTOS)
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
+//
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This software is dual-licensed under the terms of the open source GNU
-// General Public License version 3 (or any later version), or alternatively,
-// under the terms of one of the closed source Quantum Leaps commercial
-// licenses.
-//
-// The terms of the open source GNU General Public License version 3
-// can be found at: <www.gnu.org/licenses/gpl-3.0>
-//
-// The terms of the closed source Quantum Leaps commercial licenses
-// can be found at: <www.state-machine.com/licensing>
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
 // Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
-// <www.state-machine.com>
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
+// <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #ifndef QP_CONFIG_H_
@@ -37,7 +34,7 @@
 // <o>QP API compatibility version (QP_API_VERSION)
 //   <0=>  0   (Maximum compatibility)
 //   <691=>691 (QP 6.9.1 or newer)
-//   <734=>7.3.4 (QP 7.3.4 or newer)
+//   <750=>750 (QP 7.5.0 or newer)
 //   <9999=>9999 (Latest only)
 // <i>QP API backwards compatibility with the QP API version.
 // <i>Lower QP_API_VERSION values enable backwards compatibility
@@ -51,38 +48,7 @@
 #define QP_API_VERSION 0
 
 //..........................................................................
-// <h>QP Functional Safety (FuSa) Subsystem (Q_UNSAFE)
-// <i>The QP FuSa Subsystem consists of the following facilities:
-// <i>- Software assertions as a recommended technique
-// <i>  (called Failure Assertion Programming (FAP) in IEC 61508)
-// <i>- Software Self-Monitoring (SSM), which encompasses such techniques:
-// <i>  * Duplicate Inverse Storage for critical variables
-// <i>  * Memory Markers for critical objects (e.g., events)
-// <i>  * Hard-limits for all loops
-// <i>  * Memory Isolation by means of Memory Protection Unit (MPU)
-
-// <c3>Disable QP FuSa in development
-// <i>Disable assertions and other self monitoring features
-// <i>in development build configurations (NDEBUG undefined).
-// <i>VIOLATES functional safety standards. NOT recommended !!!
-//#ifndef NDEBUG
-//#define Q_UNSAFE
-//#endif
-// </c>
-
-// <c3>Disable QP FuSa in production release
-// <i>Disable assertions and other self monitoring features
-// <i>in the release build configurations (NDEBUG defined).
-// <i>VIOLATES functional safety standards. NOT recommended !!!
-//#ifdef NDEBUG
-//#define Q_UNSAFE
-//#endif
-// </c>
-
-// </h>
-
-//..........................................................................
-// <h>QF Framework
+// <h>QF Framework (Active Objects)
 // <i>Active Object framework
 
 // <o>Maximum # Active Objects (QF_MAX_ACTIVE) <1-64>
@@ -158,10 +124,30 @@
 //#define QACTIVE_CAN_STOP
 // </c>
 
+// <c1>Enable context switch callback *without* QS (QF_ON_CONTEXT_SW)
+// <i>Context switch callback QF_onContextSw() when Q_SPY is undefined.
+//#ifndef Q_SPY
+//#define QF_ON_CONTEXT_SW
+//#endif
+// </c>
+
+// <c1>Enable context switch callback *with* QS (QF_ON_CONTEXT_SW)
+// <i>Context switch callback QF_onContextSw() when Q_SPY is defined.
+//#ifdef Q_SPY
+//#define QF_ON_CONTEXT_SW
+//#endif
+// </c>
+
+// <c2>Enable memory isolation (QF_MEM_ISOLATE)
+// <i>Memory isolation (supported in SafeQP only, requires MPU)
+// <i>NOTE: implies QF_ON_CONTEXT_SW.
+//#define QF_MEM_ISOLATE
+// </c>
+
 // </h>
 
 //..........................................................................
-// <h>QS Software Tracing
+// <h>QS Software Tracing (Q_SPY)
 // <i>Target-resident component of QP/Spy software tracing system
 // <i>(tracing instrumentation and command-input).
 // <i>NOTE: The QS software tracing instrumentation is activated only when

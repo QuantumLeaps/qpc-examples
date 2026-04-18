@@ -338,8 +338,8 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-                <Define></Define>
-                <Undefine></Undefine>
+              <Define></Define>
+              <Undefine></Undefine>
               <IncludePath>..\..;..\..\..\..\..\include;..\..\..\..\..\ports\arm-cm\qv\armclang;..\..\..\..\..\3rd_party\CMSIS\Include;..\..\..\..\..\3rd_party\ek-tm4c123gxl</IncludePath>
             </VariousControls>
           </Cads>
@@ -385,14 +385,14 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
-            </File>
-            <File>
-              <FileName>dpp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -1016,14 +1016,14 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
-            </File>
-            <File>
-              <FileName>dpp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -1647,14 +1647,14 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
-            </File>
-            <File>
-              <FileName>dpp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>

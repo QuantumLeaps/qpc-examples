@@ -1,34 +1,35 @@
 //============================================================================
 // Product: BSP for DPP application with lwIP on EV-LM3S9665 board
-// Last Updated for Version: 4.1.03
-// Date of the Last Update:  Mar 05, 2010
 //
-//                   Q u a n t u m     L e a P s
-//                   ---------------------------
-//                   innovating embedded systems
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C)-2010 Quantum Leaps, LLC. All rights reserved.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// This software may be distributed and modified under the terms of the GNU
-// General Public License version 2 (GPL) as published by the Free Software
-// Foundation and appearing in the file GPL.TXT included in the packaging of
-// this file. Please note that GPL Section 2[b] requires that all works based
-// on this software must also be made publicly available under the terms of
-// the GPL ("Copyleft").
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// Alternatively, this software may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GPL and are specifically designed for licensees interested in
-// retaining the proprietary status of their code.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// Contact information:
-// Quantum Leaps Web site:  http://www.quantum-leaps.com
-// e-mail:                  info@quantum-leaps.com
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
+//
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
+// <www.state-machine.com/licensing>
+// <info@state-machine.com>
 //============================================================================
 #ifndef BSP_H_
 #define BSP_H_
 
-#define BSP_TICKS_PER_SEC    100
+#define BSP_TICKS_PER_SEC    100U
 
 void BSP_init(void const * const arg);
 

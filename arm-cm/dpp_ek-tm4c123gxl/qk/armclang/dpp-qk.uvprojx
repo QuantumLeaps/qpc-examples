@@ -385,6 +385,11 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1006,6 +1011,11 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1626,6 +1636,11 @@
         <Group>
           <GroupName>Applicatioin</GroupName>
           <Files>
+            <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
             <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>

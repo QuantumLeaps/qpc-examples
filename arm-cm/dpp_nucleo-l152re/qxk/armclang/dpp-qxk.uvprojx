@@ -186,6 +186,7 @@
             <RvdsVP>0</RvdsVP>
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
+            <nBranchProt>0</nBranchProt>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -384,6 +385,11 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -392,11 +398,6 @@
               <FileName>bsp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\bsp.h</FilePath>
-            </File>
-            <File>
-              <FileName>dpp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
             </File>
             <File>
               <FileName>philo.c</FileName>
@@ -831,6 +832,7 @@
             <RvdsVP>0</RvdsVP>
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
+            <nBranchProt>0</nBranchProt>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -1029,6 +1031,11 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1037,11 +1044,6 @@
               <FileName>bsp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\bsp.h</FilePath>
-            </File>
-            <File>
-              <FileName>dpp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
             </File>
             <File>
               <FileName>philo.c</FileName>
@@ -1476,6 +1478,7 @@
             <RvdsVP>0</RvdsVP>
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
+            <nBranchProt>0</nBranchProt>
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
@@ -1674,6 +1677,11 @@
           <GroupName>Application</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1682,11 +1690,6 @@
               <FileName>bsp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\bsp.h</FilePath>
-            </File>
-            <File>
-              <FileName>dpp.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
             </File>
             <File>
               <FileName>philo.c</FileName>

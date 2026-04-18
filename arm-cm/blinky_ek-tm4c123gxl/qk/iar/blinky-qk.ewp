@@ -3250,7 +3250,7 @@
             <name>$PROJ_DIR$\..\..\blinky.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\..\blinky.h</name>
+            <name>$PROJ_DIR$\..\..\app.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\bsp.c</name>

@@ -385,6 +385,11 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -398,11 +403,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>blinky.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\blinky.h</FilePath>
             </File>
             <File>
               <FileName>xthr.c</FileName>
@@ -433,11 +433,6 @@
               <FileName>gpio.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>rom.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\rom.h</FilePath>
             </File>
             <File>
               <FileName>sysctl.h</FileName>
@@ -1026,6 +1021,11 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1039,11 +1039,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>blinky.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\blinky.h</FilePath>
             </File>
             <File>
               <FileName>xthr.c</FileName>
@@ -1074,11 +1069,6 @@
               <FileName>gpio.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>rom.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\rom.h</FilePath>
             </File>
             <File>
               <FileName>sysctl.h</FileName>
@@ -1667,6 +1657,11 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1680,11 +1675,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>blinky.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\blinky.h</FilePath>
             </File>
             <File>
               <FileName>xthr.c</FileName>
@@ -1715,11 +1705,6 @@
               <FileName>gpio.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\gpio.h</FilePath>
-            </File>
-            <File>
-              <FileName>rom.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\..\..\3rd_party\ek-tm4c123gxl\rom.h</FilePath>
             </File>
             <File>
               <FileName>sysctl.h</FileName>

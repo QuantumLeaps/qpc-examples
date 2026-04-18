@@ -1,46 +1,41 @@
 //============================================================================
-// Product: DPP example
-// Last updated for version 5.4.0
-// Last updated on  2015-03-25
+// DPP example
 //
-//                   Q u a n t u m     L e a P s
-//                   ---------------------------
-//                   innovating embedded systems
+// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// Copyright (C) 2005 Quantum Leaps, www.state-machine.com.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses/>.
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
 //
-// Contact information:
-// Web:   www.state-machine.com
+// Quantum Leaps contact information:
+// <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #include "qpc.h"     // QP/C header file
-#include "dpp.h"     // application events and active objects
 #include "bsp.h"     // Board Support Package header file
+#include "app.h"     // application events and active objects
 
 Q_DEFINE_THIS_FILE
 
 // Active object class -----------------------------------------------------
 typedef struct PhiloTag {
     QActive super;
-    QTimeEvt timeEvt;                   // for timing out thining or eating
+    QTimeEvt timeEvt; // for timing out thinking or eating
 } Philo;
 
 static QState Philo_initial (Philo *me, QEvt const *e);
@@ -49,15 +44,15 @@ static QState Philo_hungry  (Philo *me, QEvt const *e);
 static QState Philo_eating  (Philo *me, QEvt const *e);
 
 // Local objects -----------------------------------------------------------
-static Philo l_philo[N_PHILO];                    // storage for all Philos
+static Philo l_philo[N_PHILO]; // storage for all Philos
 
 #define THINK_TIME  (BSP_TICKS_PER_SEC/2)
 #define EAT_TIME    (BSP_TICKS_PER_SEC/5)
 
-                           // helper macro to provide the ID of Philo "me_"
+// helper macro to provide the ID of Philo "me_"
 #define PHILO_ID(me_)    ((uint8_t)((me_) - l_philo))
 
-enum InternalSignals {                                  // internal signals
+enum InternalSignals { // internal signals
     TIMEOUT_SIG = MAX_SIG
 };
 
@@ -71,7 +66,7 @@ QActive * const AO_Philo[N_PHILO] = {     // "opaque" pointers to Philo AO
 };
 
 //............................................................................
-void Philo_ctor(void) {                    // instantiate all Philo objects
+void Philo_ctor(void) { // instantiate all Philo objects
     uint8_t n;
     Philo *me;
     for (n = 0; n < N_PHILO; ++n) {
@@ -82,8 +77,8 @@ void Philo_ctor(void) {                    // instantiate all Philo objects
 }
 //............................................................................
 QState Philo_initial(Philo *me, QEvt const *e) {
-    static uint8_t registered;         // starts off with 0, per C-standard
-    (void)e;        // suppress the compiler warning about unused parameter
+    static uint8_t registered; // starts off with 0, per C-standard
+    (void)e; // suppress the compiler warning about unused parameter
     if (!registered) {
         QS_OBJ_DICTIONARY(&l_philo[0]);
         QS_OBJ_DICTIONARY(&l_philo[0].timeEvt);
@@ -103,12 +98,12 @@ QState Philo_initial(Philo *me, QEvt const *e) {
 
         registered = (uint8_t)1;
     }
-    QS_SIG_DICTIONARY(HUNGRY_SIG, me);            // signal for each Philos
-    QS_SIG_DICTIONARY(TIMEOUT_SIG, me);           // signal for each Philos
+    QS_SIG_DICTIONARY(HUNGRY_SIG, me);  // signal for each Philos
+    QS_SIG_DICTIONARY(TIMEOUT_SIG, me); // signal for each Philos
 
     QActive_subscribe((QActive *)me, EAT_SIG);
 
-    return Q_TRAN(&Philo_thinking);          // top-most initial transition
+    return Q_TRAN(&Philo_thinking); // top-most initial transition
 }
 //............................................................................
 QState Philo_thinking(Philo *me, QEvt const *e) {
@@ -120,9 +115,9 @@ QState Philo_thinking(Philo *me, QEvt const *e) {
         case TIMEOUT_SIG: {
             return Q_TRAN(&Philo_hungry);
         }
-        case EAT_SIG:                         // intentionally fall-through
+        case EAT_SIG:  // intentionally fall-through
         case DONE_SIG: {
-                      // EAT or DONE must be for other Philos than this one
+            // EAT or DONE must be for other Philos than this one
             Q_ASSERT(((TableEvt const *)e)->philoNum != PHILO_ID(me));
             return Q_HANDLED();
         }
@@ -145,7 +140,7 @@ QState Philo_hungry(Philo *me, QEvt const *e) {
             break;
         }
         case DONE_SIG: {
-                             // DONE must be for other Philos than this one
+            // DONE must be for other Philos than this one
             Q_ASSERT(((TableEvt const *)e)->philoNum != PHILO_ID(me));
             return Q_HANDLED();
         }
@@ -168,9 +163,9 @@ QState Philo_eating(Philo *me, QEvt const *e) {
         case TIMEOUT_SIG: {
             return Q_TRAN(&Philo_thinking);
         }
-        case EAT_SIG:                         // intentionally fall-through
+        case EAT_SIG: // intentionally fall-through
         case DONE_SIG: {
-                      // EAT or DONE must be for other Philos than this one
+            // EAT or DONE must be for other Philos than this one
             Q_ASSERT(((TableEvt const *)e)->philoNum != PHILO_ID(me));
             return Q_HANDLED();
         }

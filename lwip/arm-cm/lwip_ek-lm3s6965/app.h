@@ -1,11 +1,9 @@
 //============================================================================
-// Product: DPP example with lwIP
-// Last Updated for Version: 5.1.1
-// Date of the Last Update:  Oct 20, 2013
+// Application example with lwIP
 //
-//                   Q u a n t u m     L e a P s
-//                   ---------------------------
-//                   innovating embedded systems
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
 // Copyright (C)-2013 Quantum Leaps, LLC. All rights reserved.
 //
@@ -32,8 +30,8 @@
 //                         <www.state-machine.com/licensing>
 // e-mail:                  info@quantum-leaps.com
 //============================================================================
-#ifndef DPP_H
-#define DPP_H
+#ifndef APP_H
+#define APP_H
 
 enum DPPSignals {
    EAT_SIG = Q_USER_SIG,     // published by Table to let a philosopher eat
@@ -76,4 +74,4 @@ extern QActive * const AO_Philo[N_PHILO]; // "opaque" pointers to Philo  AO
 extern QActive * const AO_Table;          // "opaque" pointer to Table   AO
 extern QActive * const AO_LwIPMgr;        // "opaque" pointer to LwIPMgr AO
 
-#endif  // DPP_H
+#endif  // APP_H

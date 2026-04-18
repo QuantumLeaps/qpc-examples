@@ -3261,7 +3261,7 @@
             <name>$PROJ_DIR$\..\bsp.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\..\dpp.h</name>
+            <name>$PROJ_DIR$\..\app.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\..\main.c</name>

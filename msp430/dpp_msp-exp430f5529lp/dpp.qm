@@ -90,7 +90,7 @@ return me;</code>
    <!--${App::Philo_ctor::id}-->
    <parameter name="id" type="uint_fast8_t const"/>
    <code>Philo * const me = &amp;Philo_inst[id];
-QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Philo_initial));
+QMActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Philo_initial));
 QTimeEvt_ctorX(&amp;me-&gt;timeEvt, Q_ACTIVE_UPCAST(me), TIMEOUT_SIG, 0U),
 me-&gt;id = (uint8_t)id;</code>
   </operation>
@@ -101,7 +101,7 @@ me-&gt;id = (uint8_t)id;</code>
   <!--${App::Table_ctor}-->
   <operation name="Table_ctor" type="void" visibility="0x00" properties="0x00">
    <code>Table * const me = &amp;Table_inst;
-QMActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Table_initial));
+QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Table_initial));
 for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
     me-&gt;fork[n] = FREE;
     me-&gt;isHungry[n] = false;
@@ -111,7 +111,7 @@ for (uint8_t n = 0U; n &lt; N_PHILO; ++n) {
  <!--${AOs}-->
  <package name="AOs" stereotype="0x02">
   <!--${AOs::Philo}-->
-  <class name="Philo" superclass="qpc::QActive">
+  <class name="Philo" superclass="qpc::QMActive">
    <documentation>The Philo AO and the N_PHILO instances</documentation>
    <!--${AOs::Philo::timeEvt}-->
    <attribute name="timeEvt" type="QTimeEvt" visibility="0x02" properties="0x00"/>
@@ -232,7 +232,7 @@ Q_ASSERT(Q_EVT_CAST(TableEvt)-&gt;philoId != me-&gt;id);</action>
    </statechart>
   </class>
   <!--${AOs::Table}-->
-  <class name="Table" superclass="qpc::QMActive">
+  <class name="Table" superclass="qpc::QActive">
    <!--${AOs::Table::fork[N_PHILO]}-->
    <attribute name="fork[N_PHILO]" type="uint8_t" visibility="0x02" properties="0x00"/>
    <!--${AOs::Table::isHungry[N_PHILO]}-->

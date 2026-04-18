@@ -1,41 +1,36 @@
 //============================================================================
-// Product: lwIP-Manager Active Object
-// Last updated for version 7.2.0
-// Last updated on  2022-12-22
-//
-//                   Q u a n t u m  L e a P s
-//                   ------------------------
-//                   Modern Embedded Software
+// lwIP-Manager Active Object
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
-// This program is open source software: you can redistribute it and/or
-// modify it under the terms of the GNU General Public License as published
-// by the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
+//                    Q u a n t u m  L e a P s
+//                    ------------------------
+//                    Modern Embedded Software
 //
-// Alternatively, this program may be distributed and modified under the
-// terms of Quantum Leaps commercial licenses, which expressly supersede
-// the GNU General Public License and are specifically designed for
-// licensees interested in retaining the proprietary status of their code.
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
-// This program is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
+// This software is dual-licensed under the terms of the open-source GNU
+// General Public License (GPL) or under the terms of one of the closed-
+// source Quantum Leaps commercial licenses.
 //
-// You should have received a copy of the GNU General Public License
-// along with this program. If not, see <www.gnu.org/licenses>.
+// Redistributions in source code must retain this top-level comment block.
+// Plagiarizing this software to sidestep the license obligations is illegal.
 //
-// Contact information:
+// NOTE:
+// The GPL does NOT permit the incorporation of this code into proprietary
+// programs. Please contact Quantum Leaps for commercial licensing options,
+// which expressly supersede the GPL and are designed explicitly for
+// closed-source distribution.
+//
+// Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
 #define LWIP_ALLOWED
 
 #include "qpc.h"   // QP/C API
-#include "dpp.h"   // application events and active objects
 #include "bsp.h"   // Board Support Package
+#include "app.h"   // application events and active objects
 
 #include "lwip.h"  // lwIP stack
 #include "httpd.h" // lwIP application
@@ -198,7 +193,7 @@ QState LwIPMgr_running(LwIPMgr *me, QEvt const *e) {
                                       strlen(((TextEvt const *)e)->text) + 1);
                 if (p != (struct pbuf *)0) {
                     udp_send(me->upcb, p);
-                    pbuf_free(p);                   // don't leak the pbuf!
+                    pbuf_free(p); // don't leak the pbuf!
                 }
             }
             return Q_HANDLED();
@@ -213,14 +208,14 @@ QState LwIPMgr_running(LwIPMgr *me, QEvt const *e) {
             return Q_HANDLED();
         }
         case LWIP_SLOW_TICK_SIG: {
-                                                 // has IP address changed?
+            // has IP address changed?
             if (me->ip_addr != me->netif->ip_addr.addr) {
                 TextEvt *te;
-                uint32_t ip_net;    // IP address in the network byte order
+                uint32_t ip_net; // IP address in the network byte order
 
                 me->ip_addr = me->netif->ip_addr.addr; // save the IP addr.
                 ip_net  = ntohl(me->ip_addr);
-                    // publish the text event to display the new IP address
+                // publish the text event to display the new IP address
                 te = Q_NEW(TextEvt, DISPLAY_IPADDR_SIG);
                 snprintf(te->text, sizeof(te->text), "%d.%d.%d.%d",
                           (int)(((ip_net) >> 24) & 0xFFU),
@@ -319,7 +314,7 @@ static int ssi_handler(int iIndex, char *pcInsert, int iInsertLen) {
     return snprintf(pcInsert, MAX_TAG_INSERT_LEN, "%d", value);
 }
 
-// Common Gateway Iinterface (CG) handler ..................................
+// Common Gateway Interface (CG) handler ..................................
 static char const *cgi_display(int index, int numParams,
                                char const *param[],
                                char const *value[])

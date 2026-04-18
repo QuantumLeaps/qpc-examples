@@ -1,5 +1,5 @@
 //============================================================================
-// Product: DPP with lwIP application, preemptive QK kernel
+// BSP for DPP with lwIP on EK-LM3S9665 board, QK kernel
 //
 // Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 //
@@ -28,7 +28,7 @@
 //============================================================================
 #include "qpc.h"  // QP/C header file
 #include "bsp.h"  // Board Support Package header file
-#include "dpp.h"  // application events and active objects
+#include "app.h"  // application events and active objects
 
 #include "LM3S6965.h" // the device specific header (TI)
 
@@ -60,39 +60,62 @@ static uint32_t l_nTicks;
 
 #endif
 
-//............................................................................
-void SysTick_Handler(void) {
-    // state of the button debouncing, see below
-    static struct ButtonsDebouncing {
-        uint32_t depressed;
-        uint32_t previous;
-    } buttons = { 0U, 0U };
-    uint32_t current;
-    uint32_t volatile tmp;
+//============================================================================
+// Error handler
 
+Q_NORETURN Q_onError(char const * const module, int_t const id) {
+    // NOTE: this implementation of the error handler is intended only
+    // for debugging and MUST be changed for deployment of the application
+    // (assuming that you ship your production code with assertions enabled).
+    Q_UNUSED_PAR(module);
+    Q_UNUSED_PAR(id);
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
+
+#ifndef NDEBUG
+    // light up the user LED
+    GPIOF->DATA_Bits[USER_LED] = USER_LED; // turn the User LED on
+    for (;;) { // for debugging, hang on in an endless loop...
+    }
+#endif
+    NVIC_SystemReset();
+    for (;;) { // explicitly "no-return"
+    }
+}
+//............................................................................
+// assertion failure handler for the startup and library code
+void assert_failed(char const * const module, int_t const id); // prototype
+void assert_failed(char const * const module, int_t const id) {
+    Q_onError(module, id);
+}
+
+// ISRs used in the application ==============================================
+
+void SysTick_Handler(void); // prototype
+void SysTick_Handler(void) {
     QK_ISR_ENTRY();    // inform QK about ISR entry
 
     ++l_nTicks;        // count the number of clock ticks
 
-#ifdef Q_SPY
-    tmp = SysTick->CTRL; // clear SysTick_CTRL_COUNTFLAG
-    QS_tickTime_ += QS_tickPeriod_; // account for the clock rollover
-#endif
-
-    QTIMEEVT_TICK_X(0U, &l_SysTick_Handler); // process time events for rate 0
+    QTIMEEVT_TICK_X(0U, &l_SysTick_Handler); // time events at rate 0
 
     // Perform the debouncing of buttons. The algorithm for debouncing
     // adapted from the book "Embedded Systems Dictionary" by Jack Ganssle
     // and Michael Barr, page 71.
-    //
-    current = ~GPIOF->DATA_Bits[USER_BTN]; // read USER_BTN
-    tmp = buttons.depressed; // save the debounced depressed buttons
+    static struct {
+        uint32_t depressed;
+        uint32_t previous;
+    } buttons = { 0U, 0U };
+
+    uint32_t current = ~GPIOF->DATA_Bits[USER_BTN]; // read USER_BTN
+    uint32_t tmp = buttons.depressed; // save the debounced depressed buttons
     buttons.depressed |= (buttons.previous & current); // set depressed
     buttons.depressed &= (buttons.previous | current); // clear released
     buttons.previous   = current; // update the history
     tmp ^= buttons.depressed;     // changed debounced depressed
+    current = buttons.depressed;
+
     if ((tmp & USER_BTN) != 0U) { // debounced USER_BTN state changed?
-        if ((buttons.depressed & USER_BTN) != 0U) { // is BTN depressed?
+        if ((current & USER_BTN) != 0U) { // is BTN depressed?
             static QEvt const bd = QEVT_INITIALIZER(BTN_DOWN_SIG);
             QACTIVE_PUBLISH(&bd, &l_SysTick_Handler);
         }
@@ -102,15 +125,21 @@ void SysTick_Handler(void) {
         }
     }
 
+#ifdef Q_SPY
+    tmp = SysTick->CTRL; // clear SysTick_CTRL_COUNTFLAG
+    QS_tickTime_ += QS_tickPeriod_; // account for the clock rollover
+#endif
+
     QK_ISR_EXIT();  // inform QK about ISR exit
 }
 
-//............................................................................
 //============================================================================
-// BSP functions...
+// BSP...
 
 void BSP_init(void const * const arg) {
     Q_UNUSED_PAR(arg);
+
+    SystemCoreClockUpdate();
 
     SYSCTL->RCGC2 |= (1 << 5); // enable clock to GPIOF (User and Eth LEDs)
     __NOP();
@@ -152,7 +181,7 @@ void BSP_init(void const * const arg) {
         Q_ERROR();
     }
 
-    // dictionaries...
+    // QS dictionaries...
     QS_OBJ_DICTIONARY(&l_SysTick_Handler);
 
     // setup the QS filters...
@@ -170,26 +199,24 @@ void QF_onStartup(void) {
     NVIC_SetPriorityGrouping(0U);
 
     // set priorities of ALL ISRs used in the system, see NOTE1
-    //
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!! CAUTION !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // Assign a priority to EVERY ISR explicitly by calling NVIC_SetPriority().
-    // DO NOT LEAVE THE ISR PRIORITIES AT THE DEFAULT VALUE!
-    //
     NVIC_SetPriority(Ethernet_IRQn,  QF_AWARE_ISR_CMSIS_PRI);
     NVIC_SetPriority(SysTick_IRQn,   QF_AWARE_ISR_CMSIS_PRI + 1U);
     // ...
 
+    // enable IRQs in the NVIC...
     NVIC_EnableIRQ(Ethernet_IRQn); // enable the Ethernet Interrupt
+    // ...
 }
 //............................................................................
 void QF_onCleanup(void) {
 }
+
 //............................................................................
 void QK_onIdle(void) {
     // toggle the User LED on and then off, see NOTE2
     QF_INT_DISABLE();
     GPIOF->DATA_Bits[USER_LED] = USER_LED; // turn the User LED on
-    GPIOF->DATA_Bits[USER_LED] = 0;        // turn the User LED off
+    GPIOF->DATA_Bits[USER_LED] = 0U;       // turn the User LED off
     QF_INT_ENABLE();
 
 #ifdef Q_SPY
@@ -215,46 +242,31 @@ void QK_onIdle(void) {
 }
 
 //............................................................................
-Q_NORETURN Q_onError(char const * const module, int_t const id) {
-    //
-    // NOTE: add here your application-specific error handling
-    //
-    Q_UNUSED_PAR(module);
-    Q_UNUSED_PAR(id);
-
-    QS_ASSERTION(module, id, 10000U); // report assertion to QS
-    NVIC_SystemReset();
-}
-
-//............................................................................
 // sys_now() is used in the lwIP stack
-//
 uint32_t sys_now(void) {
-    return l_nTicks * (1000 / BSP_TICKS_PER_SEC);
-}
-//............................................................................
-void assert_failed(char const * const module, int_t const id); // prototype
-void assert_failed(char const * const module, int_t const id) {
-    Q_onError(module, id);
+    return l_nTicks * (1000U / BSP_TICKS_PER_SEC);
 }
 
-//----------------------------------------------------------------------------
+//============================================================================
+// QS callbacks...
 #ifdef Q_SPY
+
 //............................................................................
 uint8_t QS_onStartup(void const *arg) {
-    static uint8_t qsBuf[6*256]; // buffer for Quantum Spy
-    uint32_t tmp;
-    QS_initBuf(qsBuf, sizeof(qsBuf));
+    Q_UNUSED_PAR(arg);
+
+    static uint8_t qsTxBuf[2*1024]; // buffer for QS-TX channel
+    QS_initBuf(qsTxBuf, sizeof(qsTxBuf));
 
     // enable the peripherals used by the UART0
-    SYSCTL->RCGC1 |= (1 << 0);  // enable clock to UART0
-    SYSCTL->RCGC2 |= (1 << 0);  // enable clock to GPIOA
+    SYSCTL->RCGC1 |= (1U << 0);  // enable clock to UART0
+    SYSCTL->RCGC2 |= (1U << 0);  // enable clock to GPIOA
     __NOP();  // wait after enabling clocks
     __NOP();
     __NOP();
 
     // configure UART0 pins for UART operation
-    tmp = (1 << 0) | (1 << 1);
+    uint32_t tmp = (1U << 0U) | (1U << 1U);
     GPIOA->DIR   &= ~tmp;
     GPIOA->AFSEL |=  tmp;
     GPIOA->DR2R  |=  tmp;  // set 2mA drive, DR4R and DR8R are cleared
@@ -265,17 +277,17 @@ uint8_t QS_onStartup(void const *arg) {
     GPIOA->DEN   |=  tmp;
     GPIOA->AMSEL &= ~tmp;
 
-    // configure the UART for the desired baud rate, 8-N-1 operation
+    // configure the UART for the desired baud rate, 8-N-1 operation...
     SystemCoreClockUpdate();
-    tmp = (((SystemCoreClock * 8) / UART_BAUD_RATE) + 1) / 2;
-    UART0->IBRD   = tmp / 64;
-    UART0->FBRD   = tmp % 64;
-    UART0->LCRH   = 0x60;  // configure 8-bit operation
-    UART0->LCRH  |= 0x10;  // enable FIFOs
-    UART0->CTL   |= (1 << 0) | (1 << 8) | (1 << 9);
+    tmp = (((SystemCoreClock * 8U) / UART_BAUD_RATE) + 1U) / 2U;
+    UART0->IBRD   = tmp / 64U;
+    UART0->FBRD   = tmp % 64U;
+    UART0->LCRH   = 0x60U; // configure 8-bit operation
+    UART0->LCRH  |= 0x10U; // enable FIFOs
+    UART0->CTL   |= (1U << 0) | (1U << 8) | (1U << 9);
 
     QS_tickPeriod_ = SystemCoreClock / BSP_TICKS_PER_SEC;
-    QS_tickTime_ = QS_tickPeriod_;  // to start the timestamp at zero
+    QS_tickTime_   = QS_tickPeriod_; // to start the timestamp at zero
 
     return 1U; // return success
 }
@@ -296,7 +308,7 @@ QSTimeCtr QS_onGetTime(void) { // invoked with interrupts disabled
 // No critical section in QS_onFlush() to avoid nesting of critical sections
 // in case QS_onFlush() is called from Q_onError().
 void QS_onFlush(void) {
-    uint16_t fifo = UART_TXFIFO_DEPTH;  // Tx FIFO depth
+    uint16_t fifo = UART_TXFIFO_DEPTH; // Tx FIFO depth
     uint8_t const *block;
     while ((block = QS_getBlock(&fifo)) != (uint8_t *)0) {
         // busy-wait until TX FIFO empty
@@ -308,6 +320,20 @@ void QS_onFlush(void) {
         fifo = UART_TXFIFO_DEPTH; // re-load the Tx FIFO depth
     }
 }
+//............................................................................
+void QS_onReset(void) {
+    NVIC_SystemReset();
+}
+//............................................................................
+void QS_onCommand(uint8_t cmdId,
+    uint32_t param1, uint32_t param2, uint32_t param3)
+{
+    Q_UNUSED_PAR(cmdId);
+    Q_UNUSED_PAR(param1);
+    Q_UNUSED_PAR(param2);
+    Q_UNUSED_PAR(param3);
+}
+
 #endif // Q_SPY
 //----------------------------------------------------------------------------
 
@@ -320,7 +346,7 @@ void QS_onFlush(void) {
 // Only ISRs prioritized at or below the QF_AWARE_ISR_CMSIS_PRI level (i.e.,
 // with the numerical values of priorities equal or higher than
 // QF_AWARE_ISR_CMSIS_PRI) are allowed to call the QK_ISR_ENTRY/QK_ISR_ENTRY
-// macros or any other QF/QK  services. These ISRs are "QF-aware".
+// macros or any other QF/QK services. These ISRs are "QF-aware".
 //
 // Conversely, any ISRs prioritized above the QF_AWARE_ISR_CMSIS_PRI priority
 // level (i.e., with the numerical values of priorities less than

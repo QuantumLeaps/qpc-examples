@@ -399,9 +399,9 @@
               <FilePath>..\main.c</FilePath>
             </File>
             <File>
-              <FileName>dpp.h</FileName>
+              <FileName>app.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\dpp.h</FilePath>
+              <FilePath>..\app.h</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -1049,9 +1049,9 @@
               <FilePath>..\main.c</FilePath>
             </File>
             <File>
-              <FileName>dpp.h</FileName>
+              <FileName>app.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\dpp.h</FilePath>
+              <FilePath>..\app.h</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>
@@ -1699,9 +1699,9 @@
               <FilePath>..\main.c</FilePath>
             </File>
             <File>
-              <FileName>dpp.h</FileName>
+              <FileName>app.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\dpp.h</FilePath>
+              <FilePath>..\app.h</FilePath>
             </File>
             <File>
               <FileName>bsp.h</FileName>

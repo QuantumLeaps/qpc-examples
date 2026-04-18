@@ -394,9 +394,9 @@
               <FilePath>..\..\bsp.h</FilePath>
             </File>
             <File>
-              <FileName>dpp.h</FileName>
+              <FileName>app.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
+              <FilePath>..\..\app.h</FilePath>
             </File>
             <File>
               <FileName>philo.c</FileName>
@@ -1019,9 +1019,9 @@
               <FilePath>..\..\bsp.h</FilePath>
             </File>
             <File>
-              <FileName>dpp.h</FileName>
+              <FileName>app.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
+              <FilePath>..\..\app.h</FilePath>
             </File>
             <File>
               <FileName>philo.c</FileName>
@@ -1644,9 +1644,9 @@
               <FilePath>..\..\bsp.h</FilePath>
             </File>
             <File>
-              <FileName>dpp.h</FileName>
+              <FileName>app.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\..\dpp.h</FilePath>
+              <FilePath>..\..\app.h</FilePath>
             </File>
             <File>
               <FileName>philo.c</FileName>

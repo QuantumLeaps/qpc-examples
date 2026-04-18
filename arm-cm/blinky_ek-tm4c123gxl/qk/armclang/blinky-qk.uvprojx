@@ -385,6 +385,11 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -398,11 +403,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>blinky.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\blinky.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1006,6 +1006,11 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1019,11 +1024,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>blinky.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\blinky.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -1627,6 +1627,11 @@
           <GroupName>Applicatioin</GroupName>
           <Files>
             <File>
+              <FileName>app.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\app.h</FilePath>
+            </File>
+            <File>
               <FileName>bsp.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\bsp.c</FilePath>
@@ -1640,11 +1645,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>blinky.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\blinky.h</FilePath>
             </File>
           </Files>
         </Group>

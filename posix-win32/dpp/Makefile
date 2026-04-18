@@ -136,7 +136,6 @@ QS_SRCS := \
 
 VPATH += \
 	$(QPC)/src/qf \
-	$(QPC)/src/qs \
 	$(QP_PORT_DIR)
 
 INCLUDES += \
