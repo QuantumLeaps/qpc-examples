@@ -126,8 +126,8 @@ QASM_DISPATCH((QAsm *)&amp;TTSched_inst, &amp;modeEvt[mode], 0U);</code>
       <!--${Components::TTSched::SM::active::m0tick0::TICK}-->
       <tran trig="TICK" target="../../3">
        <action>QACTIVE_POST(AO_Periodic4, &amp;runEvt, 0U);</action>
-       <tran_glyph conn="4,18,3,1,36,12,-2">
-        <action box="0,-2,34,5"/>
+       <tran_glyph conn="4,20,3,1,36,10,-2">
+        <action box="0,-2,36,5"/>
        </tran_glyph>
       </tran>
       <state_glyph node="4,14,34,10"/>
@@ -136,8 +136,8 @@ QASM_DISPATCH((QAsm *)&amp;TTSched_inst, &amp;modeEvt[mode], 0U);</code>
      <state name="m0tick1">
       <!--${Components::TTSched::SM::active::m0tick1::TICK}-->
       <tran trig="TICK" target="../../4">
-       <tran_glyph conn="4,32,3,1,36,12,-2">
-        <action box="0,-2,32,4"/>
+       <tran_glyph conn="4,34,3,1,36,10,-2">
+        <action box="0,-2,34,4"/>
        </tran_glyph>
       </tran>
       <state_glyph node="4,28,34,10"/>
@@ -147,8 +147,8 @@ QASM_DISPATCH((QAsm *)&amp;TTSched_inst, &amp;modeEvt[mode], 0U);</code>
       <!--${Components::TTSched::SM::active::m0tick2::TICK}-->
       <tran trig="TICK" target="../../5">
        <action>QACTIVE_POST(AO_Periodic4, &amp;runEvt, 0U);</action>
-       <tran_glyph conn="4,46,3,1,36,12,-2">
-        <action box="0,-2,32,4"/>
+       <tran_glyph conn="4,48,3,1,36,10,-2">
+        <action box="0,-2,34,6"/>
        </tran_glyph>
       </tran>
       <state_glyph node="4,42,34,10"/>
@@ -158,8 +158,8 @@ QASM_DISPATCH((QAsm *)&amp;TTSched_inst, &amp;modeEvt[mode], 0U);</code>
       <!--${Components::TTSched::SM::active::m0tick3::TICK}-->
       <tran trig="TICK" target="../../2">
        <action>QACTIVE_POST(AO_Periodic1, &amp;runEvt, 0U);</action>
-       <tran_glyph conn="4,60,3,1,38,-44,-4">
-        <action box="0,-2,32,4"/>
+       <tran_glyph conn="4,62,3,1,38,-46,-4">
+        <action box="0,-2,36,4"/>
        </tran_glyph>
       </tran>
       <state_glyph node="4,56,34,10"/>
@@ -170,7 +170,7 @@ QASM_DISPATCH((QAsm *)&amp;TTSched_inst, &amp;modeEvt[mode], 0U);</code>
       <tran trig="TICK" target="../../7">
        <action>QACTIVE_POST(AO_Periodic4, &amp;runEvt, 0U);
 QACTIVE_POST(AO_Sporadic3, &amp;runEvt, 0U);</action>
-       <tran_glyph conn="46,18,3,1,36,12,-2">
+       <tran_glyph conn="46,20,3,1,36,10,-2">
         <action box="0,-2,34,8"/>
        </tran_glyph>
       </tran>
@@ -182,7 +182,7 @@ QACTIVE_POST(AO_Sporadic3, &amp;runEvt, 0U);</action>
       <tran trig="TICK" target="../../8">
        <action>QACTIVE_POST(AO_Periodic4, &amp;runEvt, 0U);
 QACTIVE_POST(AO_Sporadic3, &amp;runEvt, 0U);</action>
-       <tran_glyph conn="46,32,3,1,36,12,-2">
+       <tran_glyph conn="46,34,3,1,36,10,-2">
         <action box="0,-2,36,8"/>
        </tran_glyph>
       </tran>
@@ -194,7 +194,7 @@ QACTIVE_POST(AO_Sporadic3, &amp;runEvt, 0U);</action>
       <tran trig="TICK" target="../../9">
        <action>QACTIVE_POST(AO_Periodic4, &amp;runEvt, 0U);
 QACTIVE_POST(AO_Sporadic2, &amp;runEvt, 0U);</action>
-       <tran_glyph conn="46,46,3,1,36,12,-2">
+       <tran_glyph conn="46,48,3,1,36,10,-2">
         <action box="0,-2,36,8"/>
        </tran_glyph>
       </tran>
@@ -206,7 +206,7 @@ QACTIVE_POST(AO_Sporadic2, &amp;runEvt, 0U);</action>
       <tran trig="TICK" target="../../10">
        <action>QACTIVE_POST(AO_Periodic4, &amp;runEvt, 0U);
 QACTIVE_POST(AO_Sporadic3, &amp;runEvt, 0U);</action>
-       <tran_glyph conn="46,60,3,1,36,12,-2">
+       <tran_glyph conn="46,62,3,1,36,10,-2">
         <action box="0,-2,36,8"/>
        </tran_glyph>
       </tran>
@@ -218,7 +218,7 @@ QACTIVE_POST(AO_Sporadic3, &amp;runEvt, 0U);</action>
       <tran trig="TICK" target="../../11">
        <action>QACTIVE_POST(AO_Periodic4, &amp;runEvt, 0U);
 QACTIVE_POST(AO_Periodic1, &amp;runEvt, 0U);</action>
-       <tran_glyph conn="46,74,3,1,36,12,-2">
+       <tran_glyph conn="46,76,3,1,36,10,-2">
         <action box="0,-2,36,8"/>
        </tran_glyph>
       </tran>
@@ -230,7 +230,7 @@ QACTIVE_POST(AO_Periodic1, &amp;runEvt, 0U);</action>
       <tran trig="TICK" target="../../6">
        <action>QACTIVE_POST(AO_Periodic4, &amp;runEvt, 0U);
 QACTIVE_POST(AO_Sporadic3, &amp;runEvt, 0U);</action>
-       <tran_glyph conn="46,88,3,1,38,-72,-4">
+       <tran_glyph conn="46,90,3,1,38,-74,-4">
         <action box="0,-2,36,8"/>
        </tran_glyph>
       </tran>
@@ -238,7 +238,7 @@ QACTIVE_POST(AO_Sporadic3, &amp;runEvt, 0U);</action>
      </state>
      <state_glyph node="2,6,84,92"/>
     </state>
-    <state_diagram size="90,103"/>
+    <state_diagram size="90,102"/>
    </statechart>
   </class>
   <!--${Components::Periodic1}-->

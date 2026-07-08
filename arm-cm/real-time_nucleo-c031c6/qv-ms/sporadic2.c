@@ -140,10 +140,6 @@ static QState Sporadic2_active(Sporadic2 * const me, QEvt const * const e) {
             me->total = Q_EVT_CAST(SporadicSpecEvt)->toggles;
             me->done = 0U;
 
-            #ifdef USE_SCHED_DISABLE
-            QV_schedDisable(2U); // <== disable scheduler up to given prio.
-            #endif
-
             BSP_d5off();
             static struct {
                 QMState const *target;
@@ -190,10 +186,6 @@ static QState Sporadic2_busy(Sporadic2 * const me, QEvt const * const e) {
                 BSP_d5on();
                 BSP_d5off();
             }
-
-            #ifdef USE_SCHED_DISABLE
-            QV_schedDisable(2U); // <== disable scheduler up to given prio.
-            #endif
             //${AOs::Sporadic2::SM::active::busy::REMINDER::[me->done<me->total]}
             if (me->done < me->total) {
                 static struct {

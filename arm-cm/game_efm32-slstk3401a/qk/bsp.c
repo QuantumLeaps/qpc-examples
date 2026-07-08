@@ -223,8 +223,6 @@ void BSP_init(void const * const arg) {
     // enable clock for to the peripherals used by this application...
     CMU_ClockEnable(cmuClock_HFPER, true);
     CMU_ClockEnable(cmuClock_GPIO,  true);
-    CMU_ClockEnable(cmuClock_HFPER, true);
-    CMU_ClockEnable(cmuClock_GPIO,  true);
 
     // configure the LEDs
     GPIO_PinModeSet(LED_PORT, LED0_PIN, gpioModePushPull, 0);
