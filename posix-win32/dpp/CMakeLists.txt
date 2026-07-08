@@ -33,6 +33,7 @@ list(PREPEND CMAKE_MODULE_PATH ${QPC_SDK_PATH}/3rd_party/cmake ${CMAKE_SOURCE_DI
 
 # set the qpc include path to find our local `qp_config.h`
 set(QPC_CFG_QPCONFIG_H_INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR})
+
 # import QPC SDK; download from git, if necessary
 include(qpc_sdk_import)
 
@@ -46,6 +47,13 @@ project(
     DESCRIPTION "Dining Philosophers Problem (dpp) using qpc@win32"
     LANGUAGES C
 )
+
+# -- Project settings ---------------------------------------------------------
+set(CMAKE_C_STANDARD 23)
+set(CMAKE_C_EXTENSIONS OFF)
+
+set(CMAKE_LINK_GROUP_USING_RESCAN_SUPPORTED True)
+set(CMAKE_LINK_GROUP_USING_RESCAN "LINKER:--start-group" "LINKER:--end-group")
 
 # add support for SPY configuration if not set via CMAKE_TOOLCHAIN_FILE
 if(NOT CMAKE_C_FLAGS_SPY)
@@ -75,32 +83,33 @@ target_compile_definitions(qpc PUBLIC
 )
 target_include_directories(qpc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-# set general defines and options
+# set general defines
 target_compile_definitions(dpp PRIVATE
     $<$<BOOL:${QPC_CFG_GUI}>:QWIN_GUI>
 )
 
 target_compile_options(dpp PRIVATE
-    $<$<C_COMPILER_ID:GNU>:-mconsole>
+    $<$<AND:$<C_COMPILER_ID:GNU>,$<BOOL:${WIN32}>>:-mconsole>
     $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
 )
 
 target_link_options(dpp PRIVATE
-    $<$<C_COMPILER_ID:GNU>:-mconsole>
+    $<$<AND:$<C_COMPILER_ID:GNU>,$<BOOL:${WIN32}>>:-mconsole>
     $<$<BOOL:${QPC_CFG_VERBOSE}>:-v>
 )
 
 # link the library with the application
-target_link_libraries(dpp PRIVATE
-    qpc
-    $<$<CONFIG:Spy>:ws2_32>
-)
+if(CMAKE_LINK_GROUP_USING_RESCAN_SUPPORTED)
+    target_link_libraries(dpp PRIVATE $<LINK_GROUP:RESCAN,qpc,$<$<AND:$<CONFIG:Spy>,$<BOOL:${WIN32}>>:ws2_32>>)
+else()
+    target_link_libraries(dpp PRIVATE qpc $<$<AND:$<CONFIG:Spy>,$<BOOL:${WIN32}>>:ws2_32>)
+endif()
 
 # show configuration results
 message(STATUS
 "Configured project ${PROJECT_NAME} for ${PORT}
  Configuration options set:
-    PROJECT_NAME                = ${QPC_PROJECT}
+    PROJECT_NAME                = ${PROJECT_NAME}
     SW_VERSION                  = ${SW_VERSION}
 
     CONFIG_GUI                  = ${QPC_CFG_GUI}
@@ -109,7 +118,7 @@ message(STATUS
     CONFIG_DEBUG                = ${CONFIG_DEBUG}
 
     QPC_CFG_KERNEL              = ${QPC_CFG_KERNEL}
-    QPC_DIR                     = ${QPC_DIR}"
+    QPC_DIR                     = ${QPC_SDK_PATH}"
 )
 
 if(QPC_CFG_VERBOSE)

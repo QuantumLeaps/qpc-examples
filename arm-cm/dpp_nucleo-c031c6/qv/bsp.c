@@ -64,6 +64,7 @@ static uint32_t l_rndSeed;
 //============================================================================
 // Error handler and ISRs...
 
+__attribute__((used)) // prevent removal with link-time optimization
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
     // for debugging and MUST be changed for deployment of the application

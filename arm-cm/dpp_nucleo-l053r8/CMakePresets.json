@@ -23,7 +23,7 @@
             "displayName": "Nucleo L053r8 build",
             "description": "Build for ARM Cortex-M0+ on Nucleo L0538r8",
             "inherits": "gen",
-            "toolchainFile": "${sourceDir}/../../../3rd_party/cmake/toolchain/tc_gnuarm.cmake",
+            "toolchainFile": "${sourceDir}/../../../3rd_party/cmake/toolchain/tc_armgnu.cmake",
             "binaryDir": "${sourceDir}/Build/arm"
         }
     ],

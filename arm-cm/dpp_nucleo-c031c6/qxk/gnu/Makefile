@@ -29,6 +29,7 @@
 # <www.state-machine.com/licensing>
 # <info@state-machine.com>
 ##############################################################################
+#
 # examples of invoking this Makefile:
 # building configurations: Debug (default), Release, and Spy
 # make
@@ -176,14 +177,14 @@ BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 MKDIR := mkdir
 RM    := rm
 
-#-----------------------------------------------------------------------------
-# build options for various configurations for ARM Cortex-M
-#
-
 # combine all the sources...
 C_SRCS   += $(QP_SRCS)
 C_SRCS   += syscalls.c
 ASM_SRCS += $(QP_ASMS)
+
+LINKFLAGS :=
+#-----------------------------------------------------------------------------
+# build configurations...
 
 ifeq (rel, $(CONF)) # Release configuration ..................................
 
@@ -191,13 +192,17 @@ BIN_DIR := rel
 
 ASFLAGS = $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
-	-ffunction-sections -fdata-sections \
-	-O2 $(INCLUDES) $(DEFINES) -DNDEBUG
+CFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
+	-flto -ffunction-sections -fdata-sections \
+	-O0 $(INCLUDES) $(DEFINES) -DNDEBUG
 
-CPPFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
-	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
-	-O2 $(INCLUDES) $(DEFINES) -DNDEBUG
+CPPFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c++17 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
+	-flto -ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
+	-O0 $(INCLUDES) $(DEFINES) -DNDEBUG
+
+LINKFLAGS += -flto
 
 else ifeq (spy, $(CONF))  # Spy configuration ................................
 
@@ -207,11 +212,13 @@ C_SRCS += $(QS_SRCS)
 
 ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-ffunction-sections -fdata-sections \
 	-O $(INCLUDES) $(DEFINES) -DQ_SPY
 
-CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c++17 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES) -DQ_SPY
 
@@ -221,18 +228,19 @@ BIN_DIR := dbg
 
 ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-ffunction-sections -fdata-sections \
 	-O $(INCLUDES) $(DEFINES)
 
-CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c++17 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES)
 
 endif # ......................................................................
 
-
-LINKFLAGS = -T$(LD_SCRIPT) $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb \
+LINKFLAGS += -T$(LD_SCRIPT) $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb \
 	-specs=nosys.specs -specs=nano.specs \
 	-Wl,-Map,$(BIN_DIR)/$(OUTPUT).map,--cref,--gc-sections $(LIB_DIRS)
 

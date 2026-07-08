@@ -1,34 +1,32 @@
 ##############################################################################
 # Makefile for QP/C on NUCLEO-C031C6, QK kernel, GNU-ARM
 #
+# Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+#
 #                    Q u a n t u m  L e a P s
 #                    ------------------------
 #                    Modern Embedded Software
 #
-# Copyright (C) 2005 Quantum Leaps, LLC. <state-machine.com>
+# SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 #
-# This program is open source software: you can redistribute it and/or
-# modify it under the terms of the GNU General Public License as published
-# by the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# This software is dual-licensed under the terms of the open-source GNU
+# General Public License (GPL) or under the terms of one of the closed-
+# source Quantum Leaps commercial licenses.
 #
-# Alternatively, this program may be distributed and modified under the
-# terms of Quantum Leaps commercial licenses, which expressly supersede
-# the GNU General Public License and are specifically designed for
-# licensees interested in retaining the proprietary status of their code.
+# Redistributions in source code must retain this top-level comment block.
+# Plagiarizing this software to sidestep the license obligations is illegal.
 #
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
+# NOTE:
+# The GPL does NOT permit the incorporation of this code into proprietary
+# programs. Please contact Quantum Leaps for commercial licensing options,
+# which expressly supersede the GPL and are designed explicitly for
+# closed-source distribution.
 #
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses>.
-#
-# Contact information:
+# Quantum Leaps contact information:
 # <www.state-machine.com/licensing>
 # <info@state-machine.com>
 ##############################################################################
+#
 # examples of invoking this Makefile:
 # building configurations: Debug (default), Release, and Spy
 # make
@@ -160,9 +158,8 @@ AS    := $(GNU_ARM)/bin/arm-none-eabi-as
 LINK  := $(GNU_ARM)/bin/arm-none-eabi-gcc
 BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 
-
 ##############################################################################
-# Typically, you should not need to change anything below this line
+# Typically you should not need to change anything below this line
 
 # basic utilities (included in QTools for Windows), see:
 #     https://www.state-machine.com/qtools
@@ -170,14 +167,14 @@ BIN   := $(GNU_ARM)/bin/arm-none-eabi-objcopy
 MKDIR := mkdir
 RM    := rm
 
-#-----------------------------------------------------------------------------
-# build options for various configurations for ARM Cortex-M
-#
-
 # combine all the sources...
 C_SRCS   += $(QP_SRCS)
 C_SRCS   += syscalls.c
 ASM_SRCS += $(QP_ASMS)
+
+LINKFLAGS :=
+#-----------------------------------------------------------------------------
+# build configurations...
 
 ifeq (rel, $(CONF)) # Release configuration ..................................
 
@@ -185,13 +182,17 @@ BIN_DIR := rel
 
 ASFLAGS = $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
-	-ffunction-sections -fdata-sections \
-	-O2 $(INCLUDES) $(DEFINES) -DNDEBUG
+CFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
+	-flto -ffunction-sections -fdata-sections \
+	-O0 $(INCLUDES) $(DEFINES) -DNDEBUG
 
-CPPFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
-	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
-	-O2 $(INCLUDES) $(DEFINES) -DNDEBUG
+CPPFLAGS = -c $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c++17 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
+	-flto -ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
+	-O0 $(INCLUDES) $(DEFINES) -DNDEBUG
+
+LINKFLAGS += -flto
 
 else ifeq (spy, $(CONF))  # Spy configuration ................................
 
@@ -201,11 +202,13 @@ C_SRCS += $(QS_SRCS)
 
 ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-ffunction-sections -fdata-sections \
 	-O $(INCLUDES) $(DEFINES) -DQ_SPY
 
-CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c++17 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES) -DQ_SPY
 
@@ -215,18 +218,19 @@ BIN_DIR := dbg
 
 ASFLAGS = -g $(ARM_CPU) $(ARM_FPU) $(ASM_CPU) $(ASM_FPU)
 
-CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c11 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-ffunction-sections -fdata-sections \
 	-O $(INCLUDES) $(DEFINES)
 
-CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -Wall \
+CPPFLAGS = -c -g $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb -std=c++17 -pedantic \
+	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-ffunction-sections -fdata-sections -fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES)
 
 endif # ......................................................................
 
-
-LINKFLAGS = -T$(LD_SCRIPT) $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb \
+LINKFLAGS += -T$(LD_SCRIPT) $(ARM_CPU) $(ARM_FPU) $(FLOAT_ABI) -mthumb \
 	-specs=nosys.specs -specs=nano.specs \
 	-Wl,-Map,$(BIN_DIR)/$(OUTPUT).map,--cref,--gc-sections $(LIB_DIRS)
 

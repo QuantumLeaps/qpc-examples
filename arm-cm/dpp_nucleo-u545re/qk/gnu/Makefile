@@ -119,7 +119,7 @@ INCLUDES += \
 	-I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
-# QP/C++ framework sources
+# QP framework sources
 #
 QP_SRCS := \
 	qep_hsm.c \

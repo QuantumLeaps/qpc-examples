@@ -59,6 +59,7 @@ Q_DEFINE_THIS_FILE  // file name for assertions
 //============================================================================
 // Error handler
 
+__attribute__((used)) // prevent removal with link-time optimization
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
     // for debugging and MUST be changed for deployment of the application
