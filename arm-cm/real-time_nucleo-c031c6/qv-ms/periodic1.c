@@ -128,10 +128,6 @@ static QState Periodic1_active(Periodic1 * const me, QEvt const * const e) {
                 BSP_d6on();
                 BSP_d6off();
             }
-
-            #ifdef USE_SCHED_DISABLE
-            QV_schedDisable(1U); // <== disable scheduler up to given prio.
-            #endif
             status_ = QM_HANDLED();
             break;
         }

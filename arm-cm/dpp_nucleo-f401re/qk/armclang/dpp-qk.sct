@@ -15,7 +15,7 @@ LR_IROM1 0x08000000 0x00080000  {    ; load region size_region
   RW_STACK 0x20000000 {              ; <== Quantum Leaps 
    * (STACK, +First)
   }
-  RW_IRAM1 +0 (0x00018000 - 2048) {  ; NOTE: 2048 assumed for STACK size!
+  RW_IRAM1 +0 (0x00018000 - 2048) {  ; 96KB - 2048 assumed for STACK size!
    .ANY (+RW +ZI)
   }
 }

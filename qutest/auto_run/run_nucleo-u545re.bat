@@ -9,7 +9,7 @@
 
 @if "%1"=="" (
 @echo usage  : run_%TRG%.bat USB-NUCLEO-BOARD
-@echo example: run_%TRG%.bat f:
+@echo example: run_%TRG%.bat f:/
 exit /b
 )
 

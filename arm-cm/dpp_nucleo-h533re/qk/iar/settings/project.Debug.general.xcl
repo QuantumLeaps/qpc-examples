@@ -1,0 +1,21 @@
+C:\tools\IAR\ARM\arm\bin\armproc.dll
+
+ C:\tools\IAR\ARM\arm\bin\armstlink.dll
+
+ C:\qp-dev\qpc\examples\arm-cm\dpp_nucleo-h533re\qk\iar\dbg\project.out
+
+ --plugin=C:\tools\IAR\ARM\arm\bin\armLibSupportUniversal.dll
+
+ --device_macro=C:\tools\IAR\ARM\arm/config/debugger/ST/STM32H5xx.dmac
+
+ --device_macro=C:\tools\IAR\ARM\arm/config/debugger/ST/STM32H5xx_DBG.dmac
+
+ --device_macro=C:\tools\IAR\ARM\arm/config/debugger/ST/STM32H5xx_OB.dmac
+
+ --device_macro=C:\tools\IAR\ARM\arm/config/debugger/ST/STM32H5xx_TRACE.dmac
+
+ --flash_loader=C:\tools\IAR\ARM\arm/config/flashloader/ST/FlashSTM32H5xx.board
+
+ 
+
+
