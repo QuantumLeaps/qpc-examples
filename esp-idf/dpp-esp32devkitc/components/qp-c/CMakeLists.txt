@@ -7,14 +7,14 @@ set(required_modules "freertos")
 
 set(qpc_path "../../../../../")
 
-set(src_dirs    ${qpc_path}/ports/esp-idf
+set(src_dirs    ports/esp-idf
                 ${qpc_path}/src/qf
                 ${qpc_path}/include
  )
 
  set(include_dirs    ${qpc_path}/include
-                     ${qpc_path}ports/esp-idf
                      ${qpc_path}/src
+					 ports/esp-idf
 )
 
 if(CONFIG_QPC_QSPY_ENABLE)
