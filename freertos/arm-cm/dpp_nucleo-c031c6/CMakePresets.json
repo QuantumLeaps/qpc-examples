@@ -1,0 +1,32 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/Build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_CONFIGURATION_TYPES": "Debug;Release;Spy"
+            }
+        },
+        {
+            "name": "gnu",
+            "hidden": true,
+            "toolchainFile": "${sourceDir}/../../../../3rd_party/cmake/tc_armgnu.cmake"
+        },
+        {
+            "name": "armclang",
+            "hidden": true,
+            "toolchainFile": "${sourceDir}/../../../../3rd_party/cmake/tc_armclang.cmake"
+        },
+
+        { "name": "freertos-gnu", "displayName": "FreeRTOS, GNU-ARM", "inherits": ["base", "gnu"] },
+        { "name": "freertos-armclang", "displayName": "FreeRTOS, ARMClang (Keil)", "inherits": ["base", "armclang"] }
+    ],
+    "buildPresets": [
+        { "name": "freertos-gnu", "configurePreset": "freertos-gnu" },
+        { "name": "freertos-armclang", "configurePreset": "freertos-armclang" }
+    ]
+}

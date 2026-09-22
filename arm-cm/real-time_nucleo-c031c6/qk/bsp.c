@@ -1,7 +1,7 @@
 //============================================================================
 // BSP for "real-time" Example
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+// Copyright (C) 2005-2026 Quantum Leaps, LLC. All rights reserved.
 //
 //                    Q u a n t u m  L e a P s
 //                    ------------------------
@@ -10,17 +10,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
 // This software is dual-licensed under the terms of the open-source GNU
-// General Public License (GPL) or under the terms of one of the closed-
-// source Quantum Leaps commercial licenses.
+// General Public License, version 3 or later (GPL-3.0-or-later), or,
+// alternatively, under the terms of one of the closed-source Quantum Leaps
+// commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
-// Plagiarizing this software to sidestep the license obligations is illegal.
 //
 // NOTE:
-// The GPL does NOT permit the incorporation of this code into proprietary
-// programs. Please contact Quantum Leaps for commercial licensing options,
-// which expressly supersede the GPL and are designed explicitly for
-// closed-source distribution.
+// The GPL does NOT permit distributing this code as part of proprietary
+// (closed-source) programs. For such use, please contact Quantum Leaps for
+// a commercial license, which is an alternative to the GPL designed
+// explicitly for closed-source distribution.
 //
 // Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
@@ -208,7 +208,7 @@ void BSP_init(void const * const arg) {
     static QEvtPtr periodic1QSto[10]; // Event queue storage
     QActive_start(
         AO_Periodic1,          // AO pointer to start
-        Q_PRIO(1U, 1U),        // QF-prio/pre-thre.
+        QF_prioSpec(1U, 1U),   // QF-prio/pre-thre.
         periodic1QSto,         // storage for the AO's queue
         Q_DIM(periodic1QSto),  // queue length
         (void *)0, 0U,         // stack storage, size (not used)
@@ -218,7 +218,7 @@ void BSP_init(void const * const arg) {
     static QEvtPtr sporadic2QSto[8]; // Event queue storage
     QActive_start(
         AO_Sporadic2,          // AO pointer to start
-        Q_PRIO(2U, 3U),        // QF-prio/pre-thre.
+        QF_prioSpec(2U, 3U),   // QF-prio/pre-thre.
         sporadic2QSto,         // storage for the AO's queue
         Q_DIM(sporadic2QSto),  // queue length
         (void *)0, 0U,         // stack storage, size (not used)
@@ -228,7 +228,7 @@ void BSP_init(void const * const arg) {
     static QEvtPtr sporadic3QSto[8]; // Event queue storage
     QActive_start(
         AO_Sporadic3,          // AO pointer to start
-        Q_PRIO(3U, 3U),        // QF-prio/pre-thre.
+        QF_prioSpec(3U, 3U),   // QF-prio/pre-thre.
         sporadic3QSto,         // storage for the AO's queue
         Q_DIM(sporadic3QSto),  // queue length
         (void *)0, 0U,         // stack storage, size (not used)
@@ -238,7 +238,7 @@ void BSP_init(void const * const arg) {
     static QEvtPtr periodic4QSto[8]; // Event queue storage
     QActive_start(
         AO_Periodic4,          // AO pointer to start
-        Q_PRIO(4U, 4U),        // QF-prio/pre-thre.
+        QF_prioSpec(4U, 4U),   // QF-prio/pre-thre.
         periodic4QSto,         // storage for the AO's queue
         Q_DIM(periodic4QSto),  // queue length
         (void *)0, 0U,         // stack storage, size (not used)

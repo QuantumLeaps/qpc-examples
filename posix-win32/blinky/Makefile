@@ -31,7 +31,6 @@
 # examples of invoking this Makefile:
 # building configurations: Debug (default), Release, and Spy
 # make
-# make QV=1     # use the single-threaded (QV) port
 # make CONF=rel
 # make CONF=spy
 # make clean   # cleanup the build
@@ -45,7 +44,7 @@
 #-----------------------------------------------------------------------------
 # project:
 #
-PROJECT := project
+PROJECT := blinky
 
 VPATH := .
 
@@ -62,6 +61,16 @@ CPP_SRCS :=
 
 LIB_DIRS :=
 LIBS     :=
+OUTPUT   := $(PROJECT)
+
+#-----------------------------------------------------------------------------
+# target
+#
+TARGET   := host
+
+DEFINES +=
+
+BIN_DIR := build_$(TARGET)
 
 #-----------------------------------------------------------------------------
 # QP framework
@@ -100,7 +109,7 @@ INCLUDES += \
 	-I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
-# QP/C framework sources
+# QP framework sources
 #
 QP_SRCS := \
 	qep_hsm.c \
@@ -126,6 +135,7 @@ QS_SRCS := \
 
 VPATH += \
 	$(QPC)/src/qf \
+	$(QPC)/src/qs \
 	$(QP_PORT_DIR)
 
 INCLUDES += \
@@ -187,41 +197,41 @@ endif
 
 ifeq (rel, $(CONF)) # Release configuration ..................................
 
-BIN_DIR := rel
+BIN_DIR := build_rel
 # gcc options:
 CFLAGS := -c -fno-pie -std=c11 -pedantic \
 	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-O3 $(INCLUDES) $(DEFINES) $(DEF) -DNDEBUG
 
-CPPFLAGS := -c -fno-pie -std=c++17 -pedantic \
+CPPFLAGS := -c -g -fno-pie -std=c++17 -pedantic \
 	-Wall -Wextra -Wpedantic -Wsign-conversion -Wold-style-cast \
 	-fno-rtti -fno-exceptions \
 	-O3 $(INCLUDES) $(DEFINES) $(DEF) -DNDEBUG
 
 else ifeq (spy, $(CONF))  # Spy configuration ................................
 
-BIN_DIR := spy
+BIN_DIR := build_spy
 
 # gcc options:
 CFLAGS := -c -g -fno-pie -std=c11 -pedantic \
 	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-O $(INCLUDES) $(DEFINES) $(DEF) -DQ_SPY
 
-CPPFLAGS := -c -g -fno-pie -std=c++17 -pedantic \
+CPPFLAGS := -c -g -fno-pie -std=c++11 -pedantic \
 	-Wall -Wextra -Wpedantic -Wsign-conversion -Wold-style-cast \
 	-fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES) -DQ_SPY
 
 else # default Debug configuration .........................................
 
-BIN_DIR := dbg
+BIN_DIR := build
 
 # gcc options:
 CFLAGS := -c -g -fno-pie -std=c11 -pedantic \
 	-Wall -Wextra -Wpedantic -Wsign-conversion \
 	-O $(INCLUDES) $(DEFINES) $(DEF)
 
-CPPFLAGS := -c -g -fno-pie -std=c++17 -pedantic \
+CPPFLAGS := -c -g -fno-pie -std=c++11 -pedantic \
 	-Wall -Wextra -Wpedantic -Wsign-conversion -Wold-style-cast \
 	-fno-rtti -fno-exceptions \
 	-O $(INCLUDES) $(DEFINES) $(DEF)
@@ -288,12 +298,12 @@ $(BIN_DIR)/%.o : %.cpp
 # create BIN_DIR and include dependencies only if needed
 ifneq ($(MAKECMDGOALS),clean)
   ifneq ($(MAKECMDGOALS),show)
-    ifneq ($(MAKECMDGOALS),debug)
+   ifneq ($(MAKECMDGOALS),debug)
 ifeq ("$(wildcard $(BIN_DIR))","")
 $(shell $(MKDIR) $(BIN_DIR))
 endif
 -include $(C_DEPS_EXT) $(CPP_DEPS_EXT)
-    endif
+   endif
   endif
 endif
 

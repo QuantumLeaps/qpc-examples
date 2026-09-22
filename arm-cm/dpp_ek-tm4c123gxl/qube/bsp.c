@@ -40,7 +40,7 @@ void BSP_init(void const * const arg) {
 
             // NOTE: set the preemption-threshold of all Philos to
             // the same level, so that they cannot preempt each other.
-            Q_PRIO(n + 3U, N_PHILO + 2U), // QF-prio/pre-thre.
+            QF_prioSpec(n + 3U, N_PHILO + 2U), // QF-prio/pre-thre.
 
             philoQueueSto[n],        // event queue storage
             Q_DIM(philoQueueSto[n]), // queue length [events]

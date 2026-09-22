@@ -1,27 +1,26 @@
 ##############################################################################
 # Makefile for QUTEST-QP/C on NUCLEO-U545RE-Q, GNU-ARM (integration tests)
 #
-# Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+# Copyright (C) 2005-2026 Quantum Leaps, LLC. All rights reserved.
 #
-#                   Q u a n t u m  L e a P s
-#                   ------------------------
-#                   Modern Embedded Software
+#                    Q u a n t u m  L e a P s
+#                    ------------------------
+#                    Modern Embedded Software
 #
 # SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 #
-# The QP/C software is dual-licensed under the terms of the open-source GNU
-# General Public License (GPL) or under the terms of one of the closed-
-# source Quantum Leaps commercial licenses.
+# This software is dual-licensed under the terms of the open-source GNU
+# General Public License, version 3 or later (GPL-3.0-or-later), or,
+# alternatively, under the terms of one of the closed-source Quantum Leaps
+# commercial licenses.
 #
 # Redistributions in source code must retain this top-level comment block.
-# Plagiarizing this software to sidestep the license obligations is illegal.
 #
 # NOTE:
-# The GPL (see <www.gnu.org/licenses/gpl-3.0>) does NOT permit the
-# incorporation of the QP/C software into proprietary programs. Please
-# contact Quantum Leaps for commercial licensing options, which expressly
-# supersede the GPL and are designed explicitly for licensees interested
-# in using QP/C in closed-source proprietary applications.
+# The GPL does NOT permit distributing this code as part of proprietary
+# (closed-source) programs. For such use, please contact Quantum Leaps for
+# a commercial license, which is an alternative to the GPL designed
+# explicitly for closed-source distribution.
 #
 # Quantum Leaps contact information:
 # <www.state-machine.com/licensing>
@@ -55,9 +54,10 @@ C_SRCS := \
 	test_sched.c \
 	bsp_nucleo-u545re.c
 
+CPP_SRCS :=
+
 DEFINES  :=
 
-CPP_SRCS :=
 LIB_DIRS :=
 LIBS     :=
 OUTPUT   := $(PROJECT)
@@ -82,7 +82,7 @@ C_SRCS += \
 	system_stm32u5xx.c \
 	startup_stm32u545retxq.c
 
-DEFINES += -DQ_SPY -DQ_UTEST=0 \
+DEFINES += -DQ_SPY -DQ_UTEST \
 	-DSTM32U545xx
 
 ARM_CPU   := -mcpu=cortex-m33
@@ -137,14 +137,14 @@ QP_SRCS := \
 	qf_qeq.c \
 	qf_qmact.c \
 	qf_time.c \
+	qk.c \
+	qk_port.c \
 	qs.c \
 	qs_64bit.c \
 	qs_rx.c \
 	qs_fp.c \
 	qutest.c \
-	qutest_port.c \
-	qk.c \
-	qk_port.c
+	qutest_port.c
 
 VPATH += \
 	$(QP)/src/qf \

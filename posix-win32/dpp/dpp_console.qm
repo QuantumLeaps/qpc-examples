@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="7.0.3" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
+<model version="7.0.4" links="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.state-machine.com/qm/qm7.xsd">
  <documentation>About this example:
 -------------------
 Dining Philosopher Problem console application for workstations
@@ -93,7 +93,7 @@ return me;</code>
    <parameter name="id" type="uint_fast8_t const"/>
    <code>Philo * const me = &amp;Philo_inst[id];
 QActive_ctor(&amp;me-&gt;super, Q_STATE_CAST(&amp;Philo_initial));
-QTimeEvt_ctorX(&amp;me-&gt;timeEvt, Q_ACTIVE_UPCAST(me), TIMEOUT_SIG, 0U),
+QTimeEvt_ctorX(&amp;me-&gt;timeEvt, Q_ACTIVE_UPCAST(me), TIMEOUT_SIG, 0U);
 me-&gt;id = (uint8_t)id;</code>
   </operation>
   <!--${App::AO_Table}-->
