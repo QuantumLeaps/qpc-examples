@@ -1,7 +1,7 @@
 //============================================================================
 // Product: "Fly 'n' Shoot" game example, EFM32-SLSTK3401A, Win32-GUI
 //
-// Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
+// Copyright (C) 2005-2026 Quantum Leaps, LLC. All rights reserved.
 //
 //                    Q u a n t u m  L e a P s
 //                    ------------------------
@@ -10,17 +10,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 //
 // This software is dual-licensed under the terms of the open-source GNU
-// General Public License (GPL) or under the terms of one of the closed-
-// source Quantum Leaps commercial licenses.
+// General Public License, version 3 or later (GPL-3.0-or-later), or,
+// alternatively, under the terms of one of the closed-source Quantum Leaps
+// commercial licenses.
 //
 // Redistributions in source code must retain this top-level comment block.
-// Plagiarizing this software to sidestep the license obligations is illegal.
 //
 // NOTE:
-// The GPL does NOT permit the incorporation of this code into proprietary
-// programs. Please contact Quantum Leaps for commercial licensing options,
-// which expressly supersede the GPL and are designed explicitly for
-// closed-source distribution.
+// The GPL does NOT permit distributing this code as part of proprietary
+// (closed-source) programs. For such use, please contact Quantum Leaps for
+// a commercial license, which is an alternative to the GPL designed
+// explicitly for closed-source distribution.
 //
 // Quantum Leaps contact information:
 // <www.state-machine.com/licensing>
@@ -82,15 +82,16 @@ static void paintBitsClear(uint8_t x, uint8_t y,
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
     // for debugging and MUST be changed for deployment of the application
-    // (assuming that you ship your production code with assertions enabled).
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
-    QS_ASSERTION(module, id, 10000U); // report assertion to QS
+
     QF_stop(); // stop ticking
 
+    QS_ASSERTION(module, id, 10000U); // report assertion to QS
+
     char message[80];
-    SNPRINTF_S(message, Q_DIM(message) - 1,
-        "Assertion failed in module %s location %d", module, id);
+    SNPRINTF_S(message, Q_DIM(message) - 1U,
+        "Assertion failed in module %s:%d", module, id);
     MessageBox(l_hWnd, message, "!!! ASSERTION !!!",
         MB_OK | MB_ICONEXCLAMATION | MB_APPLMODAL);
     PostQuitMessage(-1);
@@ -143,7 +144,7 @@ void BSP_init(void const * const arg) {
     QS_GLB_FILTER(QS_GRP_AO); // active object records
     QS_GLB_FILTER(QS_GRP_UA); // all user records
 
-    // initialize the event pools...
+    // initialize event pools
     //static QF_MPOOL_EL(QEvt) smlPoolSto[10];
     //QF_poolInit(smlPoolSto, sizeof(smlPoolSto), sizeof(smlPoolSto[0]));
     static QF_MPOOL_EL(ObjectImageEvt) medPoolSto[2*GAME_MINES_MAX + 20];
@@ -155,7 +156,7 @@ void BSP_init(void const * const arg) {
 
     BSP_randomSeed(1234U);
 
-    // start the active objects...
+    // start AOs...
     QTicker_ctor(&QTicker_inst0, 0U); // "ticker" AO for tick rate 0
     QActive_start(Q_ACTIVE_UPCAST(&QTicker_inst0),
                   1U,                // QP priority
