@@ -15,14 +15,14 @@ def on_reset():
     # this will be done by the individual tests
     # after they poke the priorities of threads
 
-# helper function to repliacte the Q_PRIO() macro
-def Q_PRIO(prio, pthre):
+# helper function to replicate QF_prioSpec() (the former Q_PRIO() macro)
+def prio_spec(prio, pthre):
     return prio | (pthre << 8)
 
 #-------------------------------------------------------------------------------
 @scenario("ao->ao->ao (NO PTS)")
 def do(context):
-    context.prio = [Q_PRIO(1,0), Q_PRIO(2,0), Q_PRIO(3,0)]
+    context.prio = [prio_spec(1,0), prio_spec(2,0), prio_spec(3,0)]
     return context
 
 @given("priorities: (1,0), (2,0), (3,0)")
@@ -90,7 +90,7 @@ def do(context):
 #-------------------------------------------------------------------------------
 @scenario("ao->ao->ao (PTS1)")
 def do(context):
-    context.prio = [Q_PRIO(1,3), Q_PRIO(2,3), Q_PRIO(3,0)]
+    context.prio = [prio_spec(1,3), prio_spec(2,3), prio_spec(3,0)]
     return context
 
 @given("priorities: (1,3), (2,3), (3,0)")
@@ -158,7 +158,7 @@ def do(context):
 #-------------------------------------------------------------------------------
 @scenario("ao->ao->ao (PTS2)")
 def do(context):
-    context.prio = [Q_PRIO(1,0), Q_PRIO(2,3), Q_PRIO(3,0)]
+    context.prio = [prio_spec(1,0), prio_spec(2,3), prio_spec(3,0)]
     return context
 
 @given("priorities: (1,0), (2,3), (3,0)")

@@ -1,46 +1,19 @@
 {
-  "version": 6,
-  "cmakeMinimumRequired": {
-    "major": 3,
-    "minor": 23,
-    "patch": 0
-  },
-
-  "configurePresets": [
-    {
-      "name": "gen",
-      "hidden": true,
-      "generator": "Ninja Multi-Config",
-      "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": {
-          "type": "STRING",
-          "value": "Debug;Release;Spy"
+    "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+    "configurePresets": [
+        {
+            "name": "host",
+            "displayName": "Host (gcc)",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/Build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CONFIGURATION_TYPES": "Debug;Release;Spy"
+            }
         }
-      }
-    },
-    {
-      "name": "dpp",
-      "inherits": "gen",
-      "binaryDir": "${sourceDir}/Build/dpp"
-    },
-    {
-      "name": "mingw",
-      "inherits": "gen",
-      "displayName": "MinGW config",
-      "description": "Build for MinGW",
-      "binaryDir": "${sourceDir}/Build/dpp-mingw",
-      "toolchainFile": "${sourceParentDir}/../../3rd_party/cmake/toolchain/tc_mingwgcc.cmake"
-    }
-  ],
-
-  "buildPresets": [
-    {
-      "name": "dpp",
-      "configurePreset": "dpp"
-    },
-    {
-      "name": "mingw",
-      "configurePreset": "mingw"
-    }
- ]
+    ],
+    "buildPresets": [
+        { "name": "host", "configurePreset": "host" }
+    ]
 }

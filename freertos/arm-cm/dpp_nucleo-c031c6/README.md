@@ -2,9 +2,9 @@
 This file is best viewed in a **markdown viewer**, such as the one built into
 GitHub. Markdown viewers are also available as plug-ins to popular Internet browsers.
 
-# DPP on NUCLEO-F401RE
-This example demonstrates QP port to the FreeRTOS on the STM32 NUCLEO-F401RE board
-(ARM Cortex-M4F).
+# DPP on NUCLEO-C031C6 with FreeRTOS
+This example demonstrates the QP/C port to FreeRTOS on the STM32 NUCLEO-C031C6
+board (ARM Cortex-M0+).
 
 <p align="center">
 <img src="logo_freertos.webp"/>
@@ -13,15 +13,16 @@ This example demonstrates QP port to the FreeRTOS on the STM32 NUCLEO-F401RE boa
 The example uses the [Dining Philosophers Problem (DPP) application](https://www.state-machine.com/qpc/tut_dpp.html)
 
 <p align="center">
-<img src="./stm32-nucleo-f401re.webp"/><br>
-<b>STM32 NUCELO-F401RE (Cortex-M4F)</b>
+<img src="./stm32-nucleo-c031c6.webp"/><br>
+<b>STM32 NUCLEO-C031C6 (Cortex-M0+)</b>
 </p>
 
 ## Features Demonstrated
-- QP port to FreeRTOS
+- QP/C port to FreeRTOS
   + with GNU-ARM toolchain
   + with Keil-MDK toolchain
   + with IAR-ARM toolchain
+  + with CMake (GNU-ARM and Keil-MDK)
 - multiple cooperating active objects
 - immutable (const) events
 - mutable (dynamic) events
@@ -37,7 +38,9 @@ The example uses the [Dining Philosophers Problem (DPP) application](https://www
 
 # Code Organization
 ```
-examples\freertos\dpp_nucleo-f401re
+examples\freertos\arm-cm\dpp_nucleo-c031c6
+|   |   CMakeLists.txt        // CMake project
+|   |   CMakePresets.json     // CMake presets
 |   |
 |   +---armclang              // Keil-MDK toolchain
 |   |       . . .
@@ -54,7 +57,7 @@ examples\freertos\dpp_nucleo-f401re
 
 ### GNU/ARM
 - open terminal window
-- change to the directory `examples\freertos\dpp_nucleo-f401re\gnu`
+- change to the directory `examples\freertos\arm-cm\dpp_nucleo-c031c6\gnu`
 - to build the default Debug configuration, type:
 
 ```
@@ -86,6 +89,24 @@ in Keil uVision IDE. Build/Debug/Download to the board from the IDE.
 - Open the provided IAR EWARM workspace (`iar\dpp.eww`)
 in IAR EWARM IDE. Build/Debug/Download to the board from the IDE.
 - Change the build configuration in the "Project Configuration" drop-down menu.
+
+
+### CMake
+- open terminal window
+- change to the directory `examples\freertos\arm-cm\dpp_nucleo-c031c6`
+- configure with the preset `freertos-gnu` (GNU-ARM) or `freertos-armclang` (Keil-MDK)
+and build the Debug, Release, or Spy configuration, for example:
+
+```
+cmake --preset freertos-gnu
+cmake --build --preset freertos-gnu
+cmake --build --preset freertos-gnu --config Release
+cmake --build --preset freertos-gnu --config Spy
+```
+
+The results are in `Build\<preset>\<config>` (e.g., `Build\freertos-gnu\Debug\dpp.bin`).
+Please see the [CMake Support](https://www.state-machine.com/qpc/gs_cmake.html)
+section in the QP/C manual for details.
 
 
 # Uploading the Binary to the Board

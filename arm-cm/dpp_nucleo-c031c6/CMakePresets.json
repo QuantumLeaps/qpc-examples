@@ -1,0 +1,26 @@
+{
+    "version": 6,
+    "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+    "configurePresets": [
+        {"name": "base", "hidden": true, "generator": "Ninja Multi-Config", "binaryDir": "${sourceDir}/Build/${presetName}", "cacheVariables": {"CMAKE_CONFIGURATION_TYPES": "Debug;Release;Spy"}},
+        {"name": "gnu", "hidden": true, "toolchainFile": "${sourceDir}/../../../3rd_party/cmake/tc_armgnu.cmake"},
+        {"name": "armclang", "hidden": true, "toolchainFile": "${sourceDir}/../../../3rd_party/cmake/tc_armclang.cmake"},
+        {"name": "qv", "hidden": true, "cacheVariables": {"QPC_KERNEL": "qv"}},
+        {"name": "qk", "hidden": true, "cacheVariables": {"QPC_KERNEL": "qk"}},
+        {"name": "qxk", "hidden": true, "cacheVariables": {"QPC_KERNEL": "qxk"}},
+        {"name": "qv-gnu", "displayName": "QV kernel, GNU-ARM", "inherits": ["base", "gnu", "qv"]},
+        {"name": "qk-gnu", "displayName": "QK kernel, GNU-ARM", "inherits": ["base", "gnu", "qk"]},
+        {"name": "qxk-gnu", "displayName": "QXK kernel, GNU-ARM", "inherits": ["base", "gnu", "qxk"]},
+        {"name": "qv-armclang", "displayName": "QV kernel, ARMClang (Keil)", "inherits": ["base", "armclang", "qv"]},
+        {"name": "qk-armclang", "displayName": "QK kernel, ARMClang (Keil)", "inherits": ["base", "armclang", "qk"]},
+        {"name": "qxk-armclang", "displayName": "QXK kernel, ARMClang (Keil)", "inherits": ["base", "armclang", "qxk"]}
+    ],
+    "buildPresets": [
+        {"name": "qv-gnu", "configurePreset": "qv-gnu"},
+        {"name": "qk-gnu", "configurePreset": "qk-gnu"},
+        {"name": "qxk-gnu", "configurePreset": "qxk-gnu"},
+        {"name": "qv-armclang", "configurePreset": "qv-armclang"},
+        {"name": "qk-armclang", "configurePreset": "qk-armclang"},
+        {"name": "qxk-armclang", "configurePreset": "qxk-armclang"}
+    ]
+}
