@@ -157,7 +157,6 @@ void BSP_init(void const * const arg) {
 //............................................................................
 void BSP_terminate(int16_t const result) {
     Q_UNUSED_PAR(result);
-    QF_stop();
 }
 //............................................................................
 void BSP_ledOn(void) {

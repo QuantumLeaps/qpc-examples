@@ -679,7 +679,6 @@ static QState Tunnel_final(Tunnel * const me, QEvt const * const e) {
             // clear the screen
             BSP_clearFB();
             BSP_updateScreen();
-            QF_stop(); // stop QF and cleanup
             status_ = Q_HANDLED();
             break;
         }

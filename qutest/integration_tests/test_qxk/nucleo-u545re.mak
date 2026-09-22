@@ -55,9 +55,10 @@ C_SRCS := \
 	test_sched.c \
 	bsp_nucleo-u545re.c
 
+CPP_SRCS :=
+
 DEFINES  :=
 
-CPP_SRCS :=
 LIB_DIRS :=
 LIBS     :=
 OUTPUT   := $(PROJECT)
@@ -82,7 +83,7 @@ C_SRCS += \
 	system_stm32u5xx.c \
 	startup_stm32u545retxq.c
 
-DEFINES += -DQ_SPY -DQ_UTEST=0 \
+DEFINES += -DQ_SPY -DQ_UTEST \
 	-DSTM32U545xx
 
 ARM_CPU   := -mcpu=cortex-m33
@@ -137,17 +138,17 @@ QP_SRCS := \
 	qf_qeq.c \
 	qf_qmact.c \
 	qf_time.c \
+	qxk.c \
+	qxk_xthr.c \
+	qxk_sema.c \
+	qxk_mutex.c \
+	qxk_port.c \
 	qs.c \
 	qs_64bit.c \
 	qs_rx.c \
 	qs_fp.c \
 	qutest.c \
-	qutest_port.c \
-	qxk.c \
-	qxk_xthr.c \
-	qxk_sema.c \
-	qxk_mutex.c \
-	qxk_port.c
+	qutest_port.c
 
 VPATH += \
 	$(QP)/src/qf \

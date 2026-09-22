@@ -56,9 +56,10 @@ C_SRCS := \
 	spy_Led.c \
 	test_LedBar.c
 
+CPP_SRCS :=
+
 DEFINES  :=
 
-CPP_SRCS :=
 LIB_DIRS :=
 LIBS     :=
 OUTPUT   := $(PROJECT)
@@ -77,7 +78,7 @@ BIN_DIR := build_$(TARGET)
 # QP framework
 #
 
-# location of the QP framework (if not provided in an env. variable)
+# location of the QP/C framework (if not provided in an env. variable)
 ifeq ($(QP),)
 QP := ../../../..
 endif
@@ -104,7 +105,7 @@ INCLUDES += \
 	-I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
-# QP framework sources
+# QP/C framework sources
 #
 QP_SRCS := \
 	qep_hsm.c \
@@ -124,6 +125,7 @@ QP_SRCS := \
 	qs_rx.c \
 	qs_fp.c \
 	qutest.c \
+	qf_stub.c \
 	qutest_port.c
 
 VPATH += \
