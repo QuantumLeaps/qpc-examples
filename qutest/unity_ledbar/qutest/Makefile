@@ -3,9 +3,9 @@
 #
 # Copyright (C) 2005 Quantum Leaps, LLC. All rights reserved.
 #
-#                   Q u a n t u m  L e a P s
-#                   ------------------------
-#                   Modern Embedded Software
+#                    Q u a n t u m  L e a P s
+#                    ------------------------
+#                    Modern Embedded Software
 #
 # SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-QL-commercial
 #
@@ -56,9 +56,10 @@ C_SRCS := \
 	spy_led.c \
 	test_ledbar.c
 
+CPP_SRCS :=
+
 DEFINES  :=
 
-CPP_SRCS :=
 LIB_DIRS :=
 LIBS     :=
 OUTPUT   := $(PROJECT)
@@ -124,11 +125,13 @@ QP_SRCS := \
 	qs_rx.c \
 	qs_fp.c \
 	qutest.c \
+	qf_stub.c \
 	qutest_port.c
 
 VPATH += \
 	$(QP)/src/qf \
-	$(QP)/src/qs $(QP_PORT_DIR)
+	$(QP)/src/qs \
+	$(QP_PORT_DIR)
 
 INCLUDES += \
 	-I$(QP)/include \

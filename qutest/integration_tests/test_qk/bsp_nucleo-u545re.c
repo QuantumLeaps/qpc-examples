@@ -299,24 +299,6 @@ void QK_onIdle(void) {
 }
 
 //============================================================================
-// QS callbacks...
-#ifdef Q_SPY
-
-//............................................................................
-void QTimeEvt_tick1_(
-    uint_fast8_t const tickRate,
-    void const * const sender)
-{
-    QF_INT_DISABLE();
-    // TODO pend the SysTick
-    *Q_UINT2PTR_CAST(uint32_t, 0xE000ED04U) = (1U << 26U);
-    QF_INT_ENABLE();
-}
-
-#endif // Q_SPY
-//----------------------------------------------------------------------------
-
-//============================================================================
 // NOTE0:
 // The MPU protection against NULL-pointer dereferencing sets up a no-access
 // MPU region #7 around the NULL address (0x0). The size of this region is set

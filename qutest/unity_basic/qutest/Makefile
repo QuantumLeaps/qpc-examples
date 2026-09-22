@@ -54,10 +54,12 @@ INCLUDES := -I. \
 C_SRCS := \
 	ProductionCode.c \
 	test_ProductionCode.c
+	test_blinky.c
+
+CPP_SRCS :=
 
 DEFINES  :=
 
-CPP_SRCS :=
 LIB_DIRS :=
 LIBS     :=
 OUTPUT   := $(PROJECT)
@@ -103,7 +105,7 @@ INCLUDES += \
 	-I$(QP_PORT_DIR)
 
 #-----------------------------------------------------------------------------
-# QP framework sources
+# QP/C framework sources
 #
 QP_SRCS := \
 	qep_hsm.c \
@@ -123,6 +125,7 @@ QP_SRCS := \
 	qs_rx.c \
 	qs_fp.c \
 	qutest.c \
+	qf_stub.c \
 	qutest_port.c
 
 VPATH += \

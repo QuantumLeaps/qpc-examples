@@ -56,9 +56,10 @@ C_SRCS := \
 	blinky.c \
 	test_blinky.c
 
+CPP_SRCS :=
+
 DEFINES  :=
 
-CPP_SRCS :=
 LIB_DIRS :=
 LIBS     :=
 OUTPUT   := $(PROJECT)
@@ -143,6 +144,7 @@ QP_SRCS := \
 	qs_rx.c \
 	qs_fp.c \
 	qutest.c \
+	qf_stub.c \
 	qutest_port.c
 
 VPATH += \

@@ -56,9 +56,10 @@ C_SRCS := \
 	blinky.c \
 	test_blinky.c
 
+CPP_SRCS :=
+
 DEFINES  :=
 
-CPP_SRCS :=
 LIB_DIRS :=
 LIBS     :=
 OUTPUT   := $(PROJECT)
@@ -113,7 +114,6 @@ endif
 # QP port used in this project
 QP_PORT_DIR := $(QP)/ports/arm-cm/qutest
 
-
 VPATH += \
 	$(QP)/src/qs \
 	$(QP_PORT_DIR)
@@ -143,6 +143,7 @@ QP_SRCS := \
 	qs_rx.c \
 	qs_fp.c \
 	qutest.c \
+	qf_stub.c \
 	qutest_port.c
 
 VPATH += \
