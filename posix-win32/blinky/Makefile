@@ -286,14 +286,14 @@ $(BIN_DIR)/%.o : %.cpp
 
 # create BIN_DIR and include dependencies only if needed
 ifneq ($(MAKECMDGOALS),clean)
-  ifneq ($(MAKECMDGOALS),show)
-    ifneq ($(MAKECMDGOALS),debug)
+ ifneq ($(MAKECMDGOALS),show)
+  ifneq ($(MAKECMDGOALS),debug)
 ifeq ("$(wildcard $(BIN_DIR))","")
 $(shell $(MKDIR) $(BIN_DIR))
 endif
 -include $(C_DEPS_EXT) $(CPP_DEPS_EXT)
-    endif
   endif
+ endif
 endif
 
 clean :

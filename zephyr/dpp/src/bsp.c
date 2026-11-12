@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"                 // QP/C real-time event framework
-#include "bsp.h"                 // Board Support Package
-#include "app.h"                 // Application
+#include "qpc.h"          // QP/C real-time event framework
+#include "bsp.h"          // Board Support Package
+#include "app.h"          // Application
 
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/sys/reboot.h>
@@ -61,8 +61,7 @@ static uint32_t l_rnd; // random seed
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
-    // for debugging and MUST be changed for deployment of the application
-    // (assuming that you ship your production code with assertions enabled).
+    // for debugging and MUST be changed for deployment of the application.
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
@@ -115,7 +114,7 @@ void BSP_init(void const * const arg) {
 
     QS_ONLY(produce_sig_dict());
 
-    // setup the QS filters...
+    // setup QS filters...
     QS_GLB_FILTER(QS_GRP_ALL);  // enable all records
     QS_GLB_FILTER(-QS_QF_TICK); // exclude the tick record
 
@@ -235,9 +234,7 @@ static struct device const *uart_dev =
 
 //............................................................................
 static void uart_cb(const struct device *dev, void *user_data) {
-    if (!uart_irq_update(uart_dev)) {
-        return;
-    }
+    uart_irq_update(uart_dev); // returns void since Zephyr 4.5
 
     if (uart_irq_rx_ready(uart_dev)) {
         uint8_t buf[32];

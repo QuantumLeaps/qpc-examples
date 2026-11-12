@@ -26,9 +26,9 @@
 // <www.state-machine.com/licensing>
 // <info@state-machine.com>
 //============================================================================
-#include "qpc.h"                 // QP/C real-time event framework
-#include "bsp.h"                 // Board Support Package
-#include "app.h"                 // Application
+#include "qpc.h"          // QP/C real-time event framework
+#include "bsp.h"          // Board Support Package
+#include "app.h"          // Application
 
 #include <zephyr/drivers/gpio.h>
 #include <zephyr/sys/reboot.h>
@@ -60,8 +60,7 @@ Q_DEFINE_THIS_FILE  // define the name of this file for assertions
 
 Q_NORETURN Q_onError(char const * const module, int_t const id) {
     // NOTE: this implementation of the error handler is intended only
-    // for debugging and MUST be changed for deployment of the application
-    // (assuming that you ship your production code with assertions enabled).
+    // for debugging and MUST be changed for deployment of the application.
     Q_UNUSED_PAR(module);
     Q_UNUSED_PAR(id);
     QS_ASSERTION(module, id, 10000U); // report assertion to QS
@@ -70,7 +69,6 @@ Q_NORETURN Q_onError(char const * const module, int_t const id) {
     Q_PRINTK("\nERROR in %s:%d\n", module, id);
     k_panic(); // debug build: halt the system for error search...
 #endif
-
     sys_reboot(SYS_REBOOT_COLD); // release build: reboot the system
     for (;;) { // explicitly "no-return"
     }
